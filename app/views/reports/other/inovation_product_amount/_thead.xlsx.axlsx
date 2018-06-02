@@ -1,0 +1,2 @@
+head_rows = CSV.read('app/views/reports/other/inovation_product_amount/csv/main_head.csv')
+head_rows.each { |head_row| @sheet.add_row(head_row, style: @styles[:th]) }

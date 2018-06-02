@@ -1,0 +1,5 @@
+<%= fields_for :bidder do |fo| %>
+  <%= fo.fields_for :bidder_files_attributes, tender_file.bidder_files.build, index: gen_index do |builder| %>
+    $('#tender_files').append("<%= j render 'bidders/bidder_file_fields', f: builder %>");
+  <% end %>
+<% end %>

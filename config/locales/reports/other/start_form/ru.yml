@@ -1,0 +1,18 @@
+ru:
+  helpers:
+    submit:
+      reports_other_start_form:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/start_form: 'Исполнение планов стартов'
+    attributes:
+      reports/other/start_form:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        organizers: 'Организаторы'
+        gkpz_year: 'Годы ГКПЗ'
+        directions: 'Направления закупок'
+        tender_types: 'Типы закупок'
+        format: 'Формат'

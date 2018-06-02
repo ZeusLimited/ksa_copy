@@ -1,0 +1,40 @@
+= simple_form_for [tender, bidder] do |f|
+  = error_messages_for bidder
+
+  .row
+    .span8
+      = f.input :contractor_name_inn, input_html: { data: { tender_type_id: tender.tender_type_id },
+                                                    class: 'autocomplete_bidder_name input-block-level' }
+      = f.hidden_field :contractor_id, class: 'autocomplete_contractor_id'
+
+  legend Документы оферты
+  = render "tender_files/field", area_id: Constants::TenderFileArea::BIDDER, year: Time.now.year
+
+  table.table.table-hover.table-striped
+    thead
+      tr
+        th
+        th Файл
+        th Размер
+        th Примечание
+        th Загружен
+        th Владелец
+        th
+    tbody#tender_files
+      = f.simple_fields_for :bidder_files do |builder|
+        = render 'bidder_file_fields', f: builder
+
+  legend КОНВЕРТЫ
+  = f.simple_fields_for :covers do |builder|
+    = render 'cover_fields', f: builder
+
+  .row
+    .span12= link_to_add_fields content_tag(:i, '', class: 'icon-plus') + ' Добавить конверт', f, :covers
+
+
+  .form-actions
+    .pull-right
+      = link_to "Отмена", tender_bidders_path(tender), class: 'btn btn-warning'
+      = f.button :submit, 'Сохранить',
+        data: { confirm: "Вы уверены, что хотите сохранить сведения в журнале?" },
+        class: 'btn btn-primary'

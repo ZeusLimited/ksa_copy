@@ -1,0 +1,84 @@
+select
+  lot_num,
+  lot_name,
+  reason_create_quot,
+  tender_type_name,
+  round(sum(fact_cost) / 1000, 2) as fact_cost,
+  sum(rn) as rn,
+  direction_type,
+  tender_type_id
+from (
+  select
+  pl.num_tender || case when l.plan_lot_id is not null then '' else '.' || t.num end || '.' || pl.num_lot as lot_num,
+  pl.lot_name,
+  'Протокол ' || min_pl.commission_type_name || ' №' || min_pl.num || ' от ' || to_char(min_pl.date_confirm, 'dd.mm.yyyy') as reason_create_quot,
+  tt.name as tender_type_name,
+  sum(s.qty * os.final_cost_nds) as fact_cost,
+  max_pl.state as is_plan,
+  case when
+    row_number() over (partition by nvl(l.frame_id,l.id), l.plan_lot_id
+                       order by l.id, abs(l.main_direction_id-s.direction_id)) = 1
+    then decode(l.main_direction_id,s.direction_id, 1, 0) else 0 end as rn,
+  s.direction_id,
+  l.id,
+  decode(wpl.solution_type_id, <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>, <%= Constants::TenderTypes::ONLY_SOURCE %>, t.tender_type_id) as tender_type_id,
+  case
+    when dir.type_id = 1 then 'invest'
+    else 'tek'
+  end as direction_type
+  from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join offer_specifications os on (s.id = os.specification_id)
+  inner join offers o on (o.id = os.offer_id and o.version = 0 and o.lot_id = l.id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  inner join winner_protocol_lots wpl on (wpl.lot_id = l.id and wpl.winner_protocol_id = wp.id)
+  inner join dictionaries tt on (tt.ref_id = t.tender_type_id)
+  inner join directions dir on (dir.id = s.direction_id)
+  left join lots fr on (fr.id = l.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id,fr.plan_lot_id))
+  inner join
+    (select guid, state from
+      (select tpl.guid, tpl.state, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date) sub
+       where rn = 1) max_pl on (pl.guid = max_pl.guid)
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+  inner join
+    (select guid, num, date_confirm, commission_type_name from
+      (select tpl.guid, tp.num, tp.date_confirm, td.name as commission_type_name,
+        row_number() over (partition by tpl.guid order by tp.date_confirm asc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+        inner join commissions tc on tc.id = tp.commission_id
+        inner join dictionaries td on td.ref_id = tc.commission_type_id) sub
+       where rn = 1) min_pl on (pl.guid = min_pl.guid)
+Where o.status_id = <%= Constants::OfferStatuses::WIN %> and t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+    And can.guid is null -- неотмененная
+    And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>) -- статус лота
+    and l.gkpz_year = :gkpz_year -- gkpz_year
+    and wp.confirm_date between :begin_date and :end_date
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>
+  Group By l.plan_lot_id, pl.num_tender, pl.num_lot, pl.lot_name, pl.guid, tt.name, l.frame_id,
+    l.id, max_pl.state, l.main_direction_id, wpl.solution_type_id, t.num, t.tender_type_id,
+    s.direction_id, t.tender_type_id, min_pl.num, min_pl.date_confirm, min_pl.commission_type_name, dir.type_id
+) t
+Where is_plan = 0
+group by lot_num, lot_name, reason_create_quot, tender_type_name, direction_type, tender_type_id

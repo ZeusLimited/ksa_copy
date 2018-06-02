@@ -1,0 +1,10 @@
+h3 = t('.additional')
+fieldset.frame
+  .row
+    = view_text_field('span2', tender, :agency_contract_num)
+    = view_text_field('span2', tender, :agency_contract_date)
+    = view_text_field('span3', tender, :hidden_offer, tbool(tender.hidden_offer))
+    = view_text_field('span4', tender, :price_begin_limited, tbool(tender.price_begin_limited))
+  - if tender.service_subject_type?
+    .row
+      = view_text_field('span4', tender, :is_gencontractor, tbool(tender.is_gencontractor))

@@ -1,0 +1,35 @@
+= simple_form_for @unfair_contractor do |f|
+  = error_messages_for @unfair_contractor
+
+  .row
+    .span2
+      = f.input :num, input_html: { class: 'input-block-level' }
+    .span2
+      = f.input :date_in, as: :string,
+        input_html: { value: f.object.date_in, class: 'datepicker input-block-level' }
+    .span2.offset6
+      = f.input :date_out, as: :string,
+        input_html: { value: f.object.date_out, class: 'datepicker input-block-level' }
+  .row
+    .span6
+      = f.input :contractor_id do
+        = f.hidden_field :contractor_id, class: 'autocomplete-contractors-select input-block-level'
+    .span6
+      = f.input :lot_ids do
+        = f.hidden_field :lot_ids, value: f.object.lot_ids.join(","), class: 'input-block-level', data: { url_lots: lots_unfair_contractors_path, url_lots_info: lots_info_unfair_contractors_path }
+  .row
+    .span6
+      = f.input :contract_info, as: :text,
+      input_html: { class: 'input-block-level', rows: 4 }
+    .span6
+      = f.input :unfair_info, as: :text,
+      input_html: { class: 'input-block-level', rows: 4 }
+  .row
+    .span12
+      = f.input :note, as: :text,
+      input_html: { class: 'input-block-level', rows: 4 }
+
+
+  .form-actions.text-right
+    => f.submit t('save'), class: 'btn btn-primary'
+    = link_to t('.cancel'), url_from_session_or_default(:unfair_contractors, unfair_contractors_path), class: 'btn input-small btn-warning'

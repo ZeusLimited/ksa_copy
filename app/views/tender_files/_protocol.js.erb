@@ -1,0 +1,5 @@
+<%= fields_for :protocol do |fo| %>
+  <%= fo.fields_for :protocol_files_attributes, tender_file.protocol_files.build, index: gen_index do |builder| %>
+    $('#tender_files').append("<%= j render 'protocols/protocol_file_fields', f: builder %>");
+  <% end %>
+<% end %>

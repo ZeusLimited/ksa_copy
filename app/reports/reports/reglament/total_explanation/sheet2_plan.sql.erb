@@ -1,0 +1,45 @@
+--sheet2_plan
+<% def filter_case(f, pl_alias, ps_alias, ps_field)
+    res = []
+    res << "#{ps_alias}.#{ps_field} = #{f[:dir]}" if f[:dir]
+    res << "#{pl_alias}.subject_type_id = #{f[:subj]}" if f[:subj]
+    res.join(' and ')
+  end
+%>
+
+select
+<% fields.each do |f| %>
+  count(t.<%= f[:name] %>) as <%= "#{f[:name]}_cnt" %>,
+  round(sum(t.<%= "#{f[:name]}_cost_n" %>) / 1000, 2) as <%= "#{f[:name]}_cost_n_s" %>,
+
+<% end %>
+
+count(t.cost_nds) as all_count, round(sum(t.cost_nds) / 1000, 2) as all_cost_nds_sum --all
+
+from (
+  select
+  <% fields.each do |f| %>
+    CASE WHEN <%= filter_case(f, 'gkpz_pl', 'gkpz_pl', 'main_direction_id') %> THEN 1 ELSE null END as <%= f[:name] %>,
+  <% end %>
+
+  gkpz_pl.id, sum_specs.*
+
+  from
+    (
+      <%= render_sql '_gkpz_pl.sql.erb' %>
+    ) gkpz_pl
+
+  left join
+    (select
+      <% fields.each do |f| %>
+        sum(case when <%= filter_case(f, 'tpl', 'tps', 'direction_id') %> then tps.qty * tps.cost_nds else 0 end) as <%= "#{f[:name]}_cost_n" %>,
+      <% end %>
+
+      tps.plan_lot_id,
+      sum(tps.qty * tps.cost_nds) as cost_nds
+
+      from plan_specifications tps
+      inner join plan_lots tpl on tps.plan_lot_id = tpl.id
+      group by tps.plan_lot_id
+    ) sum_specs on sum_specs.plan_lot_id = gkpz_pl.id
+) t

@@ -1,0 +1,6 @@
+head_rows = CSV.read("app/views/reports/gkpz/gkpz_oos_common/plan_oos_etp/csv/head_#{@report.etp}.csv")
+
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:td_text]) }
+
+AxlsxExt::AutoMergeNil.merge_rows(rows)

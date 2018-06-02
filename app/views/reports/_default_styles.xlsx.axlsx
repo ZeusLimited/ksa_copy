@@ -1,0 +1,89 @@
+alignment_center = { horizontal: :center, vertical: :center, wrap_text: true }
+alignment_left = { horizontal: :left, vertical: :center, wrap_text: true }
+alignment_right = { horizontal: :right, vertical: :center, wrap_text: true }
+td = { sz: 9, border: Axlsx::STYLE_THIN_BORDER, alignment: { vertical: :center, wrap_text: true } }
+th = { sz: 10, bg_color: "CCFFFF", b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: alignment_center }
+group_row_h1 = { sz: 10, bg_color: "CCCCFF", b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: alignment_left }
+group_row_h2 = { sz: 10, bg_color: "CCCCCC", b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: alignment_left }
+group_row_h3 = { sz: 10, bg_color: "AACCCC", b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: alignment_left }
+group_separator = { bg_color: "0070C0", b: true, border: Axlsx::STYLE_THIN_BORDER }
+money = { format_code: '#,##0.00' }
+money_round = { format_code: '#,##0' }
+money_alt = { format_code: '#,#####0.00000' }
+date = { format_code: 'dd.mm.yyyy' }
+percent = { format_code: "0.00%" }
+percent_round = { format_code: "0%" }
+text = { format_code: '@' }
+title = { sz: 12, b: true, alignment: alignment_center }
+alt_title = { sz: 12, bg_color: "AACCCC", b: true, alignment: alignment_left }
+title_left = { sz: 12, b: true, alignment: alignment_left }
+plain = { sz: 12, alignment: alignment_left }
+plain_bold = { sz: 12, b: true, alignment: { horizontal: :left, vertical: :center } }
+note = { sz: 8, font: { color: "78766E" } }
+sum = { bg_color: "87CEFA", b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: { vertical: :center } }
+alt_sum = { bg_color: "875AFA", b: true, border: Axlsx::STYLE_THIN_BORDER }
+was_agreed = { bg_color: "CCFFCC" }
+agreed = { bg_color: "006600" }
+cancel_agreed = { bg_color: "FF6600" }
+
+@styles = {
+  text_center: wb.styles.add_style(alignment: alignment_center),
+  text_left: wb.styles.add_style(alignment: alignment_left),
+  text_right: wb.styles.add_style(alignment: alignment_right),
+  text_center_bold: wb.styles.add_style(b: true, alignment: alignment_center),
+  text_left_bold: wb.styles.add_style(b: true, alignment: alignment_left),
+  title: wb.styles.add_style(title),
+  alt_title: wb.styles.add_style(alt_title),
+  title_left: wb.styles.add_style(title_left),
+  plain: wb.styles.add_style(plain),
+  plain_bold: wb.styles.add_style(plain_bold),
+  note: wb.styles.add_style(note),
+  th: wb.styles.add_style(th),
+  td: wb.styles.add_style(td),
+  group_row_h1: wb.styles.add_style(group_row_h1),
+  group_row_h2: wb.styles.add_style(group_row_h2),
+  group_row_h3: wb.styles.add_style(group_row_h3),
+  group_row_h2_money: wb.styles.add_style(group_row_h2.merge(money)),
+  group_row_h2_date: wb.styles.add_style(group_row_h2.merge(date)),
+  group_separator: wb.styles.add_style(group_separator),
+  td_title: wb.styles.add_style(td.merge(b: true, alignment: alignment_center)),
+  td_center: wb.styles.add_style(td.merge(alignment: alignment_center)),
+  td_right: wb.styles.add_style(td.merge(alignment: alignment_right)),
+  td_wrap: wb.styles.add_style(td.merge(alignment: { wrap_text: true, vertical: :center })),
+  td_money: wb.styles.add_style(td.merge(money)),
+  td_money_round: wb.styles.add_style(td.merge(money_round)),
+  td_money_alt: wb.styles.add_style(td.merge(money_alt)),
+  td_date: wb.styles.add_style(td.merge(date)),
+  td_percent: wb.styles.add_style(td.merge(percent)),
+  td_percent_round: wb.styles.add_style(td.merge(percent_round)),
+  td_text: wb.styles.add_style(td.merge(text)),
+  sum: wb.styles.add_style(sum),
+  sum_percent: wb.styles.add_style(sum.merge(percent)),
+  sum_percent_round: wb.styles.add_style(sum.merge(percent_round)),
+  sum_money: wb.styles.add_style(sum.merge(money)),
+  sum_money_round: wb.styles.add_style(sum.merge(money_round)),
+  alt_sum: wb.styles.add_style(alt_sum),
+  alt_sum_percent: wb.styles.add_style(alt_sum.merge(percent)),
+  alt_sum_money: wb.styles.add_style(alt_sum.merge(money)),
+  agreed: wb.styles.add_style(agreed),
+  td_agreed: wb.styles.add_style(td.merge(agreed)),
+  td_money_agreed: wb.styles.add_style(td.merge(money).merge(agreed)),
+  td_date_agreed: wb.styles.add_style(td.merge(date).merge(agreed)),
+  group_row_h2_agreed: wb.styles.add_style(group_row_h2.merge(agreed)),
+  group_row_h2_money_agreed: wb.styles.add_style(group_row_h2.merge(money).merge(agreed)),
+  group_row_h2_date_agreed: wb.styles.add_style(group_row_h2.merge(date).merge(agreed)),
+  cancel_agreed: wb.styles.add_style(cancel_agreed),
+  td_cancel: wb.styles.add_style(td.merge(cancel_agreed)),
+  td_money_cancel: wb.styles.add_style(td.merge(money).merge(cancel_agreed)),
+  td_date_cancel: wb.styles.add_style(td.merge(date).merge(cancel_agreed)),
+  group_row_h2_cancel: wb.styles.add_style(group_row_h2.merge(cancel_agreed)),
+  group_row_h2_money_cancel: wb.styles.add_style(group_row_h2.merge(money).merge(cancel_agreed)),
+  group_row_h2_date_cancel: wb.styles.add_style(group_row_h2.merge(date).merge(cancel_agreed)),
+  was_agreed: wb.styles.add_style(was_agreed),
+  td_was_agreed: wb.styles.add_style(td.merge(was_agreed)),
+  td_money_was_agreed: wb.styles.add_style(td.merge(money).merge(was_agreed)),
+  td_date_was_agreed: wb.styles.add_style(td.merge(date).merge(was_agreed)),
+  group_row_h2_was_agreed: wb.styles.add_style(group_row_h2.merge(was_agreed)),
+  group_row_h2_money_was_agreed: wb.styles.add_style(group_row_h2.merge(money).merge(was_agreed)),
+  group_row_h2_date_was_agreed: wb.styles.add_style(group_row_h2.merge(date).merge(was_agreed))
+}

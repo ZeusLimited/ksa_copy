@@ -1,0 +1,65 @@
+-- line 105 Rosstat Part1
+select
+<% if detail %>
+  pl.num_tender || nvl2(l.frame_id, '.' || t.num, '') || '.' ||
+    nvl2(l.frame_id, l.num, pl.num_lot) as num,
+  l.name,
+  case when t.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else
+  (
+    select sum(gkpz_ps.qty * gkpz_ps.cost_nds)
+    from plan_specifications gkpz_ps
+    where gkpz_ps.plan_lot_id = gkpz_pl.id
+  ) end as gkpz_cost,
+  (
+    select sum(s.qty * s.cost_nds)
+    from specifications s
+    where s.lot_id = l.id) as plan_cost,
+  wp.confirm_date as protocol_confirm_date,
+  (
+    select sum(s.qty * os.final_cost_nds)
+    from offers o
+      inner join offer_specifications os on (os.offer_id = o.id)
+      inner join specifications s on (s.id = os.specification_id)
+    where o.version = 0 and o.lot_id = l.id and o.status_id = 26004) as fact_cost,
+  c.confirm_date as contract_date,
+  nvl2(c.parent_id,'','-') ||
+  (
+    select sum(specifications.qty * contract_specifications.cost_nds)
+    from contract_specifications
+      inner join specifications on (specifications.id = contract_specifications.specification_id)
+      Where contract_specifications.contract_id = c.id
+  ) as contract_cost,
+  l.frame_id
+<% else %>
+  count(*) as num_all,
+  <%= line105_row('num_ok', Constants::TenderTypes::OK.join(','), false) %>,
+  <%= line105_row('num_zk', Constants::TenderTypes::ZK.join(',')) %>,
+  <%= line105_row('num_ok_etp', Constants::TenderTypes::OK.join(','), true) %>,
+  <%= line105_row('num_oa', Constants::TenderTypes::OA, false) %>,
+  <%= line105_row('num_za', Constants::TenderTypes::ZA) %>,
+  <%= line105_row('num_oa_etp', Constants::TenderTypes::OA, true) %>,
+  <%= line105_row('num_ei', Constants::TenderTypes::ROSSTAT_EI.join(', ')) %>,
+  <%= line105_row('num_other_o', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), false) %>,
+  <%= line105_row('num_other_z', Constants::TenderTypes::ROSSTAT_OTHER_CLOSE.join(',')) %>,
+  <%= line105_row('num_other_etp', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), true) %>
+<% end %>
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (l.frame_id = fr.id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  inner join contracts c on (c.lot_id = l.id)
+  left join contracts bc on (bc.id = c.parent_id)
+  left join lots bl on (bl.id = bc.lot_id)
+  left join tenders bt on (bt.id = bl.tender_id)
+<% if detail %>
+  <%= detail_join.html_safe %>
+<% end %>
+Where t.tender_type_id not in (<%= Constants::TenderTypes::FRAMES.join(', ') %>)
+  And l.root_customer_id = :customer
+  And c.confirm_date between :begin_date and :end_date
+  And l.status_id = <%= Constants::LotStatus::CONTRACT %>
+  And (c.parent_id is not null or c.type_id = <%= Constants::ContractTypes::REDUCTION %>)
+<% if detail %>
+  <%= additional_filter(col, true) %>
+<% end %>

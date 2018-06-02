@@ -1,0 +1,5 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+wb.add_worksheet(name: "Итоги") { |sheet| render 'total', sheet: sheet }
+wb.add_worksheet(name: "Общий") { |sheet| render 'general', sheet: sheet }

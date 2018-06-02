@@ -1,0 +1,38 @@
+-
+  name: "<a href='#' class='link-to-structure' data-url='docs/structure?id=departments'>..</a>"
+-
+  name: 'id'
+  data_type: 'Integer'
+  desc: 'Идентификатор записи'
+  required: true
+  example: '701000'
+-
+  name: 'parent_dept_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор родительской записи'
+  required: false
+  example: '7'
+-
+  name: 'name'
+  data_type: 'String'
+  desc: 'Наименование краткое'
+  required: true
+  example: 'Сахаэнерго'
+-
+  name: 'ownership'
+  data_type: 'String'
+  desc: 'Форма собственности'
+  required: false
+  example: 'ПАО'
+-
+  name: 'inn'
+  data_type: 'String'
+  desc: 'ИНН'
+  required: false
+  example: '1435117944'
+-
+  name: 'kpp'
+  data_type: 'String'
+  desc: 'КПП'
+  required: false
+  example: '143501001'

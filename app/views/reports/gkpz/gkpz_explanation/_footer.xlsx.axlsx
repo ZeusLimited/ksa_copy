@@ -1,0 +1,8 @@
+@sheet.add_row
+@sheet.add_row ["Приложение:", "1. ГКПЗ #{@report.gkpz_years.try(:join, ', ')}  на ___ л. в 1 экз.", nil, nil]
+@sheet.add_row [nil, "2. Контрольная таблица #{@report.gkpz_years.try(:join, ', ')}  на ___ л. в 1 экз.", nil, nil]
+@sheet.add_row [nil, "3. Обоснования по закупкам у единственного источника на ___ л. в 1 экз.", nil, nil]
+@sheet.add_row [nil, "4. Обосновывающие материалы на ___ л. в 1 экз.", nil, nil]
+@sheet.add_row []
+@sheet.add_row ["Заместитель генерального директора", nil, nil, nil]
+@sheet.add_row ["________________/_________________", nil, nil, nil]

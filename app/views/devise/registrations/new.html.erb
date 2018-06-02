@@ -1,0 +1,80 @@
+<div class="page-header">
+  <h1>Регистрация</h1>
+</div>
+
+<%= simple_form_for resource, as: resource_name, url: registration_path(resource_name) do |f| %>
+  <%#= devise_error_messages! %>
+
+  <div class="row">
+    <div class="span3">
+      <%= f.input :email, input_html: {class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span3">
+      <%= f.input :login, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.input :password, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.input :password_confirmation, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.invisible_captcha :subtitle %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span3">
+      <%= f.input :surname, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.input :name, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.input :patronymic, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span2">
+      <%= f.input :gender, collection: t_enums('user_gender'), include_blank: true, input_html: { class: 'input-block-level', data: { placeholder: 'Нет' } } %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12">
+      <%= f.input :user_job, input_html: {class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span3">
+      <%= f.input :phone_public, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.input :phone_cell, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.input :phone_office, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.input :fax, input_html: {class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span6">
+      <%= f.association :root_dept, collection: Department.customers_by_root, label_method: :name_with_depth_symbols, input_html: {class: 'input-block-level', data: { placeholder: 'Всё видит' } } %>
+    </div>
+    <div class="span6">
+      <%= f.association :department, collection: Department.rank_array, label_method: :name_with_depth_symbols, input_html: {class: 'input-block-level'}, include_blank: false %>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit, 'Зарегистрировать', class: 'btn-primary' %>
+  </div>
+
+<% end %>
+
+<%= render "devise/shared/links" %>

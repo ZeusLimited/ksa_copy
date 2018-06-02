@@ -1,0 +1,9 @@
+head_rows = CSV.read('app/views/reports/reglament/high_tech_result/csv/total_head.csv')
+head_rows.each { |head_row| @sheet.add_row(head_row, style: @styles[:th], height: 60) }
+
+@report.total_rows.values.each do |group|
+  @sheet.add_row([group[:title], nil, nil, nil, nil], style: @styles[:th]) if group[:title]
+  group[:rows].each do |row|
+    @sheet.add_row @total_columns.values.map { |c| c[:value].call(row) }, style: @column_styles, types: @column_types
+  end
+end

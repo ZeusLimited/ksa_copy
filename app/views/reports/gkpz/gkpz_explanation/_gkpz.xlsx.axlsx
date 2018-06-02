@@ -1,0 +1,11 @@
+add_text_row t('.gkpz', years: @report.gkpz_years.try(:join, ', '), holding: @holding_name, customer_names: @report.customer_names)
+
+add_text_row t('.gkpz_cost', cost: xlsx_money(@report.gkpz_row['cost_nds']))
+
+add_text_row t(".gkpz_tek", cost: xlsx_money(@report.gkpz_row['cost_nds_tek']))
+
+add_text_row t(".gkpz_inv", cost: xlsx_money(@report.gkpz_row['cost_nds_inv']))
+
+@sheet.rows[2..5].each do |row|
+  @sheet.merge_cells row.cells[0..3]
+end

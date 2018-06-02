@@ -1,0 +1,37 @@
+ru:
+  user_gender:
+    female: 'Женский'
+    male: 'Мужской'
+  activerecord:
+    models:
+      user: 'Пользователь'
+    attributes:
+      user:
+        login: 'Логин'
+        email: 'Адрес электронной почты'
+        gender: 'Пол'
+        password: 'Пароль'
+        password_confirmation: 'Подтверждение пароля'
+        department: 'Подразделение (отдел) пользователя'
+        root_dept: 'Предприятие, с которым может работать пользователь'
+        surname: 'Фамилия'
+        name: 'Имя'
+        patronymic: 'Отчество'
+        user_job: 'Должность'
+        phone_public: 'Городской телефон'
+        phone_cell: 'Сотовый телефон'
+        phone_office: 'Внутриофисный телефон'
+        fax: 'Факс'
+        remember_me: 'Запомнить меня'
+        roles: 'Роли'
+        approved: 'Активация'
+        fio_full: 'ФИО'
+        root_dept_name: 'Предприятие, с которым может работать пользователь'
+        department_name: 'Подразделение (отдел) пользователя'
+        current_password: 'Текущий пароль'
+    errors:
+      models:
+        user:
+          attributes:
+            base:
+              restrict_admin: 'Выбор роли администратора запрещен'

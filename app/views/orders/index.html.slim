@@ -1,0 +1,68 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li = link_to_session_or_default t('.gkpz'), :filter_path, plan_lots_path
+
+.page-header
+  h1 = t('.header')
+
+= input_block_form_for @order_filter, url: orders_path, method: :get do |f|
+  .row
+    .span1 = f.input :year,
+      collection: (2010..(Time.current.year + 1)).to_a.reverse,
+      include_blank: false,
+      selected: Time.current.year
+
+    .span3 = f.input :department,
+      collection: Department.organizers_by_root,
+      include_blank: false,
+      selected: f.object.department || Constants::Departments::RGS
+
+    .span3 = f.input :customers,
+      collection: Department.customers_by_root(current_user.root_dept_id),
+      label_method: :name_with_depth_symbols,
+      include_hidden: false,
+      label_html: { class: 'select-all-clear-roots' },
+      input_html: multi
+
+    .span3 = f.input :num, as: :string
+
+    .span2 = f.input :not_confirmed, collection: { 'Не утвержденные' => true }, input_html: { data: { placeholder: 'Все'} }
+  .row
+    .span2.offset10
+      label &nbsp;
+      = f.button :button, class: 'btn-success input-block-level', name: nil
+
+
+= field_set_tag do
+  p
+    => t('.count')
+    span.label = @orders.total_count
+
+  = paginate @orders
+  table.table.table-hover.table-bordered.table-striped
+    thead
+      tr
+        - %w(num root_customer_names receiving_date agreement_date received_from_user_id).each do |col|
+          th = sortable_column(col, Order.human_attribute_name(col), order_filter: session[:order_filter])
+        th = t('lot_count_short')
+        th
+        th
+        th
+    tbody
+      - @orders.each do |order|
+        tr
+          td = order.num
+          td = order.root_customer_names
+          td = order.receiving_date
+          td = order.agreement_date
+          td = order.received_from_fio_full
+          td = order.plan_lots.size
+          td
+            = link_icon_title 'icon-info-sign', t('icon-show'), order
+          td
+            = link_icon_title_if can?(:update, Order), 'icon-edit', t('edit'), edit_order_path(order)
+          td
+            = link_icon_title_if can?(:destroy, Order), 'icon-trash', t('icon-delete'), order, method: :delete,
+              data: { confirm: t('.confirm') }
+  = paginate @orders

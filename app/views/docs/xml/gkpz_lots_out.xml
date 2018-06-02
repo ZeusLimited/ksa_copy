@@ -1,0 +1,160 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:WashOut">
+   <soap:Body>
+      <tns:gkpz_lots_response>
+         <plan_lot xsi:type="tns:plan_lot">
+            <id xsi:type="xsd:int">1216141</id>
+            <guid_hex xsi:type="xsd:string">cdc71c9cdd1dc2a12c55a3a2e6ae942d</guid_hex>
+            <additional_to_hex xsi:type="xsd:string"/>
+            <preselection_guid_hex xsi:type="xsd:string"/>
+            <gkpz_year xsi:type="xsd:int">2016</gkpz_year>
+            <num_tender xsi:type="xsd:int">125</num_tender>
+            <num_lot xsi:type="xsd:int">1</num_lot>
+            <lot_name xsi:type="xsd:string">Формирование и постановка на кадастровый учет части земельного участка для строительства ПГУ на Владивостокской ТЭЦ-2</lot_name>
+            <announce_date xsi:type="xsd:date">01.02.2016</announce_date>
+            <subject_type_id xsi:type="xsd:int">30002</subject_type_id>
+            <tender_type_id xsi:type="xsd:int">10011</tender_type_id>
+            <etp_address_id xsi:type="xsd:int">12002</etp_address_id>
+            <point_clause xsi:type="xsd:string"/>
+            <tender_type_explanations xsi:type="xsd:string"/>
+            <explanations_doc xsi:type="xsd:string"/>
+            <department_id xsi:type="xsd:int">2</department_id>
+            <commission_id xsi:type="xsd:int">62</commission_id>
+            <sme_type_name xsi:type="xsd:string"/>
+            <order1352_id xsi:type="xsd:int">41001</order1352_id>
+            <state xsi:type="xsd:string">plan</state>
+            <status_id xsi:type="xsd:int">15003</status_id>
+            <root_customer_id xsi:type="xsd:int">2</root_customer_id>
+            <main_direction_id xsi:type="xsd:int">21003</main_direction_id>
+            <regulation_item_id xsi:type="xsd:int">13</regulation_item_id>
+            <created_at xsi:type="xsd:dateTime">14.12.2015 10:15</created_at>
+            <updated_at xsi:type="xsd:dateTime">14.12.2015 10:15</updated_at>
+            <plan_lot_contractors xsi:type="tns:plan_lot_contractors">
+               <contractor_id xsi:type="xsd:int">54370</contractor_id>
+            </plan_lot_contractors>
+            <plan_lot_contractors xsi:type="tns:plan_lot_contractors">
+               <contractor_id xsi:type="xsd:int">61292</contractor_id>
+            </plan_lot_contractors>
+            <plan_lot_contractors xsi:type="tns:plan_lot_contractors">
+               <contractor_id xsi:type="xsd:int">900604</contractor_id>
+            </plan_lot_contractors>
+            <plan_specifications xsi:type="tns:plan_specifications">
+               <id xsi:type="xsd:int">569802</id>
+               <guid_hex xsi:type="xsd:string">e619fb507dfdc0b9d607b8b405d8d7a6</guid_hex>
+               <plan_lot_id xsi:type="xsd:int">1216141</plan_lot_id>
+               <num_spec xsi:type="xsd:int">1</num_spec>
+               <name xsi:type="xsd:string">Формирование и постановка на кадастровый учет части земельного участка для строительства ПГУ на Владивостокской ТЭЦ-2</name>
+               <qty xsi:type="xsd:int">1</qty>
+               <cost xsi:type="xsd:double">300000.0</cost>
+               <cost_nds xsi:type="xsd:double">354000.0</cost_nds>
+               <unit_code xsi:type="xsd:string">876</unit_code>
+               <okdp_code xsi:type="xsd:string">68.3</okdp_code>
+               <okved_code xsi:type="xsd:string">68.31</okved_code>
+               <product_type_id xsi:type="xsd:int">61016</product_type_id>
+               <cost_doc xsi:type="xsd:string">Локальная смета</cost_doc>
+               <direction_id xsi:type="xsd:int">21003</direction_id>
+               <financing_id xsi:type="xsd:int">11007</financing_id>
+               <customer_id xsi:type="xsd:int">2</customer_id>
+               <consumer_id xsi:type="xsd:int">2</consumer_id>
+               <monitor_service_id xsi:type="xsd:int">200012</monitor_service_id>
+               <delivery_date_begin xsi:type="xsd:date">15.04.2016</delivery_date_begin>
+               <delivery_date_end xsi:type="xsd:date">15.06.2016</delivery_date_end>
+               <bp_item xsi:type="xsd:string">29 503</bp_item>
+               <requirements xsi:type="xsd:string">соответствие техническому заданию</requirements>
+               <curator xsi:type="xsd:string">Трефилов Д.С.</curator>
+               <tech_curator xsi:type="xsd:string">Орлова О.А.</tech_curator>
+               <note xsi:type="xsd:string"/>
+               <created_at xsi:type="xsd:dateTime">14.12.2015 10:15</created_at>
+               <updated_at xsi:type="xsd:dateTime">14.12.2015 10:15</updated_at>
+               <fias_plan_specifications xsi:type="tns:fias_plan_specifications">
+                  <addr_aoid_hex xsi:type="xsd:string">00170cae8b4e47ad847327987a9644d7</addr_aoid_hex>
+                  <houseid_hex xsi:type="xsd:string"/>
+               </fias_plan_specifications>
+               <plan_spec_amounts xsi:type="tns:plan_spec_amounts">
+                  <year xsi:type="xsd:int">2016</year>
+                  <amount_mastery xsi:type="xsd:double">300000.0</amount_mastery>
+                  <amount_mastery_nds xsi:type="xsd:double">354000.0</amount_mastery_nds>
+                  <amount_finance xsi:type="xsd:double">300000.0</amount_finance>
+                  <amount_finance_nds xsi:type="xsd:double">354000.0</amount_finance_nds>
+               </plan_spec_amounts>
+            </plan_specifications>
+         </plan_lot>
+         <plan_lot xsi:type="tns:plan_lot">
+            <id xsi:type="xsd:int">1216142</id>
+            <guid_hex xsi:type="xsd:string">1bd2626a73c123cbf40c7019b5ab0116</guid_hex>
+            <additional_to_hex xsi:type="xsd:string"/>
+            <preselection_guid_hex xsi:type="xsd:string"/>
+            <gkpz_year xsi:type="xsd:int">2016</gkpz_year>
+            <num_tender xsi:type="xsd:int">129</num_tender>
+            <num_lot xsi:type="xsd:int">1</num_lot>
+            <lot_name xsi:type="xsd:string">Актуализация Программы перспективного развития энергетического комплекса на территории ДФО в зоне ответственности Холдинга АО «РАО ЭС Востока»</lot_name>
+            <announce_date xsi:type="xsd:date">11.01.2016</announce_date>
+            <subject_type_id xsi:type="xsd:int">30002</subject_type_id>
+            <tender_type_id xsi:type="xsd:int">10001</tender_type_id>
+            <etp_address_id xsi:type="xsd:int">12002</etp_address_id>
+            <point_clause xsi:type="xsd:string"/>
+            <tender_type_explanations xsi:type="xsd:string"/>
+            <explanations_doc xsi:type="xsd:string"/>
+            <department_id xsi:type="xsd:int">2</department_id>
+            <commission_id xsi:type="xsd:int">62</commission_id>
+            <sme_type_name xsi:type="xsd:string"/>
+            <order1352_id xsi:type="xsd:int">41001</order1352_id>
+            <state xsi:type="xsd:string">plan</state>
+            <status_id xsi:type="xsd:int">15003</status_id>
+            <root_customer_id xsi:type="xsd:int">2</root_customer_id>
+            <main_direction_id xsi:type="xsd:int">21010</main_direction_id>
+            <regulation_item_id xsi:type="xsd:int">6</regulation_item_id>
+            <created_at xsi:type="xsd:dateTime">14.12.2015 10:15</created_at>
+            <updated_at xsi:type="xsd:dateTime">14.12.2015 10:15</updated_at>
+            <plan_lot_contractors xsi:type="tns:plan_lot_contractors">
+               <contractor_id xsi:type="xsd:int">50367</contractor_id>
+            </plan_lot_contractors>
+            <plan_lot_contractors xsi:type="tns:plan_lot_contractors">
+               <contractor_id xsi:type="xsd:int">63637</contractor_id>
+            </plan_lot_contractors>
+            <plan_lot_contractors xsi:type="tns:plan_lot_contractors">
+               <contractor_id xsi:type="xsd:int">65799</contractor_id>
+            </plan_lot_contractors>
+            <plan_specifications xsi:type="tns:plan_specifications">
+               <id xsi:type="xsd:int">569770</id>
+               <guid_hex xsi:type="xsd:string">2412c5f6bc42501cb883308556a6c418</guid_hex>
+               <plan_lot_id xsi:type="xsd:int">1216142</plan_lot_id>
+               <num_spec xsi:type="xsd:int">1</num_spec>
+               <name xsi:type="xsd:string">Актуализация Программы перспективного развития энергетического комплекса на территории ДФО в зоне ответственности Холдинга АО «РАО ЭС Востока»</name>
+               <qty xsi:type="xsd:int">1</qty>
+               <cost xsi:type="xsd:double">20000000.0</cost>
+               <cost_nds xsi:type="xsd:double">23600000.0</cost_nds>
+               <unit_code xsi:type="xsd:string">876</unit_code>
+               <okdp_code xsi:type="xsd:string">70.22.13</okdp_code>
+               <okved_code xsi:type="xsd:string">70.2</okved_code>
+               <product_type_id xsi:type="xsd:int">61016</product_type_id>
+               <cost_doc xsi:type="xsd:string"/>
+               <direction_id xsi:type="xsd:int">21010</direction_id>
+               <financing_id xsi:type="xsd:int">11001</financing_id>
+               <customer_id xsi:type="xsd:int">2</customer_id>
+               <consumer_id xsi:type="xsd:int">2</consumer_id>
+               <monitor_service_id xsi:type="xsd:int">200031</monitor_service_id>
+               <delivery_date_begin xsi:type="xsd:date">19.02.2016</delivery_date_begin>
+               <delivery_date_end xsi:type="xsd:date">19.02.2017</delivery_date_end>
+               <bp_item xsi:type="xsd:string">26 313</bp_item>
+               <requirements xsi:type="xsd:string">соответствие техническому заданию</requirements>
+               <curator xsi:type="xsd:string">Кутепов И.А.</curator>
+               <tech_curator xsi:type="xsd:string">Смирнова Ю.Б.</tech_curator>
+               <note xsi:type="xsd:string"/>
+               <created_at xsi:type="xsd:dateTime">14.12.2015 10:15</created_at>
+               <updated_at xsi:type="xsd:dateTime">14.12.2015 10:15</updated_at>
+               <fias_plan_specifications xsi:type="tns:fias_plan_specifications">
+                  <addr_aoid_hex xsi:type="xsd:string">5c8b06f1518e496eb6837bf917e0d70b</addr_aoid_hex>
+                  <houseid_hex xsi:type="xsd:string"/>
+               </fias_plan_specifications>
+               <plan_spec_amounts xsi:type="tns:plan_spec_amounts">
+                  <year xsi:type="xsd:int">2016</year>
+                  <amount_mastery xsi:type="xsd:double">20000000.0</amount_mastery>
+                  <amount_mastery_nds xsi:type="xsd:double">23600000.0</amount_mastery_nds>
+                  <amount_finance xsi:type="xsd:double">20000000.0</amount_finance>
+                  <amount_finance_nds xsi:type="xsd:double">23600000.0</amount_finance_nds>
+               </plan_spec_amounts>
+            </plan_specifications>
+         </plan_lot>
+      </tns:gkpz_lots_response>
+   </soap:Body>
+</soap:Envelope>

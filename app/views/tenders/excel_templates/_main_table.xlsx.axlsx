@@ -1,0 +1,36 @@
+group = {}
+@columns.each_pair do |ckey, cvalue|
+  group["#{ckey}_total"] = 0 if cvalue[:sum]
+end
+index = 0
+
+@tenders.each do |tender|
+  values = @columns.map do |key, value|
+    if tender['row_number'] == 1
+      key == :c1 ? index += 1 : value[:value].call(tender)
+    else
+      value[:no_merge] ? value[:value].call(tender) : nil
+    end
+  end
+  excel_row = @sheet.add_row values, types: @column_types, style: @column_styles
+
+  @columns.each_pair do |key, value|
+    group["#{key}_total"] += value[:value].call(tender) || 0 if value[:sum]
+  end
+
+  next if tender['row_span'] == 1 || tender['row_span'] != tender['row_number']
+
+  @columns.each_with_index do |col, i|
+    @sheet.rows[@sheet.rows.size - tender['row_span']].cells[i].merge excel_row.cells[i] unless col[1][:no_merge]
+  end
+end
+
+values = @columns.map do |key, value|
+  if key == :c1
+    'Итого'
+  else
+    value[:sum] && value[:sum_value] ? value[:sum_value].call(group) : group["#{key}_total"]
+  end
+end
+
+@sheet.add_row values, style: @sum_styles

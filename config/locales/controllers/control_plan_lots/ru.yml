@@ -1,0 +1,6 @@
+ru:
+  control_plan_lots:
+    create_list:
+      notice: 'Лоты поставлены на контроль!'
+    delete_list:
+      notice: 'Лоты сняты с контроля!'

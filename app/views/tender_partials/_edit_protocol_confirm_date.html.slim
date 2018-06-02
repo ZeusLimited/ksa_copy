@@ -1,0 +1,13 @@
+#change_confirm_date.modal.hide.fade
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 = t('.modal_header')
+  .modal-body
+    .error-container
+    = text_field_tag :confirm_date, value, class: "datepicker span2 confirm_date"
+  .modal-footer
+    = link_to t('save'),
+      '#',
+      data: { url: url },
+      class: 'btn btn-primary update_confirm_date'
+

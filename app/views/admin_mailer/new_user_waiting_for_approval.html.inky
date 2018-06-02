@@ -1,0 +1,27 @@
+callout.container-big class="warning" style="width:100%"
+  row.container-big
+    / columns.container-big small="12" large="12"
+    = email_image_tag("#{Setting.company}.png")
+    p.text-center = t('.hello', app_name: Setting.app_name)
+br
+span
+  strong == @user.fio_full
+  ' &nbsp;
+  == "(#{mail_to @user.email})"
+br
+span = t('.position')
+span.text-bold = @user.user_job
+br
+br
+span = t('.branch')
+span.text-bold = @user.department.try(:name)
+br
+span = t('.department', fio: @user.io_full)
+span.text-right.text-bold
+  = @user.root_dept.try(:name) || "Все"
+br
+br
+h6.text-center.text-bold = t('.wait')
+br
+button href=edit_user_url(@user) class="success expanded" = t('.activate')
+br

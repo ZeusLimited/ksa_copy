@@ -1,0 +1,67 @@
+= field_set_tag t('.specification'), class: "coloring specifications container-nds" do
+  = f.hidden_field :_destroy
+
+  = f.hidden_field :gkpz_year, value: gkpz_year
+  = f.hidden_field :guid_hex
+
+  = render "plan_specification_fields_ksazd", f: f
+
+  = field_set_tag t('.addresses') do
+    - if f.object.fias_plan_specifications.size == 0
+      - f.object.fias_plan_specifications.build
+
+    = f.simple_fields_for :fias_plan_specifications do |builder|
+      = render 'fias_plan_specification_fields', f: builder
+
+    = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + ' Добавить адрес', f, :fias_plan_specifications
+
+
+  = field_set_tag t('.invest_project') do
+    .row
+      = f.hidden_field :invest_project_id, class: 'invest-id'
+      .span9
+        = f.input :invest_name, input_html: { class: 'invest-name input-block-level', readonly: true }
+      .span3
+        label &nbsp;
+        = content_tag :a, data: { toggle: "tooltip" }, title: t('.remove_ip'), class: 'remove_invest_project' do
+          i.icon-remove
+        = link_to t('.select_ip'), "#invest_projects",
+          class: 'show-invest-dialog btn btn-success input-large pull-right', data: { toggle: 'modal' }
+
+  = field_set_tag t('.economic_activities') do
+    .row
+      = f.hidden_field :okdp_id, class: 'okdp-id'
+      = f.hidden_field :okved_id, class: 'okved-id'
+
+      .span5
+        = f.input :okdp_name, input_html: { class: 'okdp-name input-block-level', readonly: true }
+      .span1
+        label &nbsp;
+        a.btn.btn-success.select_okdp.input-block-level href="#select_okdp" title=t('.select_okdp') data-toggle="modal"
+          ' Выбрать
+
+      .span5
+        = f.input :okved_name, input_html: { class: 'okved-name input-block-level', readonly: true }
+      .span1
+        label &nbsp;
+        a.btn.btn-success.select_okved.input-block-level href="#select_okved" title=t('.select_okved') data-toggle="modal"
+          ' Выбрать
+    .row
+      .span12
+        p.pull-right
+          = button_tag t('.reform_okveds'),
+            class: "reform-okved btn btn-warning",
+            data: { url: reform_okveds_plan_lots_path }
+
+  = field_set_tag t('.planned_amount') do
+    - if f.object.plan_spec_amounts.size == 0
+      - 1.times { |i| f.object.plan_spec_amounts.build(year: gkpz_year + i) }
+
+    = f.simple_fields_for :plan_spec_amounts do |builder|
+      = render 'plan_spec_amount_fields', f: builder
+
+    = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + t('.add_year'), f, :plan_spec_amounts,
+      "add_field_amount btn btn-success pull-right input-large"
+
+  = link_to content_tag(:i, '', class: 'icon-minus') + t('.remove_specification'), '#',
+    class: "remove_spec_fields btn btn-danger pull-right input-large"

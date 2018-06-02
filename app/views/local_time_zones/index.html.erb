@@ -1,0 +1,33 @@
+<div class="page-header">
+  <h1>Список используемых часовых поясов</h1>
+</div>
+
+<p class="text-right">
+  <%= link_to 'Добавить', new_local_time_zone_path, class: 'btn btn-success' %>
+</p>
+<table class="table table-hover table-striped table-bordered">
+  <thead>
+    <tr>
+      <th>Часовой пояс</th>
+      <th>Расшифровка</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @local_time_zones.each do |local_time_zone| %>
+      <tr>
+        <td><%= local_time_zone.time_zone %></td>
+        <td><%= local_time_zone.timezone_example %></td>
+        <td><%= link_to_declension(local_time_zone) %></td>
+        <td><%= link_to content_tag(:i, '', class: 'icon-info-sign'), local_time_zone_path(local_time_zone), {'data-toggle' => 'tooltip', title: 'Просмотр'} %></td>
+        <td><%= link_to_if can?(:update, local_time_zone), content_tag(:i, '', class: 'icon-edit'), edit_local_time_zone_path(local_time_zone), {'data-toggle' => 'tooltip', title: 'Редактировать'} %></td>
+        <td><%= link_to content_tag(:i, '', class: 'icon-trash'), local_time_zone, method: :delete, data: { confirm: 'Вы уверены?' }, 'data-toggle' => 'tooltip', title: 'Удалить' %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= render "/shared/declension" %>

@@ -1,0 +1,184 @@
+select
+
+t.id as tender_id,
+l.id as lot_id,
+s.id as spec_id,
+gkpz_pl.id as gkpz_pl_id,
+--1
+'РАО Энергетические системы Востока' as root_name,
+--2
+fact_cust.name as root_customer_name,
+--3
+decode(s.direction_id,<%= yaml_directions['ks'] %>,'НС','ТПиР') as direction_name,
+--4
+ip.name as invest_project_name,
+--5
+ip.object_name as invest_object_name,
+--6
+ip.date_install,
+--7
+coalesce(ip.power_elec_gen, 0) as invest_power_mvt,
+--8
+coalesce(ip.power_substation, 0) as invest_power_mva,
+--9
+coalesce(ip.power_elec_net, 0) + coalesce(ip.power_thermal_net, 0) as invest_power_km,
+--10
+ptypes.name as product_type_name,
+--10_1
+(case when gkpz_pl.id is not null
+  then gkpz_pl.num_tender || '.' || gkpz_pl.num_lot
+  else rk_pl.num_tender || '.' || t.num || '.' || l.num
+end) as lot_num,
+--11
+l.name as lot_name,
+--12
+fin.name as financing_name,
+--13
+fact_org.name as org_name,
+--14
+(case when gkpz_pl.id is not null
+  then decode(t.tender_type_id, 10018, 0, 10019, 0, gkpz_ps.qty * gkpz_ps.cost)
+  else s.qty * s.cost
+end) as gkpz_cost,
+--15
+ps.cost_doc,
+--16
+s.qty * s.cost as s_cost,
+--17
+coalesce(
+  case when gkpz_pl.id is not null
+    then decode(gkpz_pl.state, 0, 'ВЗ', 1, null)
+    else decode(rk_pl.state, 0, 'ВЗ', 1, null)
+  end,
+  (case when gkpz_pl.id is not null then gkpz_ttype.name else fact_ttype.name end)
+) as gkpz_ttype_name,
+--18
+fact_ttype.name || decode(wpl.solution_type_id, <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>, ' ЕИ', null) as fact_ttype_name,
+--19
+l.registred_bidders_count,
+--20
+count(*) over (partition by l.id) as cnt_offers,
+--21
+c.name || ' (' || ow.shortname || ')' as contr_name,
+--22
+s.qty * os.cost as bid_cost,
+--23
+decode(o.status_id, <%= Constants::OfferStatuses::REJECT %>, c.name || ' (' || ow.shortname || ')', '') as bid_reject_name,
+--24
+nvl2(l.rebid_protocol_id, 1, 0) as rebid_count,
+--25
+s.qty * os.final_cost as bid_final_cost,
+--26
+decode(o.status_id, <%= Constants::OfferStatuses::WIN %>, s.qty * os.final_cost, null) as winner_final_cost,
+--27
+decode(o.status_id, <%= Constants::OfferStatuses::WIN %>, c.name || ' (' || ow.shortname || ')', '') as bid_winner_name,
+--28
+t.etp_num,
+--29
+--b2b-center
+--30
+(case when gkpz_pl.id is not null then gkpz_pl.announce_date else t.announce_date end) as gkpz_announce_date,
+--31
+t.announce_date as fact_announce_date,
+--32
+op.open_date as op_open_date,
+--33
+wp.confirm_date as wp_confirm_date,
+--34
+contracts.confirm_date as contract_confirm_date,
+--35
+ps.delivery_date_begin as gkpz_delivery_date_begin,
+--36
+l.non_public_reason,
+o.non_contract_reason,
+contracts.non_delivery_reason,
+--37
+null as future_plan_name,
+--38
+l.note as note
+
+from tenders t
+
+inner join lots l on l.tender_id = t.id
+inner join specifications s on s.lot_id = l.id
+inner join invest_projects ip on ip.id = s.invest_project_id
+inner join dictionaries ptypes on ptypes.ref_id = s.product_type_id
+inner join dictionaries fin on fin.ref_id = s.financing_id
+left join plan_lots pl on l.plan_lot_id = pl.id
+left join plan_specifications ps on s.plan_specification_id = ps.id
+left join plan_spec_amounts psa on psa.plan_specification_id = ps.id and pl.gkpz_year = psa.year
+
+inner join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date) sub
+     where rn = 1 and status_id = <%= Constants::PlanLotStatus::CANCELED %>) gkpz_pl on (pl.guid = gkpz_pl.guid)
+
+left join plan_specifications gkpz_ps on gkpz_pl.id = gkpz_ps.plan_lot_id and gkpz_ps.guid = ps.guid
+left join plan_spec_amounts gkpz_psa on gkpz_psa.plan_specification_id = gkpz_ps.id and gkpz_pl.gkpz_year = gkpz_psa.year
+
+inner join departments fact_org on fact_org.id = t.department_id
+left join arm_departments fact_cust on fact_cust.department_id = l.root_customer_id
+
+left join commissions fact_c on t.commission_id = fact_c.id
+
+left join dictionaries gkpz_ttype on gkpz_pl.tender_type_id = gkpz_ttype.ref_id
+inner join dictionaries fact_ttype on t.tender_type_id = fact_ttype.ref_id
+
+left join lots rk_l on l.frame_id = rk_l.id
+left join plan_lots rk_pl on rk_l.plan_lot_id = rk_pl.id
+--left join specifications rk_s on s.frame_id = rk_s.id
+
+left join contracts on l.id = contracts.lot_id and contracts.type_id = <%= Constants::ContractTypes::BASIC %>
+left join contract_specifications contract_spec on
+  (contract_spec.specification_id = s.id and contracts.id = contract_spec.contract_id)
+left join contract_amounts contract_am on contract_am.year = l.gkpz_year and contract_am.contract_specification_id = contract_spec.id
+
+left join open_protocols op on op.tender_id = t.id
+left join winner_protocols wp on wp.id = l.winner_protocol_id
+left join winner_protocol_lots wpl on wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id
+
+inner join offer_specifications os on os.specification_id = s.id
+inner join offers o on o.id = os.offer_id and o.version = 0
+inner join bidders b on b.id = o.bidder_id
+inner join contractors c on c.id = b.contractor_id
+left join ownerships ow on ow.id = c.ownership_id
+
+where
+l.status_id = <%= Constants::LotStatus::FAIL %> -- статус лота
+and l.next_id is null -- последняя копия
+and wp.confirm_date between :begin_date and :end_date
+and s.direction_id in (<%= Direction.invest.select(:id).to_sql %>)-- направление
+and l.gkpz_year = :gkpz_year -- год ГКПЗ
+
+<% if customer.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customer).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  and t.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  and s.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  and s.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  and l.subject_type_id = <%= subject_type %>
+<% end %>
+
+order by
+  nvl2(gkpz_pl.id, gkpz_pl.num_tender, rk_pl.num_tender),
+  nvl2(gkpz_pl.id, gkpz_pl.num_lot, l.num),
+  t.num, t.id, l.id, s.id, decode(o.status_id, <%= Constants::OfferStatuses::WIN %>, 0, 1)

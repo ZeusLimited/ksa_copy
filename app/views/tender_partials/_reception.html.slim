@@ -1,0 +1,7 @@
+.span2= f.input :provide_offer, as: :text, input_html: { rows: 2, class: 'input-block-level' }
+.span2
+  = f.input :offer_reception_start, as: :string,
+    input_html: { value: f.object.offer_reception_start, class: 'datepicker input-block-level'}
+.span2
+  = f.input :offer_reception_stop, as: :string,
+    input_html: { value: f.object.offer_reception_start, class: 'datepicker input-block-level'}

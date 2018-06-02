@@ -1,0 +1,76 @@
+--sheet1
+select
+--1.2
+count(t.cost_nds) as all_count, round(sum(t.cost_nds), 2) as all_cost_nds_sum, --all
+count(t.current_count) as current_count, round(sum(t.current_cost_nds), 2) as current_cost_nds_sum, --current
+count(t.invest_count) as invest_count, round(sum(t.invest_cost_nds), 2) as invest_cost_nds_sum, --invest
+--1.3
+count(t.ipivp_count) as ipivp_count, round(sum(t.ipivp_cost_nds), 2) as ipivp_cost_nds_sum, --niokr
+--1.4
+count(t.ea_cost_nds) as ea_count, round(sum(t.ea_cost_nds), 2) as ea_cost_nds_sum, --Электронных аукционов
+count(t.ok_cost_nds) as ok_count, round(sum(t.ok_cost_nds), 2) as ok_cost_nds_sum, --Открытых конкурсов
+count(t.zk_cost_nds) as zk_count, round(sum(t.zk_cost_nds), 2) as zk_cost_nds_sum, --Закрытых конкурсов
+count(t.ozc_cost_nds) as ozc_count, round(sum(t.ozc_cost_nds), 2) as ozc_cost_nds_sum, --Открытых запросов цен
+count(t.zzc_cost_nds) as zzc_count, round(sum(t.zzc_cost_nds), 2) as zzc_cost_nds_sum, --Закрытых запросов цен
+count(t.ozp_cost_nds) as ozp_count, round(sum(t.ozp_cost_nds), 2) as ozp_cost_nds_sum, --Открытых запросов предложений
+count(t.zzp_cost_nds) as zzp_count, round(sum(t.zzp_cost_nds), 2) as zzp_cost_nds_sum, --Закрытых запросов предложений
+count(t.okp_cost_nds) as okp_count, round(sum(t.okp_cost_nds), 2) as okp_cost_nds_sum, --Открытых конкурентных переговоров
+count(t.zkp_cost_nds) as zkp_count, round(sum(t.zkp_cost_nds), 2) as zkp_cost_nds_sum, --Закрытых конкурентных переговоров
+count(t.zpp_cost_nds) as zpp_count, round(sum(t.zpp_cost_nds), 2) as zpp_cost_nds_sum, --Закупка, путем участия в процедурах, организованных продавцом закупки
+count(t.po_cost_nds) as po_count, round(sum(t.po_cost_nds), 2) as po_cost_nds_sum, --Предварительный отбор
+count(t.ei_cost_nds) as ei_count, round(sum(t.ei_cost_nds), 2) as ei_cost_nds_sum, --Закупок у единственного источника
+count(t.nz_cost_nds) as nz_count, round(sum(t.nz_cost_nds), 2) as nz_cost_nds_sum, --Нерегламентированных закупок
+count(t.uz_cost_nds) as uz_count, round(sum(t.uz_cost_nds), 2) as uz_cost_nds_sum --Упрощенных закупок
+from (
+  select
+  --1.2
+  CASE WHEN gkpz_pl.main_direction_type_id = 1 THEN null ELSE 1 END as current_count, --current
+  CASE WHEN gkpz_pl.main_direction_type_id = 1 THEN 1 ELSE null END as invest_count, --invest
+  --1.3
+  CASE WHEN gkpz_pl.main_direction_id in (<%= Direction.inivp.select(:id).to_sql %>) THEN 1
+    ELSE null END as ipivp_count, --ipivp
+  --1.4
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::AUCTIONS.join(', ') %>) and gkpz_pl.etp_address_id != <%= Constants::EtpAddress::NOT_ETP %> THEN sum_specs.cost_nds
+    ELSE null END as ea_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::OK.join(', ') %>) THEN sum_specs.cost_nds
+    ELSE null END as ok_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::ZK.join(', ') %>) THEN sum_specs.cost_nds
+    ELSE null END as zk_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::OZC %>) THEN sum_specs.cost_nds ELSE null END as ozc_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::ZZC %>) THEN sum_specs.cost_nds ELSE null END as zzc_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::OZP %>) THEN sum_specs.cost_nds ELSE null END as ozp_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::ZZP %>) THEN sum_specs.cost_nds ELSE null END as zzp_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::OKP %>) THEN sum_specs.cost_nds ELSE null END as okp_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::ZKP %>) THEN sum_specs.cost_nds ELSE null END as zkp_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::ZPP %>) THEN sum_specs.cost_nds ELSE null END as zpp_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::PO %>) THEN sum_specs.cost_nds ELSE null END as po_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::ONLY_SOURCE %>) THEN sum_specs.cost_nds ELSE null END as ei_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::UNREGULATED %>) THEN sum_specs.cost_nds ELSE null END as nz_cost_nds,
+  CASE WHEN gkpz_pl.tender_type_id in (<%= Constants::TenderTypes::SIMPLE %>) THEN sum_specs.cost_nds ELSE null END as uz_cost_nds,
+
+  gkpz_pl.id, sum_specs.*
+
+  from
+    (
+      <%= render_sql '_gkpz_pl.sql.erb' %>
+    ) gkpz_pl
+
+  left join
+    (select
+      tps.plan_lot_id,
+      sum(tps.qty * tps.cost_nds) as cost_nds,
+      sum(case
+          when dir.type_id != 1 then tps.qty * tps.cost_nds else 0 end) as current_cost_nds,
+      sum(case
+          when dir.type_id = 1 then tps.qty * tps.cost_nds
+          else 0 end) as invest_cost_nds,
+      sum(case
+          when tps.direction_id in (<%= Direction.inivp.select(:id).to_sql %>) then tps.qty * tps.cost_nds
+          else 0 end) as ipivp_cost_nds
+      from plan_specifications tps
+        inner join directions dir on dir.id = tps.direction_id
+      group by tps.plan_lot_id
+    ) sum_specs on sum_specs.plan_lot_id = gkpz_pl.id
+
+  --where gkpz_pl.rn = 1
+) t

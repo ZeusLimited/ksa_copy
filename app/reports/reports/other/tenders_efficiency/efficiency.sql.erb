@@ -1,0 +1,44 @@
+select count(*) as cnt, sum(ows.final_cost) as winners_cost, sum(os.avg_cost) as avg_cost
+from tenders t
+inner join lots l on l.tender_id = t.id and l.status_id in (:statuses)
+inner join winner_protocols wp on wp.tender_id = t.id and wp.confirm_date between :begin_date and :end_date
+left join winner_protocol_lots wpl on wpl.winner_protocol_id = wp.id
+left join
+(
+     select ot.lot_id, sum(ost.final_cost) as final_cost
+     from offers ot
+     inner join offer_specifications ost on ost.offer_id = ot.id
+     where ot.status_id = 26004
+     group by ot.lot_id
+) ows on ows.lot_id = l.id
+left join
+(
+     select ot.lot_id, avg(ost.cost * st.qty) as avg_cost
+     from offers ot
+     inner join offer_specifications ost on ost.offer_id = ot.id
+     inner join specifications st on ost.specification_id = st.id
+     where ot.status_id in (26002, 26004)
+     group by ot.lot_id
+) os on os.lot_id = l.id
+inner join
+(
+      select lot_id
+      from specifications
+      <% if customers.present? %>
+        where customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+      <% end %>
+      group by lot_id
+) s on s.lot_id = l.id
+where t.tender_type_id not in (:excluded_tender_types)
+and wpl.solution_type_id in (:wp_solution)
+and coalesce(l.fas_appeal, 0) in (:fas_appeal)
+and (:not_check_overdue = 1 or (t.announce_date > t.order_date))
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+<% end %>
+
+<% if gkpz_years.present? %>
+  and l.gkpz_year in
+    (<%= gkpz_years.join(', ') %>)
+<% end %>

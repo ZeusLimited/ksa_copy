@@ -1,0 +1,29 @@
+.page-header
+  h1 = Reports::Other::Rosstat.model_name.human
+
+h2 = "Подробности по строке #{@report.line} колонке #{@report.col}"
+
+table.table.table-bordered
+  thead
+    tr
+      th #
+      th Номер лота
+      th Наименование лота
+      th Начальная цена (плановая по ГКПЗ)
+      th Цена по извещению
+      th Дата вступления в силу протокола ВП
+      th Итоговая цена (победителя) с НДС
+      th Дата договора
+      th Сумма договора
+  tbody
+    - @report.sql_result(@report.line).each_with_index do |r, i|
+      tr
+        td= i + 1
+        td= r['num']
+        td= r['name']
+        td.right-cell= p_money r['frame_id'].nil? ? r['gkpz_cost'] : r['plan_cost']
+        td.right-cell= p_money r['plan_cost']
+        td.right-cell= r['protocol_confirm_date'].try(:to_date)
+        td.right-cell= p_money r['fact_cost']
+        td.right-cell= r['contract_date'].try(:to_date)
+        td.right-cell= p_money r['contract_cost'].to_f

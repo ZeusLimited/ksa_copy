@@ -1,0 +1,4 @@
+head_rows = CSV.read('app/views/reports/pui/current_operation/csv/footer.csv')
+
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:td]) }

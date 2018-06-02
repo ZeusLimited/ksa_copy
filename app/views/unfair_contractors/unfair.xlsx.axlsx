@@ -1,0 +1,6 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+wb.add_worksheet(name: "Недобросовестные") do |sheet|
+  render 'unfair_contractors/excel_templates/list1', sheet: sheet
+end

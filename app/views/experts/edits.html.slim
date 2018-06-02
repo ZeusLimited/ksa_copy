@@ -1,0 +1,18 @@
+.page-header
+  h1 = t('.edit_expert')
+
+= render 'tenders/tender_header', tender: tender
+
+= simple_form_for @tender, url: updates_tender_experts_path do |f|
+  = error_messages_for tender
+  = f.simple_fields_for :experts do |builder|
+    = render 'expert_fields', f: builder
+
+  .row
+    .span12
+      = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + t('add'), f, :experts
+
+  .form-actions
+    = link_to t('cancel'), tender_experts_path, class: 'btn'
+    = f.submit t('save'), class: 'btn btn-primary'
+

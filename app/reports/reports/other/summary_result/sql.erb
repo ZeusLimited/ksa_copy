@@ -1,0 +1,199 @@
+select
+  :name as name,
+  gkpz_count, gkpz_cost,
+  plan_count, plan_cost,
+  anno_count, anno_cost,
+  fact_count, fact_cost, winner_cost
+from
+(select
+  nvl(sum(decode(l.main_direction_id, gkpz_ps.direction_id, 1, 0)), 0) as gkpz_count,
+  nvl(sum(sum(gkpz_ps.qty * gkpz_ps.cost)), 0) as gkpz_cost
+from plan_lots l
+inner join
+  (select id from
+    (select tpl.id, tpl.status_id, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm < :protocol_end_date
+      inner join commissions c on (c.id = tp.commission_id)
+      where c.commission_type_id = <%= Constants::CommissionType::SD %>)
+     where rn = 1 and status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %>) gkpz_pl on (l.id = gkpz_pl.id)
+  inner join plan_specifications gkpz_ps on (gkpz_ps.plan_lot_id = l.id)
+Where l.gkpz_year = :gkpz_year
+  And l.announce_date between :begin_date and :end_date
+  And l.tender_type_id = :tender_type
+  And decode(:etp_address, -1, -1, l.etp_address_id) = :etp_address
+
+<% if @report.current_user.root_dept_id %>
+  and gkpz_ps.customer_id in
+    (select id from departments start with id = <%= @report.current_user.root_dept_id %> connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.customers.present? %>
+  and gkpz_ps.customer_id in
+    (select id from departments start with id in (<%= @report.customers.join(', ') %>) connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.organizers.present? %>
+  and l.department_id in
+    (select id from departments start with id in (<%= @report.organizers.join(', ') %>) connect by prior id = parent_dept_id) -- организатор
+<% end %>
+
+<% if @report.tender_types.present? %>
+  and l.tender_type_id in (<%= @report.tender_types.join(', ') %>)
+<% end %>
+
+<% if @report.directions.present? %>
+  and gkpz_ps.direction_id in (<%= @report.directions.join(', ') %>)
+<% end %>
+
+<% if @report.financing_sources.present? %>
+  and gkpz_ps.financing_id in (<%= @report.financing_sources.join(', ') %>)
+<% end %>
+
+<% if @report.subject_type.present? %>
+  and l.subject_type_id = <%= @report.subject_type %>
+<% end %>
+
+group by l.id, l.main_direction_id, gkpz_ps.direction_id)
+,
+(select
+  nvl(sum(decode(l.main_direction_id, ps.direction_id, 1, 0)), 0) as plan_count,
+  nvl(sum(sum(ps.qty * ps.cost)), 0) as plan_cost
+from plan_lots l
+inner join
+  (select id from
+    (select tpl.id, tpl.status_id, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm < :protocol_end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>))
+     where rn = 1) pl on (pl.id = l.id)
+  inner join plan_specifications ps on (ps.plan_lot_id = l.id)
+Where l.gkpz_year = :gkpz_year
+  And l.announce_date between :begin_date and :end_date
+  And l.tender_type_id = :tender_type
+  And decode(:etp_address, -1, -1, l.etp_address_id) = :etp_address
+
+<% if @report.current_user.root_dept_id %>
+  and ps.customer_id in
+    (select id from departments start with id = <%= @report.current_user.root_dept_id %> connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.customers.present? %>
+  and ps.customer_id in
+    (select id from departments start with id in (<%= @report.customers.join(', ') %>) connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.organizers.present? %>
+  and l.department_id in
+    (select id from departments start with id in (<%= @report.organizers.join(', ') %>) connect by prior id = parent_dept_id) -- организатор
+<% end %>
+
+<% if @report.tender_types.present? %>
+  and l.tender_type_id in (<%= @report.tender_types.join(', ') %>)
+<% end %>
+
+<% if @report.directions.present? %>
+  and ps.direction_id in (<%= @report.directions.join(', ') %>)
+<% end %>
+
+<% if @report.financing_sources.present? %>
+  and ps.financing_id in (<%= @report.financing_sources.join(', ') %>)
+<% end %>
+
+<% if @report.subject_type.present? %>
+  and l.subject_type_id = <%= @report.subject_type %>
+<% end %>
+
+group by l.id, l.main_direction_id, ps.direction_id)
+,
+(select
+  nvl(sum(decode(l.main_direction_id, s.direction_id, 1, 0)), 0) as anno_count,
+  nvl(sum(sum(s.qty * s.cost)), 0) as anno_cost
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (s.lot_id = l.id)
+Where l.gkpz_year = :gkpz_year
+  and t.announce_date between :begin_date and :end_date
+  And t.tender_type_id = :tender_type
+  And decode(:etp_address, -1, -1, t.etp_address_id) = :etp_address
+
+<% if @report.current_user.root_dept_id %>
+  and s.customer_id in
+    (select id from departments start with id = <%= @report.current_user.root_dept_id %> connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.customers.present? %>
+  and s.customer_id in
+    (select id from departments start with id in (<%= @report.customers.join(', ') %>) connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.organizers.present? %>
+  and t.department_id in
+    (select id from departments start with id in (<%= @report.organizers.join(', ') %>) connect by prior id = parent_dept_id) -- организатор
+<% end %>
+
+<% if @report.tender_types.present? %>
+  and t.tender_type_id in (<%= @report.tender_types.join(', ') %>)
+<% end %>
+
+<% if @report.directions.present? %>
+  and s.direction_id in (<%= @report.directions.join(', ') %>)
+<% end %>
+
+<% if @report.financing_sources.present? %>
+  and s.financing_id in (<%= @report.financing_sources.join(', ') %>)
+<% end %>
+
+<% if @report.subject_type.present? %>
+  and l.subject_type_id = <%= @report.subject_type %>
+<% end %>
+Group By nvl(l.frame_id, l.id), l.plan_lot_id, l.main_direction_id, s.direction_id)
+,
+(select
+  nvl(sum(decode(l.main_direction_id, s.direction_id, 1, 0)), 0) as fact_count,
+  nvl(sum(sum(s.qty * s.cost)), 0) as fact_cost,
+  nvl(sum(sum(s.qty * os.final_cost)), 0) as winner_cost
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join offer_specifications os on (os.specification_id = s.id)
+  inner join offers o on (o.id = os.offer_id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+Where l.gkpz_year = :gkpz_year
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And wp.confirm_date between :begin_date and :end_date
+  And t.tender_type_id = :tender_type
+  And decode(:etp_address, -1, -1, t.etp_address_id) = :etp_address
+
+<% if @report.current_user.root_dept_id %>
+  and s.customer_id in
+    (select id from departments start with id = <%= @report.current_user.root_dept_id %> connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.customers.present? %>
+  and s.customer_id in
+    (select id from departments start with id in (<%= @report.customers.join(', ') %>) connect by prior id = parent_dept_id) -- заказчик
+<% end %>
+
+<% if @report.organizers.present? %>
+  and t.department_id in
+    (select id from departments start with id in (<%= @report.organizers.join(', ') %>) connect by prior id = parent_dept_id) -- организатор
+<% end %>
+
+<% if @report.tender_types.present? %>
+  and t.tender_type_id in (<%= @report.tender_types.join(', ') %>)
+<% end %>
+
+<% if @report.directions.present? %>
+  and s.direction_id in (<%= @report.directions.join(', ') %>)
+<% end %>
+
+<% if @report.financing_sources.present? %>
+  and s.financing_id in (<%= @report.financing_sources.join(', ') %>)
+<% end %>
+
+<% if @report.subject_type.present? %>
+  and l.subject_type_id = <%= @report.subject_type %>
+<% end %>
+
+Group By nvl(l.frame_id, l.id), l.plan_lot_id, l.main_direction_id, s.direction_id)

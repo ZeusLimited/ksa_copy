@@ -1,0 +1,10 @@
+rows = @simple_sheet.add_rows_from_csv File.expand_path("../csv/total_head.csv", __FILE__)
+rows[0].height = 30
+rows[1].height = 60
+
+@report.total_rows.values.each do |group|
+  @sheet.add_row([group[:title], nil, nil, nil, nil, nil], style: @styles[:th]) if group[:title]
+  group[:rows].each do |row|
+    @sheet.add_row @total_columns.values.map { |c| c[:value].call(row) }, style: @column_styles, types: @column_types
+  end
+end

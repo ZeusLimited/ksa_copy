@@ -1,0 +1,9 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to_session_or_default 'Вернуться к списку', :filter_path, plan_lots_path
+
+.page-header
+  h1 Редактирование лота
+
+= render 'form', url: @plan_lot_old, http_method: :patch, plan_lot: @plan_lot

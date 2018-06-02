@@ -1,0 +1,25 @@
+.page-header
+  h1 = t('.caption')
+
+= simple_form_for @tender_type_list, url: update_all_tender_type_rules_path, method: :patch do |f|
+  .row
+    table.table.table-bordered.span10
+      thead
+        tr
+          th.center-cell.span4 = t('.plan_type')
+          th.center-cell.span6 = t('.fact_type')
+      tbody
+        - @tender_type_list.rules.each do |rule|
+          tr
+            = f.simple_fields_for :rules, rule, index: rule.ref_id  do |rule_fields|
+              td.text-right
+                h4.text-right= rule.name
+              td
+                = rule_fields.input :fact_type_ids,
+                  collection: Dictionary.tender_types,
+                  label: false,
+                  input_html: { multiple: true, class: 'span6' }
+  .row
+    .form-actions
+      = link_to t('.cancel'), tender_type_rules_path, class: 'btn btn-warning btn-large'
+      = f.submit t('.submit'), class: 'btn btn-primary btn-large'

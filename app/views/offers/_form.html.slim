@@ -1,0 +1,52 @@
+= my_simple_form_for [tender, bidder, offer], url, http_method do |f|
+  h3 = bidder.contractor_name_short
+  h4 = offer.lot_name_with_cust
+  hr
+  = error_messages_for offer
+
+  = f.hidden_field :lot_id
+
+  .row
+    .span2
+      = f.association :status, collection: Dictionary.offer_statuses, include_blank: false,
+        input_html: { class: 'input-block-level' }
+    - if %w(new create).include?(action_name)
+      .span2= f.input :num, collection: Constants::OFFER_TYPES, include_blank: false,
+        input_html: { class: "input-block-level" }
+    - else
+      = f.hidden_field :num
+      = f.hidden_field :type_id
+
+  .row
+    .span4 = f.input :conditions, input_html: { rows: 4, class: "input-block-level" }
+    .span4 = f.input :note, input_html: { rows: 4, class: "input-block-level" }
+    .span4 = f.input :change_descriptions, input_html: { rows: 4, class: "input-block-level" }
+
+  .row
+    .span4 = f.input :rebidded
+    .span4 = f.input :maker
+    .span4 = f.input :absent_auction if tender.auction?
+
+  .row
+    .span4.final_conditions= f.input :final_conditions, input_html: { rows: 4, class: "input-block-level" }
+
+  = field_set_tag "Спецификации оферты" do
+    table.table.table-bordered
+      thead
+        tr
+          th.center-cell rowspan="2" Спецификация
+          th.center-cell colspan="5" Цена
+        tr
+          th.center-cell = t('.nds')
+          th.center-cell Предварительная без НДС
+          th.center-cell Предварительная с НДС
+          th.center-cell Окончательная без НДС
+          th.center-cell Окончательная с НДС
+      tbody
+        = f.simple_fields_for :offer_specifications do |builder|
+          = render 'offer_specification_fields', f: builder
+
+  .form-actions
+    .pull-right
+      => link_to t('cancel'), tender_bidder_offers_path(tender, bidder), class: 'btn btn-warning'
+      = f.button :submit, t('save'), class: 'btn btn-primary'

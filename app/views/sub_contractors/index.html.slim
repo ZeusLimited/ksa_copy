@@ -1,0 +1,32 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to 'Вернуться к договору', offer_contract_path(@offer)
+
+.page-header
+  h1 Субподрядчики
+
+= render 'shared/contract_info', lot: @lot, offer: @offer
+
+= field_set_tag "Субподрядчики" do
+  p.pull-right
+    = link_to 'Создать субподрядчика', new_contract_sub_contractor_path(@contract), class: "btn btn-primary"
+
+  table.table.table-bordered
+    thead
+      tr
+        th Наименование
+        th Цена без НДС
+        th Цена с НДС
+        th
+        th
+        th
+    tbody
+    - @sub_contractors.each do |sub_contractor|
+      tr
+        td= sub_contractor.contractor_name_long
+        td.right-cell= p_money sub_contractor.total_cost
+        td.right-cell= p_money sub_contractor.total_cost_nds
+        td= link_show contract_sub_contractor_path(@contract, sub_contractor)
+        td= link_edit edit_contract_sub_contractor_path(@contract, sub_contractor)
+        td= link_delete contract_sub_contractor_path(@contract, sub_contractor)

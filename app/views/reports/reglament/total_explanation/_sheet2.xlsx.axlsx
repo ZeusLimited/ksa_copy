@@ -1,0 +1,171 @@
+@sheet = sheet
+
+@col_count = 6
+
+def print_group(name, options = {})
+  values = Array.new(@col_count)
+  values[0] = name
+  group_row = @sheet.add_row values, options
+  @sheet.merge_cells group_row.cells[0..(@col_count - 1)]
+  group_row
+end
+
+def print_vals(name, name_f, styles)
+  values = Array.new(@col_count)
+  values[0] = name
+  values[1] = @report.sheet2_plan_row["#{name_f}_cnt"]
+  values[2] = @report.sheet2_fact_row["#{name_f}_fcnt"]
+  values[3] = @report.sheet2_plan_row["#{name_f}_cost_n_s"]
+  values[4] = @report.sheet2_fact_row["#{name_f}_fcost_n"]
+  values[5] = @report.sheet2_fact_row["#{name_f}_fin_cost_n"]
+
+  @sheet.add_row values, style: styles, types: %i(string integer integer float float)
+end
+
+months = "#{@report.months} #{t(:month, count: @report.months)}"
+
+invest_dirs = %w(ks tpir it_invest niokr_invest inivp_invest)
+invest_sum_fcnt = invest_dirs.sum { |n| @report.sheet2_fact_row["#{n}_fcnt"].presence || 0 }
+invest_sum_fcost_n = invest_dirs.sum { |n| @report.sheet2_fact_row["#{n}_fcost_n"].presence || 0 }
+invest_sum_fin_cost_n = invest_dirs.sum { |n| @report.sheet2_fact_row["#{n}_fin_cost_n"].presence || 0 }
+tek_sum_fcnt = (@report.sheet2_fact_row["fcnt"] || 0) - invest_sum_fcnt
+tek_sum_fin_cost_n = (@report.sheet2_fact_row['final_cost_nds'] || 0) - invest_sum_fin_cost_n
+
+print_group t('.text2', months: months, year: @report.gkpz_year), style: @styles[:text_left_bold]
+print_group t('.text21'), style: @styles[:text_left_bold]
+print_group(
+  t('.text211',
+    months: months,
+    year: @report.gkpz_year,
+    holding: @holding_name,
+    cnt: "#{@report.sheet2_fact_row["fcnt"]} #{t(:tender_procedure, count: @report.sheet2_fact_row['fcnt'])}",
+    cost: to_money_str(@report.sheet2_fact_row['final_cost_nds'])), style: @styles[:text_left], height: 30)
+print_group(
+  t('.text211a',
+    cnt: "#{tek_sum_fcnt} #{t(:tender, count: tek_sum_fcnt)}",
+    cost: to_money_str(tek_sum_fin_cost_n)), style: @styles[:text_left])
+print_group(
+  t('.text211b',
+    cnt: "#{invest_sum_fcnt} #{t(:tender, count: invest_sum_fcnt)}",
+    cost: to_money_str(invest_sum_fin_cost_n)), style: @styles[:text_left])
+
+sheet.add_row
+
+head_rows = CSV.read('app/views/reports/reglament/total_explanation/csv/head_2_1.csv', col_sep: ';')
+rows = []
+head_rows.each { |head_row| rows << sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 20
+rows[1].height = 60
+rows[2].height = 15
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+vals_styles = [
+  @styles[:td], @styles[:td], @styles[:td], @styles[:td_money], @styles[:td_money], @styles[:td_money]
+]
+sum_vals_styles = [
+  @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum_money], @styles[:sum_money], @styles[:sum_money]
+]
+
+print_group t('.r1'), style: @styles[:group_row_h1]
+
+print_group t('.r1_1'), style: @styles[:group_row_h1]
+print_vals t('.r1_1_1'), 'ks_services', vals_styles
+print_vals t('.r1_1_2'), 'ks_materials', vals_styles
+print_vals t('.r1_1_sum'), 'ks', sum_vals_styles
+
+print_group t('.r1_2'), style: @styles[:group_row_h1]
+print_vals t('.r1_2_1'), 'tpir_services', vals_styles
+print_vals t('.r1_2_2'), 'tpir_materials', vals_styles
+print_vals t('.r1_2_sum'), 'tpir', sum_vals_styles
+
+print_group t('.r1_3'), style: @styles[:group_row_h1]
+print_vals t('.r1_3_1'), 'it_invest_services', vals_styles
+print_vals t('.r1_3_2'), 'it_invest_materials', vals_styles
+print_vals t('.r1_3_sum'), 'it_invest', sum_vals_styles
+
+print_group t('.r1_4'), style: @styles[:group_row_h1]
+print_vals t('.r1_4_sum'), 'niokr_invest', sum_vals_styles
+
+print_group t('.r1_5'), style: @styles[:group_row_h1]
+print_vals t('.r1_5_sum'), 'inivp_invest', sum_vals_styles
+
+sum_rows = %w(14 18 22 24 26)
+formula = ->(rows, column) { "=#{rows.map { |r| "#{column}#{r}" }.join('+')}" }
+
+sheet.add_row [
+  t('.r1_sum'),
+  formula.call(sum_rows, 'B'),
+  formula.call(sum_rows, 'C'),
+  formula.call(sum_rows, 'D'),
+  formula.call(sum_rows, 'E'),
+  formula.call(sum_rows, 'F')
+], style: sum_vals_styles
+
+print_group t('.r2'), style: @styles[:group_row_h1]
+
+print_group t('.r2_1'), style: @styles[:group_row_h1]
+print_vals t('.r2_1_1'), 'erp_services', vals_styles
+print_vals t('.r2_1_2'), 'erp_materials', vals_styles
+print_vals t('.r2_1_sum'), 'erp', sum_vals_styles
+
+print_group t('.r2_2'), style: @styles[:group_row_h1]
+print_vals t('.r2_2_1'), 'it_other_services', vals_styles
+print_vals t('.r2_2_2'), 'it_other_materials', vals_styles
+print_vals t('.r2_2_sum'), 'it_other', sum_vals_styles
+
+print_group t('.r2_3'), style: @styles[:group_row_h1]
+print_vals t('.r2_3_1'), 'er_services', vals_styles
+print_vals t('.r2_3_2'), 'er_materials', vals_styles
+print_vals t('.r2_3_sum'), 'er', sum_vals_styles
+
+print_group t('.r2_4'), style: @styles[:group_row_h1]
+print_vals t('.r2_4_sum'), 'fuel', sum_vals_styles
+
+print_group t('.r2_5'), style: @styles[:group_row_h1]
+print_vals t('.r2_5_sum'), 'niokr_other', sum_vals_styles
+
+print_group t('.r2_6'), style: @styles[:group_row_h1]
+print_vals t('.r2_6_sum'), 'inivp_other', sum_vals_styles
+
+print_group t('.r2_7'), style: @styles[:group_row_h1]
+print_vals t('.r2_7_sum'), 'axn', sum_vals_styles
+
+print_group t('.r2_8'), style: @styles[:group_row_h1]
+print_vals t('.r2_8_sum'), 'osu', sum_vals_styles
+
+print_group t('.r2_9'), style: @styles[:group_row_h1]
+print_vals t('.r2_9_sum'), 'other', sum_vals_styles
+
+sum_rows = %w(32 36 40 42 44 46 48 50 52)
+sheet.add_row [
+  t('.r2_sum'),
+  formula.call(sum_rows, 'B'),
+  formula.call(sum_rows, 'C'),
+  formula.call(sum_rows, 'D'),
+  formula.call(sum_rows, 'E'),
+  formula.call(sum_rows, 'F')
+], style: sum_vals_styles
+
+sum_rows = %w(27 53)
+sheet.add_row [
+  t('.sum'),
+  formula.call(sum_rows, 'B'),
+  formula.call(sum_rows, 'C'),
+  formula.call(sum_rows, 'D'),
+  formula.call(sum_rows, 'E'),
+  formula.call(sum_rows, 'F')
+], style: sum_vals_styles
+
+sheet.add_row
+
+cnt = (@report.sheet2_fact_row['inivp_invest_fcnt'] || 0) + (@report.sheet2_fact_row['inivp_other_fcnt'] || 0)
+cost = (@report.sheet2_fact_row['inivp_other_fin_cost_n'] || 0) + (@report.sheet2_fact_row['inivp_invest_fin_cost_n'] || 0)
+print_group(
+  t('.text_on_bottom',
+    months: months,
+    year: @report.gkpz_year,
+    holding: @holding_name,
+    cnt: "#{cnt} #{t(:tender_procedure, count: cnt)}",
+    cost: to_money_str(cost)), style: @styles[:text_left], height: 30)
+
+sheet.column_widths 50, 10, 10, 18, 18, 18

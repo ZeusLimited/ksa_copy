@@ -1,0 +1,94 @@
+name: 'contractors'
+desc: 'возвращает список контрагентов'
+request_params:
+  -
+    name: 'begin_date'
+    data_type: 'DateTime'
+    desc: 'дата создания / изменения с'
+    required: false
+    example: '2015-12-18 01:55'
+  -
+    name: 'end_date'
+    data_type: 'DateTime'
+    desc: 'дата создания / изменения по'
+    required: false
+    example: '2016-02-01'
+  -
+    name: 'id'
+    data_type: 'Integer'
+    desc: 'Идентификатор контрагента (возможна передача нескольких значений)'
+    required: false
+    example: '56321'
+response_params:
+  -
+    name: 'id'
+    data_type: 'Integer'
+    desc: 'ИД контрагента'
+    required: true
+    example: '1'
+  -
+    name: 'name'
+    data_type: 'String(500)'
+    desc: 'Наименование'
+    required: true
+    example: 'АСКО'
+  -
+    name: 'fullname'
+    data_type: 'String(500)'
+    desc: 'Полное наименование'
+    required: true
+    example: 'Общество с ограниченной ответственностью "АСКО"'
+  -
+    name: 'inn'
+    data_type: 'String(12)'
+    desc: 'ИНН'
+    required: false
+    example: '4220032291'
+  -
+    name: 'kpp'
+    data_type: 'String(9)'
+    desc: 'КПП'
+    required: false
+    example: '422001001'
+  -
+    name: 'ogrn'
+    data_type: 'String(15)'
+    desc: 'ОГРН'
+    required: false
+    example: '1026602951957'
+  -
+    name: 'okpo'
+    data_type: 'String(10)'
+    desc: 'ОКПО'
+    required: false
+    example: '41743457'
+  -
+    name: 'ownership'
+    data_type: 'String(100)'
+    desc: 'Форма собственности'
+    required: false
+    example: 'ООО'
+  -
+    name: 'oktmo'
+    data_type: 'String(11)'
+    desc: 'Код ОКТМО'
+    required: false
+    example: '40300000'
+  -
+    name: 'legal_addr'
+    data_type: 'String(4000)'
+    desc: 'Юридический адрес'
+    required: false
+    example: '620050, Свердловская обл., г. Екатеринбург, ул. Маневровая, д. 43'
+  -
+    name: 'form'
+    data_type: 'String'
+    desc: 'Вид контрагента (businessman-физ. лицо, company-юр. лицо, foreign-иностран.)'
+    required: true
+    example: 'company'
+  -
+    name: 'status'
+    data_type: 'String'
+    desc: 'Статус (orig - Новый, active - Актуальный, old - Старый, inactive - Не действующий)'
+    required: true
+    example: 'active'

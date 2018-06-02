@@ -1,0 +1,17 @@
+= if_browser_is_supported do
+  = file_field_tag('tender_file_document',
+    multiple: true,
+    name: 'tender_file[document]',
+    class: 'file_upload',
+    data: { url: tender_files_path,
+      sequential_uploads: true,
+      form_data: { 'tender_file[area_id]' => area_id, 'tender_file[year]' => year } })
+  .loaded_files
+  p.text-info.lead Вы можете мышкой перетащить сюда файлы из вашей папки. Можно прикреплять сразу несколько файлов.
+
+  / шаблон для загружаемых файлов
+  script#template-upload type="text/x-tmpl"
+    .upload
+      ' {%=o.name%}
+      .progress.progress-striped
+        .bar style="width: 0%"

@@ -1,0 +1,8 @@
+ru:
+  sub_contractors:
+    create:
+      notice: 'Субподрядчик успешно создан.'
+    destroy:
+      notice: 'Субподрядчик успешно удалён.'
+    update:
+      notice: 'Субподрядчик успешно изменён.'

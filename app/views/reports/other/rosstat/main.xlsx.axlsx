@@ -1,0 +1,34 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+wb.add_worksheet(name: "Титул") do |sheet|
+  render 'title', sheet: sheet
+end
+
+wb.add_worksheet(name: "Титул 2") do |sheet|
+  render 'title_2', sheet: sheet
+end
+
+wb.add_worksheet(name: "Часть 1") do |sheet|
+  render 'list1', sheet: sheet
+end
+
+wb.add_worksheet(name: "Часть 2") do |sheet|
+  render 'list2', sheet: sheet
+end
+
+wb.add_worksheet(name: "Часть 3") do |sheet|
+  render 'list3', sheet: sheet
+end
+
+wb.add_worksheet(name: "Часть 4.1") do |sheet|
+  render 'list4_1', sheet: sheet
+end
+
+wb.add_worksheet(name: "Часть 4.2") do |sheet|
+  render 'list4_2', sheet: sheet
+end
+
+wb.add_worksheet(name: "Подпись") do |sheet|
+  render 'sign', sheet: sheet
+end

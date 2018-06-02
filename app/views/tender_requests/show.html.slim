@@ -1,0 +1,23 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to 'Вернуться к списку', tender_tender_requests_path
+      li = link_to 'Редактировать', edit_tender_tender_request_path
+
+.page-header
+  h1 Просмотр запроса на разъяснение
+
+.row
+  /= view_text_field('span6', @tender_request, :contractor_name_inn)
+  = view_text_field('span6', @tender_request, :contractor_text)
+  = view_text_field('span2', @tender_request, :register_date)
+  = view_text_field('span2', @tender_request, :inbox_num)
+  = view_text_field('span2', @tender_request, :inbox_date)
+
+.row
+  = view_text_area('span12', @tender_request, :request)
+
+.row
+  = view_text_field('span6', @tender_request, :user_name)
+  = view_text_field('span2', @tender_request, :outbox_num)
+  = view_text_field('span2', @tender_request, :outbox_date)

@@ -1,0 +1,7 @@
+ru:
+  activerecord:
+    models:
+      plan_lot_non_execution: 'Коментарии к лотам с просроченым стартом'
+    attributes:
+      plan_lot_non_execution:
+        reason: "Причина отсутствия старта"

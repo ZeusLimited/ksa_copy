@@ -1,0 +1,39 @@
+doctype html
+html lang="ru"
+  head
+    meta charset="utf-8"
+    meta http-equiv="x-ua-compatible" content="ie=edge"
+    meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css"
+    script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"
+    = stylesheet_link_tag "blog/blog"
+    = javascript_include_tag "docs"
+
+    = favicon_link_tag 'favicon4.ico', rel: 'shortcut icon'
+    title = "КСАЗД"
+  body data-spy="scroll" data-target="#navbar-example"
+
+    .blog-masthead
+      .container
+        nav.nav.blog-nav
+          = link_to "Web-сервис", docs_path, class: "nav-link active"
+
+    .blog-header
+      .container
+        h1.blog-title Документация web-сервиса
+
+    .container
+      .row
+        .col-sm-8.blog-main
+          = yield
+
+        .col-sm-3.col-sm-offset-1.blog-sidebar
+          = yield(:sidebar)
+
+    footer.blog-footer
+      p
+        | &copy; ООО &laquo;АРИНК ГРУПП&raquo; 2013-#{Date.current.year}
+      p
+        a href="#" Наверх
+
+    script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js"

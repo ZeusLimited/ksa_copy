@@ -1,0 +1,4 @@
+ru:
+  control_plan_lots_helper:
+    lot_control: 'Лот на контроле: %{user} %{date}'
+    tender_control: 'Закупка на контроле'

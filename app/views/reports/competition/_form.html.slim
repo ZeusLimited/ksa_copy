@@ -1,0 +1,42 @@
+ruby:
+  default_values = {
+    date_begin: Date.new(Time.now.year - 1, 1, 1),
+    date_end: Time.now.to_date,
+    gkpz_year: [Time.now.year]
+  }
+  param_report = ParamReport.new(default_values, current_user)
+
+= input_block_form_for param_report, url: report_path(action: 'competition', format: 'xlsx'), method: :get do |f|
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+      .span2= f.input :gkpz_year, collection: gkpz_years_range, include_hidden: false, input_html: multi
+    / .row
+    /   .span6
+    /     = f.input :customer,
+    /         collection: Department.customers_by_root(current_user.root_dept_id),
+    /         label_method: :name_with_depth_symbols,
+    /         label_html: { class: 'select-all-clear-roots' },
+    /         include_hidden: false,
+    /         input_html: multi
+    / .row
+    /   .span6
+    /     = f.input :organizer,
+    /         collection: Department.organizers_by_root,
+    /         label_method: :name_with_depth_symbols,
+    /         include_hidden: false,
+    /         input_html: multi
+    / .row
+    /   .span3= f.input :address_etp, collection: Dictionary.etp_addresses, include_hidden: false, input_html: multi
+    /   .span3
+    /     = f.input :tender_type,
+    /         collection: Dictionary.tender_types,
+    /         label_html: { class: 'select-all-clear' },
+    /         include_hidden: false,
+    /         input_html: multi
+    .row
+      .span3= f.input :direction, collection: Direction.order(:position), include_hidden: false, input_html: multi
+      / .span3= f.input :financing, collection: Dictionary.financing_sources, include_hidden: false, input_html: multi
+
+    .form-actions= f.submit "Сформировать", name: nil, class: 'btn btn-primary'

@@ -1,0 +1,13 @@
+ru:
+  activerecord:
+    models:
+      sub_contractor: 'Субподрядчик'
+    attributes:
+      sub_contractor:
+        contractor_id: 'Субподрядчик'
+        contract_id: 'Договор'
+        name: 'Предмет договора с субподрядчиком'
+        confirm_date: 'Дата заключения договора'
+        num: 'Номер договора'
+        begin_date: 'Дата начала исполнения'
+        end_date: 'Дата окончания исполнения'

@@ -1,0 +1,6 @@
+ru:
+  cart_lots:
+    destroy:
+      notice: 'Лот удален из корзины!'
+    clear:
+      notice: 'Корзина очищена!'

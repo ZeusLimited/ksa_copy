@@ -1,0 +1,117 @@
+
+select
+--1
+'РАО Энергетические системы Востока' as root_name,
+--2
+arm_cust.name as root_customer_name,
+--3
+decode(ps.direction_id, <%= yaml_directions['ks'] %>, 'НС', 'ТПиР') as direction_name,
+--4
+ip.name as invest_project_name,
+--5
+ip.object_name as invest_object_name,
+--6
+ip.date_install,
+--7
+coalesce(ip.power_elec_gen, 0) as invest_power_mvt,
+--8
+coalesce(ip.power_substation, 0) as invest_power_mva,
+--9
+coalesce(ip.power_elec_net, 0) + coalesce(ip.power_thermal_net, 0) as invest_power_km,
+--10
+pt.name as product_type_name,
+--10.1
+pl.num_tender || '.' || pl.num_lot as lot_num,
+--11
+pl.lot_name as lot_name,
+--12
+fin.name as financing_name,
+--13
+org.name as organizer_name,
+--14
+ps.qty*ps.cost as gkpz_cost,
+--15
+ps.cost_doc,
+--16
+decode(pl.state, 0, 'ВЗ', tt.name) as gkpz_ttype_name,
+--17
+pl.announce_date as gkpz_announce_date,
+--18
+ps.delivery_date_begin as plan_contract_date,
+--19
+ps.delivery_date_begin as gkpz_delivery_date_begin,
+--20
+ps.note
+from plan_lots pl
+  inner join plan_specifications ps on (pl.id = ps.plan_lot_id)
+  inner join invest_projects ip on (ip.id = ps.invest_project_id)
+  left join arm_departments arm_cust on arm_cust.department_id = pl.root_customer_id
+  inner join departments org on (ps.customer_id = org.id)
+  inner join dictionaries tt on (tt.ref_id = pl.tender_type_id)
+  inner join dictionaries dir on (dir.ref_id = ps.direction_id)
+  inner join dictionaries fin on (fin.ref_id = ps.financing_id)
+  inner join dictionaries pt on (pt.ref_id = ps.product_type_id)
+  inner join dictionaries st on (st.ref_id = pl.subject_type_id)
+<% if gkpz_type != 'current' %>
+  inner join protocols p on (pl.protocol_id = p.id)
+  inner join commissions c on (p.commission_id = c.id)
+  inner join (
+    select l.guid, max(p1.date_confirm) as date_confirm
+    from plan_lots l
+      inner join protocols p1 on (p1.id = l.protocol_id)
+      inner join commissions c1 on (p1.commission_id = c1.id)
+    where p1.date_confirm <= :date_gkpz_on_state
+    <% if gkpz_type == 'gkpz' %>
+      and c1.commission_type_id = <%= Constants::CommissionType::SD %>
+    <% end %>
+    Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+<% end %>
+
+Where ps.direction_id in (<%= Direction.invest.select(:id).to_sql %>)
+  And pl.announce_date between :begin_date and :end_date
+  And pl.gkpz_year in (:gkpz_year)
+
+<% if gkpz_type == 'unplanned' %>
+  And not exists (select 'x' from plan_lots l where l.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %> and l.guid = pl.guid)
+<% elsif gkpz_type == 'current' %>
+  And pl.version = 0
+<% end %>
+
+<% if current_user_root_dept_id %>
+  And ps.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customer.present? %>
+  And ps.customer_id in
+    (<%= Department.subtree_ids_for(customer).join(', ') %>) -- заказчик
+    <% end %>
+
+<% if organizers.present? %>
+  And pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  And ps.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  And ps.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if consumers.present? %>
+  and ps.consumer_id in (<%= Department.subtree_ids_for(consumers).join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  And pl.subject_type_id = <%= subject_type %>
+<% end %>
+
+<% if statuses.present? %>
+  And pl.status_id in (<%= statuses.join(', ') %>)
+<% end %>

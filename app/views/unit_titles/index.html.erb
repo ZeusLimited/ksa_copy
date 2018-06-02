@@ -1,0 +1,23 @@
+<h1>Listing unit_titles</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @unit_titles.each do |unit_title| %>
+  <tr>
+    <td><%= unit_title.name %></td>
+    <td><%= link_to 'Show', unit_title %></td>
+    <td><%= link_to 'Edit', edit_unit_title_path(unit_title) %></td>
+    <td><%= link_to 'Destroy', unit_title, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Unit title', new_unit_title_path %>

@@ -1,0 +1,20 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 16, @styles)
+@outlines = []
+@columns = Reports::Other::PlanStarts::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+
+@simple_sheet.add_row_title(Reports::Other::PlanStarts.model_name.human,
+                            style: @styles[:title], columns_count: 16)
+
+sheet.add_row
+
+rows = @simple_sheet.add_rows_from_csv File.expand_path("../csv/head_rao.csv", __FILE__)
+rows[0].height = 60
+rows[1].height = 20
+
+render 'main_table'
+
+sheet.column_widths *@widths

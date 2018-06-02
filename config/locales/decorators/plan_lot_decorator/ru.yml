@@ -1,0 +1,4 @@
+ru:
+  plan_lot_decorator:
+    etp: 'ЭТП'
+    type_fullname_with_pkfo: 'по результатам предварительного отбора'

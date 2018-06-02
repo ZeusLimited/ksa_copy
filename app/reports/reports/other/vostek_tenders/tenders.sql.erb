@@ -1,0 +1,315 @@
+<% def select_fields(key, row)
+    <<-SQL
+      coalesce(#{row}, 0) as #{key}
+    SQL
+  end
+
+  def user_filter
+    if users.present?
+      "t.user_id in (#{users}) and "
+    end
+  end
+
+%>
+
+select
+ final_id as id,
+ final_tender_type_id as tender_type_id,
+ (select
+    <%= ActiveRecord::Base.concatinate(
+      "pl.num_tender || (case when fr.id is not null then '.' || t.num else '' end) || '.' ||
+        (case when fr.id is not null then l.num else pl.num_lot end)",
+      "', '",
+      "pl.root_customer_id, pl.num_tender, pl.num_lot").html_safe %>
+  from tenders t
+    inner join lots l on (t.id = l.tender_id)
+    left join lots fr on fr.id = l.frame_id
+    inner join plan_lots pl on (pl.id= nvl(l.plan_lot_id, fr.plan_lot_id))
+  Where t.id = f.final_id
+ ) as nums,
+ (select coalesce(ow.shortname || ' ', '') || org.name
+   from tenders t
+     inner join departments org on org.id = t.department_id
+     left join ownerships ow on ow.id = org.ownership_id
+   where t.id = final_id
+ ) as organizer,
+ (select count(*) from lots l where l.tender_id = f.final_id) as lots,
+ (select
+    <%= ActiveRecord::Base.concatinate("customer_name","', '","customer_name").html_safe %>
+ from (select
+   distinct l.tender_id, owd.shortname || ' ' || cust.name as customer_name
+  from departments cust
+    inner join lots l on cust.id = l.root_customer_id
+    left join ownerships owd on owd.id = cust.ownership_id
+  ) t
+  where tender_id = f.final_id
+  ) customers,
+  coalesce(public_count, 0) + coalesce(requests_count, 0) + coalesce(files_count, 0) + coalesce(etp_public_count, 0) +
+          coalesce(oos_public_count, 0) + coalesce(open_count, 0) + coalesce(review_count, 0) + coalesce(rebid_count, 0) +
+          coalesce(winner_count, 0) + coalesce(result_count, 0) + coalesce(contract_count, 0) as is_print,
+ <%= Reports::Other::VostekTenders::ROWS.map { |key, value| select_fields(key, value[:sql]) }.join(', ') %>,
+ <%= Reports::Other::VostekTenders::PIVOT_ROWS.map { |key, value| select_fields(key, value) }.join(', ') %>
+from (
+  select t1.*, t2.contract_count, t2.all_contract_count,
+    coalesce(t1.id, t2.id) as final_id, coalesce(t1.tender_type_id, t2.tender_type_id) as final_tender_type_id
+  from
+(
+select
+ t.id,
+ t.tender_type_id,
+ t.user_id,
+ sum(
+  case when <%= user_filter %> t.announce_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end
+  ) as public_count,
+ sum(case when <%= user_filter %> t.announce_date between :start_date and :end_date then 1 else 0 end) as all_public_count,
+
+ sum(
+  case when <%= user_filter %> rp.confirm_date between :begin_date and :end_date and rl.id is not null
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end
+  ) as review_count,
+ sum(case when <%= user_filter %> (rp.confirm_date between :start_date and :end_date and rl.id is not null) then 1 else 0 end) as all_review_count,
+
+ sum(
+  case when <%= user_filter %> (
+    (rp.confirm_date between :begin_date and :end_date and rl.id is not null)
+    OR
+    (wp.confirm_date between :begin_date and :end_date and rl.id is null))
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end
+  ) as review_winner_count,
+ sum(
+  case when <%= user_filter %> (
+    (rp.confirm_date between :start_date and :end_date and rl.id is not null)
+    OR
+    (wp.confirm_date between :start_date and :end_date and rl.id is null))
+  then 1
+  else 0
+  end
+  ) as all_review_winner_count,
+
+ sum(
+  case when <%= user_filter %> op.sign_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end
+  ) as open_count,
+ sum(case when <%= user_filter %> op.sign_date between :start_date and :end_date then 1 else 0 end) as all_open_count,
+
+ sum(
+  case when <%= user_filter %> t.etp_num is not null and t.announce_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end) as etp_public_count,
+ sum(case when <%= user_filter %> t.etp_num is not null and t.announce_date between :start_date and :end_date then 1 else 0 end) as all_etp_public_count,
+ sum(
+  case when <%= user_filter %> t.oos_num is not null and t.announce_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end) as oos_public_count,
+ sum(case when <%= user_filter %> t.oos_num is not null and t.announce_date between :start_date and :end_date then 1 else 0 end) as all_oos_public_count,
+
+ sum(
+  case when <%= user_filter %> rb.confirm_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end) as rebid_count,
+ sum(case when <%= user_filter %> rb.confirm_date between :start_date and :end_date then 1 else 0 end) as all_rebid_count,
+
+ sum(
+  case when <%= user_filter %> wp.confirm_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end) as winner_count,
+ sum(case when <%= user_filter %> wp.confirm_date between :start_date and :end_date then 1 else 0 end) as all_winner_count,
+
+ sum(
+  case when <%= user_filter %> rsp.sign_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end) as result_count,
+ sum(case when <%= user_filter %> rsp.sign_date between :start_date and :end_date then 1 else 0 end) as all_result_count,
+
+(select count(distinct ltf.id)
+        from link_tender_files ltf
+          inner join tender_files tf on tf.id = ltf.tender_file_id
+        where <%= user_filter %> trunc(tf.created_at) between :begin_date and :end_date and ltf.tender_id = t.id and ltf.file_type_id = <%= Constants::TenderFileType::REPLACEMENT %>
+      ) files_count,
+(select count(distinct ltf.id)
+        from link_tender_files ltf
+          inner join tender_files tf on tf.id = ltf.tender_file_id
+        where <%= user_filter %> trunc(tf.created_at) between :start_date and :end_date and ltf.tender_id = t.id and ltf.file_type_id = <%= Constants::TenderFileType::REPLACEMENT %>
+      ) all_files_count,
+
+(select count(*) from tender_requests r where <%= user_filter %> r.tender_id = t.id and r.outbox_date between :begin_date and :end_date) as requests_count,
+(select count(*) from tender_requests r where <%= user_filter %> r.tender_id = t.id and r.outbox_date between :start_date and :end_date) as all_requests_count
+
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  left join open_protocols op on (op.tender_id = t.id)
+  left join review_lots rl on (rl.lot_id = l.id)
+  left join review_protocols rp on (rp.tender_id = t.id and rp.id = rl.review_protocol_id)
+  left join rebid_protocols rb on (rb.id = l.rebid_protocol_id)
+  left join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join result_protocols rsp on (rsp.id = l.result_protocol_id)
+  left join offers o on o.lot_id = l.id and o.status_id = <%= Constants::OfferStatuses::WIN %> and o.version = 0
+  left join contracts c on c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %>
+Where (
+    t.announce_date between :start_date and :end_date
+    OR
+    rp.confirm_date between :start_date and :end_date
+    OR
+    op.sign_date between :start_date and :end_date
+    OR
+    rb.confirm_date between :start_date and :end_date
+    OR
+    wp.confirm_date between :start_date and :end_date
+    OR
+    rsp.sign_date between :start_date and :end_date
+    OR
+    c.confirm_date between :start_date and :end_date
+    OR
+    exists (select 1 from tender_requests r where r.tender_id = t.id and r.outbox_date between :start_date and :end_date )
+    OR
+    exists (
+      select
+        1
+      from link_tender_files ltf
+        inner join tender_files tf on tf.id = ltf.tender_file_id
+      where trunc(tf.created_at) between :start_date and :end_date and ltf.tender_id = t.id and ltf.file_type_id = <%= Constants::TenderFileType::REPLACEMENT %>
+    )
+  )
+
+<% if users.present? %>
+  And t.user_id in (<%= users %>)
+<% end %>
+
+<% if organizers.present? %>
+  And t.department_id in (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id.present? %>
+  And
+    (t.department_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- организатор
+     Or
+     exists (
+      select
+        1
+      from specifications s
+      Where s.lot_id = l.id
+        and s.customer_id in
+        (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- организатор
+     )
+    )
+<% end %>
+
+<% if customers.present? || directions.present? %>
+  And exists (
+    select
+      1
+    from specifications s
+    Where s.lot_id = l.id
+      <% if customers.present? %>
+        and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+      <% end %>
+      <% if directions.present? %>
+        and s.direction_id in (<%= directions.join(', ') %>) -- заказчик
+      <% end %>
+  )
+<% end %>
+
+Group By t.id, t.tender_type_id, t.user_id
+) t1
+
+FULL JOIN
+
+(select
+ t.id,
+ t.tender_type_id,
+ t.user_id,
+sum(
+  case when c.confirm_date between :begin_date and :end_date
+  and l.root_customer_id = 2
+  <% if gkpz_years.present? %>
+    And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+  then 1
+  else 0
+  end) as contract_count,
+count(*) as all_contract_count
+from tenders t
+  inner join lots l on l.tender_id = t.id
+  inner join contracts c on c.lot_id = l.id and c.type_id = <%= Constants::ContractTypes::BASIC %>
+Where c.confirm_date between :start_date and :end_date
+  And l.root_customer_id = <%= Constants::Departments::RAO %>
+  <% if organizers.present? %>
+    And t.department_id in (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+  <% end %>
+<% if current_user_root_dept_id.present? %>
+  And
+    (t.department_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- организатор
+     Or
+     exists (
+      select
+        1
+      from specifications s
+      Where s.lot_id = l.id
+        and s.customer_id in
+        (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- организатор
+     )
+    )
+<% end %>
+
+<% if customers.present? || directions.present? %>
+  And exists (
+    select
+      1
+    from specifications s
+    Where s.lot_id = l.id
+      <% if customers.present? %>
+        and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+      <% end %>
+      <% if directions.present? %>
+        and s.direction_id in (<%= directions.join(', ') %>) -- заказчик
+      <% end %>
+  )
+<% end %>
+
+Group By t.id, t.tender_type_id, t.user_id
+) t2 on t1.id = t2.id and t1.tender_type_id = t2.tender_type_id and t1.user_id = t2.user_id
+
+) f

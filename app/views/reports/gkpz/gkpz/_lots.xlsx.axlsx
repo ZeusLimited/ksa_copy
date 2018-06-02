@@ -1,0 +1,43 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 49)
+@outlines = []
+
+@lot_title_columns = Reports::Gkpz::Gkpz::LOT_TITLE_COLUMNS.reject do |k, v|
+  k == :consumer_name && !(@report.show_cust.to_b || @report.show_root.to_b)
+end
+
+@lot_title_column_styles = @lot_title_columns.values.map { |c| @styles[c[:style]] }
+
+@lot_title_column_types = @lot_title_columns.values.map { |c| c[:type] }
+
+@widths = @lot_title_columns.values.map { |c| c[:width] }
+
+@customer = Department.find(customer_rows[0][:root_customer_id].to_i)
+
+@column_styles = {
+  "green" => @lot_title_columns.values.map { |c| @styles["#{c[:style].to_s}_agreed".to_sym] },
+  "red" => @lot_title_columns.values.map { |c| @styles["#{c[:style].to_s}_cancel".to_sym] },
+  "light_green" => @lot_title_columns.values.map { |c| @styles["#{c[:style].to_s}_was_agreed".to_sym] },
+  "white" => @lot_title_columns.values.map { |c| @styles[c[:style]] }
+}
+
+render 'head_table'
+
+@sheet.add_row
+@simple_sheet.add_row_title(t(".title", customer: @customer.try(:name), year: @report.gkpz_years.try(:join, ', ')),
+                            style: @styles[:title],
+                            columns_count: 20)
+@sheet.add_row
+
+render 'thead'
+
+@simple_sheet.add_row_title t('.caption'), style: @styles[:group_separator], columns_count: @lot_title_columns.count
+
+render 'group_rows_for_customers', customer_rows: customer_rows, tender_types: Constants::TenderTypes::REGULATED
+
+@simple_sheet.add_row_title t('.nz_caption'), style: @styles[:group_separator], columns_count: @lot_title_columns.count
+
+render 'group_rows_for_customers', customer_rows: customer_rows, tender_types: Constants::TenderTypes::UNREGULATED
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

@@ -1,0 +1,7 @@
+render 'thead'
+
+total = []
+@report.groups.each do |group|
+  total << group
+  render 'group_rows', group: group, nesting_level: 0, tender_types: tender_types
+end

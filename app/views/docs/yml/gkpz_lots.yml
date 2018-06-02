@@ -1,0 +1,58 @@
+name: 'gkpz_lots'
+desc: 'Метод предназначен для получения информации по лотам из ГКПЗ'
+request_params:
+  -
+    name: 'gkpz_year'
+    data_type: 'Integer'
+    desc: 'Год ГКПЗ'
+    required: true
+    example: '2016'
+  -
+    name: 'customer_id'
+    data_type: 'Integer'
+    desc: 'Идентификатор заказчика'
+    required: true
+    example: '5'
+  -
+    name: 'gkpz_type'
+    data_type: 'String'
+    desc: 'Тип ГКПЗ.<br>Возможные значения:<br><ul><li>Пусто - Скорректированная (любым уровнем коммиссии) ГКПЗ</li><li>gkpz - Утвержденная на Совете Директоров ГКПЗ</li><li>czk - Скорректированная на ЦЗК ГКПЗ</li><li>current - Текущая (не утверждённая) ГКПЗ.</li></ul>'
+    required: false
+    example: 'gkpz'
+  -
+    name: 'on_date'
+    data_type: 'Date'
+    desc: 'Дата ГКПЗ.<br>По умолчанию текущая дата.'
+    required: false
+    example: '27.11.2015'
+  -
+    name: 'announce_date_begin'
+    data_type: 'Date'
+    desc: 'Дата публикации (начало периода)'
+    required: false
+    example: '27.11.2015'
+  -
+    name: 'announce_date_end'
+    data_type: 'Date'
+    desc: 'Дата публикации (окончание периода)'
+    required: false
+    example: '27.11.2015'
+  -
+    name: 'num'
+    data_type: 'String'
+    desc: 'Номер лота в ГКПЗ (возможно передавать несколько значений)'
+    required: false
+    example: '145.1'
+  -
+    name: 'guid_hex'
+    data_type: 'Guid'
+    desc: 'Глобальный идентификатор лота в ГКПЗ (возможно передавать несколько значений)'
+    required: false
+    example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+response_params:
+  -
+    name: 'gkpz_lots'
+    data_type: 'Array'
+    desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_lot'>plan_lot</a>]"
+    required: false
+    structure: true

@@ -1,0 +1,45 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li= link_to 'Вернуться к списку', contract_contract_reductions_path(@basic_contract)
+      li= link_to 'Редактировать', edit_contract_contract_reduction_path(@basic_contract, @contract)
+
+.page-header
+  h1 Просмотр информации по договору
+
+- if @contract.contract_termination
+  = render 'contract_termination_info', tender: @tender, lot: @lot, contract: @contract,
+    termination: @contract.contract_termination
+  br
+
+- c = @contract.parent
+- if c
+  p.lead
+    ' Доп. соглашение к договору
+    = link_to c.title, offer_contract_path(c.offer)
+
+h4
+  | Договор #{@contract.title} (поставка c #{@contract.delivery_date_begin} по #{@contract.delivery_date_end})
+  =< link_to_history_icon(@contract)
+
+= render 'shared/contract_info', lot: @lot, offer: @offer
+
+- @contract.contract_specifications.each_with_index do |specification, index|
+  = field_set_tag "Спецификация" do
+    h4
+      = specification.specification_fullname
+      =< link_to_history_icon(specification)
+
+    table.table.table-bordered.horizontal-scroll.table-nonfluid
+      thead
+        tr
+          th.center-cell colspan="2" Цена договора
+        tr
+          - specification.contract_amounts.each do |amount|
+      tbody
+        tr
+          th.span2 руб. без НДС
+          td.right-cell = specification.cost_money
+        tr
+          th.span2 руб. с НДС
+          td.right-cell = specification.cost_nds_money

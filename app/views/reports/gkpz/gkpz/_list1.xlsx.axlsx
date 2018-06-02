@@ -1,0 +1,51 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 49)
+@outlines = []
+
+@columns = Reports::Gkpz::Gkpz::COLUMNS.reject do |k, v|
+  k == :consumer_name && !(@report.show_cust.to_b || @report.show_root.to_b)
+end
+
+@column_styles = {
+  "green" => @columns.values.map { |c| @styles["#{c[:style].to_s}_agreed".to_sym] },
+  "red" => @columns.values.map { |c| @styles["#{c[:style].to_s}_cancel".to_sym] },
+  "light_green" => @columns.values.map { |c| @styles["#{c[:style].to_s}_was_agreed".to_sym] },
+  "white" => @columns.values.map { |c| @styles[c[:style]] }
+}
+
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@sum_styles = @columns.values.map do |c|
+  if c[:sum]
+    c[:sum_style] ? @styles[c[:sum_style]] : @styles[:sum_money]
+  else
+    @styles[:sum]
+  end
+end
+
+@customer = @report.customers.present? ? Department.find(@report.customers[0].to_i) : nil
+
+render 'head_table'
+
+@sheet.add_row
+@simple_sheet.add_row_title(t(".title", customer: @customer.try(:name), year: @report.gkpz_years.try(:join, ', ')),
+                            style: @styles[:title],
+                            columns_count: 20)
+@sheet.add_row
+
+render 'thead'
+
+render 'main_table', tender_types: Constants::TenderTypes::REGULATED
+
+render 'sme_table'
+
+@simple_sheet.add_row_title t('.nz_caption'), style: @styles[:group_separator], columns_count: @columns.count
+
+render 'main_table', tender_types: Constants::TenderTypes::UNREGULATED
+
+@simple_sheet.add_row_title t('.summary_caption'), style: @styles[:group_separator], columns_count: @columns.count
+
+render 'main_table', tender_types: Constants::TenderTypes::ALL, summary: true
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

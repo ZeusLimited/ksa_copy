@@ -1,0 +1,52 @@
+ru:
+  tender_partials:
+    specification_fields:
+      remove_specification: 'Удалить спецификацию'
+      nds_placeholder: 'Вручную'
+    control_row:
+      show_all: 'Показать все лоты'
+    found:
+      delete: 'Удалить'
+      confirm: 'Вы уверены?'
+      cart: "Корзина"
+      remove_from_cart: 'Убрать из корзины'
+      add_to_cart: 'Положить в корзину'
+      search_in_plan: 'Поиск в плане'
+    center_body:
+      info: 'Просмотр'
+      not_note: "Замечаний нет"
+      frame_tenders: "Закупки по результатам рамочного конкурса"
+      single_source: 'Заключить договор с ЕИ'
+    center_caption:
+      info: 'Просмотр'
+    center_head:
+      name: 'Наименование'
+      cost: 'НПЦ'
+      cost_long: "Начальная предельная цена, тыс. руб. без НДС"
+      winner_cost: "ИЦП"
+      winner_cost_long: "Итоговая цена победителя, тыс. руб. без НДС"
+      winner: 'Победитель'
+      customer: 'Заказчик'
+      consumer: 'Потребитель'
+      announce: 'ДП'
+      announce_long: "Дата публикации"
+      bid: "ДВК"
+      bid_long: "Дата вскрытия конвертов"
+      protocol: "ПДИП"
+      protocol_long: "Планируемая дата итогового протокола"
+    lots:
+      lot_num: 'Лот №'
+      sublot_num: 'Подлот №'
+      sme_type_placeholder: 'Не установлено'
+      additional_properties: 'Дополнительные свойства'
+      spec_table:
+        num: 'Номер'
+        name: 'Наименование'
+        customer: 'Заказчик'
+        direction: 'Направление'
+        qty: 'Кол-во'
+        cost: 'Цена без НДС'
+        nds: 'НДС'
+        cost_nds: 'Цена с НДС'
+    edit_protocol_confirm_date:
+      modal_header: 'Выберите дату протокола'

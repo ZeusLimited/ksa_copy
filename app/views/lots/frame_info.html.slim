@@ -1,0 +1,58 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to_session_or_default 'Вернуться к списку', :tenders_filter_path, tenders_path
+
+.page-header
+  h1 Закупки по результатам рамочного конкурса
+
+h3
+  = link_to lot.fullnum, tender_path(tender, anchor: dom_id(lot))
+  = link_to_plan_lot(@lot) if @lot.plan_lot_id
+
+h4= lot.name
+p
+  strong Заказчик:
+  span= lot.root_customer_name
+
+br
+
+table.table.table-bordered.table-striped
+  thead
+    tr
+      th Номер закупки
+      th Дата публикации
+      th = abbr("НПЦ", "Начальная предельная цена, руб. без НДС")
+      th = abbr("ИЦП", "Итоговая цена победителя, руб. без НДС")
+      th Экономия
+      th Победитель
+      th Статус проведенной закупки
+  tbody
+    - lot.frame_lots.sort_by { |l| l.tender_announce_date }.reverse.each do |frame_lot|
+      - frame_lot = frame_lot.decorate
+      tr
+        td= link_to frame_lot.fullnum, tender_path(frame_lot.tender, anchor: dom_id(frame_lot))
+        td= frame_lot.tender_announce_date
+        td.right-cell = p_money frame_lot.specs_cost
+        td.right-cell = p_money frame_lot.limit_cost
+        td.right-cell = p_money frame_lot.economy
+        td = frame_lot.winners
+        td style=frame_lot.status_stylename_html title=frame_lot.status_fullname
+          = frame_lot.status_name
+          br
+          = frame_lot.contract_termination_info
+
+p
+  strong Начальная предельная цена по рамочному конкурсу:
+  span.text-success =<> p_money lot.initial_price
+  ' руб. без НДС
+
+p
+  strong Проведено (объявлено) торгов на сумму:
+  span.text-error =<> p_money lot.announced_price
+  ' руб. без НДС
+
+p
+  strong Доступный лимит:
+  span.text-success =<> p_money lot.available_limit
+  ' руб. без НДС

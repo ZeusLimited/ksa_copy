@@ -1,0 +1,6 @@
+$('#notifications').append('<%= j render("list", notifications: @notifications) %>');
+<% if @notifications.next_page %>
+  $('.pagination-scroll').replaceWith('<%= j paginate(@notifications, param_name: 'page_sel', theme: 'pagination_scroll', params: { controller: 'subscribe_notifications', action: 'index' }) %>');
+<% else %>
+  $('.pagination-scroll').remove();
+<% end %>

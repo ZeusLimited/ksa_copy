@@ -1,0 +1,14 @@
+ru:
+  helpers:
+    submit:
+      reports_other_rosstat:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/rosstat: 'Отчёт в Росстат (отменён приказом №266 от 15.05.2015)'
+    attributes:
+      reports/other/rosstat:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customer: 'Заказчик'
+        format: 'Формат'

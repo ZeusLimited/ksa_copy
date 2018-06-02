@@ -1,0 +1,19 @@
+[Unit]
+Description=Service for run background processes for rails application
+After=syslog.target network.target
+
+[Service]
+Type=simple
+User=deployer
+WorkingDirectory=/home/deployer/apps/torg/current
+ExecStart=/bin/bash -lc 'bundle exec sidekiq -e production'
+
+RestartSec=1
+Restart=on-failure
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sidekiq
+
+[Install]
+WantedBy=multi-user.target

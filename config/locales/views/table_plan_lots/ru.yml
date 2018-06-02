@@ -1,0 +1,16 @@
+ru:
+  table_plan_lots:
+    center_head:
+      num: '№'
+      name: 'Наименование'
+      state: 'Состояние в ГКПЗ'
+      cost: 'Начальная цена, руб. без НДС'
+      cost_long: 'Начальная цена, руб. без НДС'
+      gkpz_year: 'Год ГКПЗ'
+      announce_date: 'Дата объявления'
+      tender_type: 'Способ'
+      customer: 'Заказчик'
+      organizer: 'Организатор'
+      consumer: 'Потребитель'
+    subscribes:
+      icon_title: 'Подписка'

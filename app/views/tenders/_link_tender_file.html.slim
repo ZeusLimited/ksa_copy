@@ -1,0 +1,22 @@
+- tf = f.object.tender_file
+= content_tag_for :tr, tf do
+  = f.hidden_field :_destroy
+  = f.hidden_field :tender_file_id
+  td = icon_for_tender_file(tf, '32px')
+  td = link_to truncate(tf.read_attribute(:document)), tf.document.valid_url
+  td = number_to_human_size tf.file_size
+  td
+    - if current_user.id == tf.user_id
+      = f.select :file_type_id,
+        options_for_select(Dictionary.tender_file_types.map { |t| [t.name, t.id] }, f.object.file_type_id),
+        {}, class: 'input-large'
+    - else
+      = text_field_tag nil, f.object.file_type_name, id: nil, readonly: true
+  td
+    - if current_user.id == tf.user_id
+      = f.text_area :note, rows: 2
+    - else
+      = text_area_tag nil, f.object.note, rows: 2, id: nil, readonly: true
+  td = abbr(l(tf.created_at), l(tf.created_at, format: :long))
+  td = abbr(tf.user.fio_short, tf.user.fio_full)
+  td = link_delete_tf_file(tf)

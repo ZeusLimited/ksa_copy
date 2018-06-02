@@ -1,0 +1,8 @@
+head_rows = CSV.read('app/views/reports/other/terms_violation/csv/group_head.csv')
+
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 15
+rows[1].height = 40
+rows[2].height = 15
+AxlsxExt::AutoMergeNil.merge_rows(rows)

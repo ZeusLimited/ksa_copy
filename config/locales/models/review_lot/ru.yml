@@ -1,0 +1,14 @@
+ru:
+  activerecord:
+    models:
+      review_lot: 'Лот'
+    attributes:
+      review_lots:
+        rebid_date: 'Дата переторжки'
+        rebid_place: 'Место проведения переторжки'
+    errors:
+      models:
+        review_lot:
+          attributes:
+            rebid_date:
+              hours_after_confirm: "не может быть ранее чем через %{hours} часа после даты вступления в силу протокола рассмотрения"

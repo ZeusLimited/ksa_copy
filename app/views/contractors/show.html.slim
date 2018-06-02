@@ -1,0 +1,37 @@
+== render 'menu'
+
+.row
+  = view_text_field('span2', @contractor, :status, t("contractor_status.#{@contractor.status}"))
+  = view_text_field('span2', @contractor, :form, t("contractor_form.#{@contractor.form}"))
+.row
+  = view_text_field('span4', @contractor, :user_id, @contractor.user.fio_full)
+  - emails = current_user.contractor_boss_email
+  - if !emails.empty?
+    - email = emails.join(',')
+    - subject = t('.subject_mail', contractor: @contractor.name_inn)
+    - body = t('.body_mail', url: contractor_url(@contractor))
+    .span4
+      label &nbsp;
+      = mail_to email, subject: subject, body: body do
+        i.icon-envelope
+        = t('.link_to_shishkin')
+
+.row
+  = view_text_field('span2', @contractor, :inn, @contractor.inn, class: "text-right")
+  = view_text_field('span2', @contractor, :kpp, @contractor.kpp, class: "text-right")
+  = view_text_field('span2', @contractor, :ogrn, @contractor.ogrn, class: "text-right")
+  = view_text_field('span2', @contractor, :okpo, @contractor.okpo, class: "text-right")
+  = view_text_field('span2', @contractor, :oktmo, @contractor.oktmo, class: "text-right")
+  = view_text_field('span2', @contractor, :reg_date, @contractor.reg_date, class: "text-right")
+.row
+  = view_text_area('span4', @contractor, :name)
+  = view_text_area('span4', @contractor, :fullname)
+  = view_text_area('span4', @contractor, :legal_addr)
+.row
+  = view_text_field('span8', @contractor, :parent_id, @contractor.parent_name_long) if @contractor.view_for_all?
+  = view_text_field('span2', @contractor, :ownership_id, @contractor.ownership_shortname)
+  = view_text_field('span2', @contractor, :jsc_form_id, @contractor.jsc_form_name)
+  == view_text_field('span2', @contractor, :is_sme, tbool(@contractor.is_sme), hint: link_to(t('.site_msp'), 'https://rmsp.nalog.ru/', target: :_blank))
+  = view_text_field('span2', @contractor, :sme_type_id, @contractor.sme_type_name)
+  = view_text_field('span2', @contractor, :is_dzo, tbool(@contractor.is_dzo))
+  = view_text_field('span2', @contractor, :is_resident, tbool(@contractor.is_resident))

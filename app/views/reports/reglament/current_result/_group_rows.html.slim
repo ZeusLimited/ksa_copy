@@ -1,0 +1,56 @@
+- @columns.each_pair do |ckey, cvalue|
+  - group["#{ckey}_total"] = 0 if cvalue[:sum]
+
+tr.info
+  td colspan="45" = group['name']
+
+- if group.key?('children')
+  - group['children'].each do |child|
+    = render 'group_rows', report: report, group: child, nesting_level: nesting_level + 1, nz: nz
+    - @columns.each_pair do |ckey, cvalue|
+      - group["#{ckey}_total"] += child["#{ckey}_total"] || 0 if cvalue[:sum]
+
+- if group.key?('filter')
+  - displayed_rows = 0
+  - row_num = 0
+  - report.part1_rows(group['filter'], nz).each do |row|
+    - displayed_rows = row['cnt_offers'] if displayed_rows == 0
+    - if displayed_rows == row['cnt_offers']
+      - row_num += 1
+      - @columns.each_pair do |ckey, cvalue|
+        - group["#{ckey}_total"] += cvalue[:value].call(row) || 0 if cvalue[:sum]
+
+      tr data-tender=row['tender_id'] data-lot=row['lot_id'] data-spec=row['spec_id'] data-gkpz_pl=row['gkpz_pl_id']
+        - @columns.each_pair do |ckey, cvalue|
+          - attrs = {}
+          - attrs[:rowspan] = cvalue[:no_merge] ? nil : displayed_rows
+          - attrs[:class] = report_right_cell_class(cvalue[:type], cvalue[:style])
+          - value = ckey == :c1 ? row_num : report_value_with_format(cvalue[:value].call(row), cvalue[:type], cvalue[:style])
+          = content_tag :td, value, attrs
+    - else
+      tr
+        - @columns.each_pair do |ckey, cvalue|
+          - if cvalue[:no_merge]
+            - attrs = {}
+            - attrs[:class] = report_right_cell_class(cvalue[:type], cvalue[:style])
+            - value = report_value_with_format(cvalue[:value].call(row), cvalue[:type], cvalue[:style])
+            = content_tag :td, value, attrs
+    - displayed_rows -= 1
+
+- if group.key?('sum_name')
+  tr.warning
+    td colspan="7" = group['sum_name']
+    - @columns.each_pair do |ckey, cvalue|
+      - if %i(c1 c2 c3 c4 c5 c6 c7).include?(ckey)
+        - next
+      - else
+        - if cvalue[:sum]
+          - if cvalue[:sum_value]
+            - attrs = {}
+            - attrs[:class] = report_right_cell_class(cvalue[:type], cvalue[:sum_style])
+            - value = report_value_with_format(cvalue[:sum_value].call(group), cvalue[:type], cvalue[:sum_style])
+            = content_tag :td, value, attrs
+          - else
+            td.right-cell= p_money group["#{ckey}_total"]
+        - else
+          td

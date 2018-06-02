@@ -1,0 +1,116 @@
+--- # структура для очётов
+- sum_name: 'ИТОГО'
+  children:
+  - name: 1. Энергоремонтное производство
+    children:
+    - name: Раздел 1.1. Закупка услуг под программу энергоремонтного производства
+      filter:
+        direction_id: <%= yaml_directions['erp'] %>
+        subject_type_id: <%= Constants::SubjectType::SERVICES %>
+      sum_name: ! 'Итого услуг под программу энергоремонтного производства:'
+    - name: Раздел 1.2 Закупка оборудования и материалов под программу энергоремонтного производства
+      filter:
+        direction_id: <%= yaml_directions['erp'] %>
+        subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+      sum_name: ! 'Итого оборудования и материалов под программу энергоремонтного производства:'
+    sum_name: ! 'Итого под программу энергоремонтного производства:'
+  - name: 2. Инвестиции
+    children:
+    - name: 2.1 Капитальное строительство
+      children:
+      - name: Раздел 2.1.1. Закупка услуг под программу капитальное строительство
+        filter:
+          direction_id: <%= yaml_directions['ks'] %>
+          subject_type_id: <%= Constants::SubjectType::SERVICES %>
+        sum_name: ! 'Итого услуг под программу капитальное строительство:'
+      - name: Раздел 2.1.2. Закупка материалов и оборудования под программу капитальное строительство
+        filter:
+          direction_id: <%= yaml_directions['ks'] %>
+          subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+        sum_name: ! 'Итого материалов и оборудования под программу капитальное строительство:'
+      sum_name: ! 'Итого под программу капитального строительства:'
+    - name: 2.2. Техническое перевооружение и реконструкция
+      children:
+      - name: Раздел 2.2.1 Закупка услуг под программу технического перевооружения и реконструкции
+        filter:
+          direction_id: <%= yaml_directions['tpir'] %>
+          subject_type_id: <%= Constants::SubjectType::SERVICES %>
+        sum_name: ! 'Итого услуг под программу технического перевооружения и реконструкции:'
+      - name: Раздел 2.2.2 Закупка материалов и оборудования под программу технического перевооружения и реконструкции
+        filter:
+          direction_id: <%= yaml_directions['tpir'] %>
+          subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+        sum_name: ! 'Итого материалов под программу технического перевооружения и реконструкции:'
+      sum_name: ! 'Итого под программу технического перевооружения и реконструкции:'
+    - name: 2.3. Закупки в области информационных технологий (инвестиции)
+      children:
+      - name: Раздел 2.3.1 Закупки услуг в области информационных технологий
+        filter:
+          direction_id: <%= yaml_directions['it_invest'] %>
+          subject_type_id: <%= Constants::SubjectType::SERVICES %>
+        sum_name: ! 'Итого услуг в области информационных технологий:'
+      - name: Раздел 2.3.2 Закупки материалов в области информационных технологий
+        filter:
+          direction_id: <%= yaml_directions['it_invest'] %>
+          subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+        sum_name: ! 'Итого материалов в области информационных технологий:'
+      sum_name: ! 'Итого в области информационных технологий:'
+    - name: 2.4. НИОКР (инвестиции)
+      filter:
+        direction_id: <%= yaml_directions['niokr_invest'] %>
+      sum_name: ! 'Итого НИОКР (инвестиции):'
+    - name: 2.5. Инновационная и высокотехнологичная продукция (инвестиции)
+      filter:
+        direction_id: <%= yaml_directions['inivp_invest'] %>
+      sum_name: ! 'Итого ИНиВП (инвестиции):'
+    sum_name: ! 'Итого под программу инвестиций:'
+  - name: 3. Закупки в области информационных технологий (прочие)
+    children:
+    - name: Раздел 3.1 Закупки услуг в области информационных технологий (прочие)
+      filter:
+        direction_id: <%= yaml_directions['it'] %>
+        subject_type_id: <%= Constants::SubjectType::SERVICES %>
+      sum_name: ! 'Итого услуг в области информационных технологий (прочие):'
+    - name: Раздел 3.2 Закупки материалов в области информационных технологий (прочие)
+      filter:
+        direction_id: <%= yaml_directions['it'] %>
+        subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+      sum_name: ! 'Итого материалов в области информационных технологий (прочие):'
+    sum_name: ! 'Итого в области информационных технологий (прочие):'
+  - name: 4. Эксплуатационные расходы
+    children:
+    - name: Раздел 4.1 Закупки услуг на эксплуатационные расходы
+      filter:
+        direction_id: <%= yaml_directions['er'] %>
+        subject_type_id: <%= Constants::SubjectType::SERVICES %>
+      sum_name: ! 'Итого услуг на эксплуатационные расходы:'
+    - name: Раздел 4.2 Закупки материалов и оборудования на эксплуатационные расходы
+      filter:
+        direction_id: <%= yaml_directions['er'] %>
+        subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+      sum_name: ! 'Итого материалов на эксплуатационные расходы:'
+    sum_name: ! 'Итого в области эксплуатационных расходов:'
+  - name: 5. Закупка топлива
+    filter:
+      direction_id: <%= yaml_directions['fuel'] %>
+    sum_name: ! 'Итого топливо:'
+  - name: 6. НИОКР и прочие консультативные услуги
+    filter:
+      direction_id: <%= yaml_directions['niokr'] %>
+    sum_name: ! 'Итого НИОКР и прочие консультативные услуги:'
+  - name: 7. Инновационная и высокотехнологичная продукция (прочие)
+    filter:
+      direction_id: <%= yaml_directions['inivp'] %>
+    sum_name: ! 'Итого ИНиВП (прочие):'
+  - name: 8. Продукция административно-хозяйственного назначения
+    filter:
+      direction_id: <%= yaml_directions['ahn'] %>
+    sum_name: ! 'Итого Продукция административно-хозяйственного назначения:'
+  - name: 9. Общесистемные закупки
+    filter:
+      direction_id: <%= yaml_directions['osu'] %>
+    sum_name: ! 'Итого Общесистемные закупки:'
+  - name: 10. Прочие закупки
+    filter:
+      direction_id: <%= yaml_directions['other'] %>
+    sum_name: ! 'Итого Прочие закупки:'

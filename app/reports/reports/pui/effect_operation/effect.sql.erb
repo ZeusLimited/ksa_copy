@@ -1,0 +1,47 @@
+select
+coalesce(sum(case when wp.confirm_date <= to_date('31.03.'||to_char(l.gkpz_year),'dd.mm.yyyy') then s.qty * s.cost end), 0) as kv1_cost,
+coalesce(sum(case when to_char(wp.confirm_date,'Q.YYYY') = '2.' || l.gkpz_year then s.qty * s.cost end), 0) as kv2_cost,
+coalesce(sum(case when to_char(wp.confirm_date,'Q.YYYY') = '3.' || l.gkpz_year then s.qty * s.cost end), 0) as kv3_cost,
+coalesce(sum(case when to_char(wp.confirm_date,'Q.YYYY') = '4.' || l.gkpz_year then s.qty * s.cost end), 0) as kv4_cost,
+
+coalesce(sum(case when wp.confirm_date <= to_date('31.03.'||to_char(l.gkpz_year),'dd.mm.yyyy') then s.qty * os.final_cost end), 0) as kv1_final_cost,
+coalesce(sum(case when to_char(wp.confirm_date,'Q.YYYY') = '2.' || l.gkpz_year then s.qty * os.final_cost end), 0) as kv2_final_cost,
+coalesce(sum(case when to_char(wp.confirm_date,'Q.YYYY') = '3.' || l.gkpz_year then s.qty * os.final_cost end), 0) as kv3_final_cost,
+coalesce(sum(case when to_char(wp.confirm_date,'Q.YYYY') = '4.' || l.gkpz_year then s.qty * os.final_cost end), 0) as kv4_final_cost,
+s.direction_id,
+l.subject_type_id
+
+from tenders t
+  inner join lots l on t.id = l.tender_id
+  inner join specifications s on l.id = s.lot_id
+  inner join offer_specifications os on s.id = os.specification_id
+  inner join offers o on o.id = os.offer_id and o.status_id = <%= Constants::OfferStatuses::WIN %>
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join plan_lots pl on pl.id = l.plan_lot_id
+  left join (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on pl.guid = can.guid
+Where wp.confirm_date between :begin_date and :end_date
+  And can.guid is null -- неотмененная
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And l.gkpz_year = :gkpz_year
+
+<% if customer.present? %>
+  And s.customer_id in (<%= Department.subtree_ids_for(customer).join(', ') %>)
+<% end %>
+
+<% if organizers.present? %>
+  And t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if directions.present? %>
+  And s.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+Group By s.direction_id, l.subject_type_id

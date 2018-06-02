@@ -1,0 +1,104 @@
+- :name: Инвестиции
+  :filter:
+    :direction_id: <%= Direction.invest.pluck(:id) %>
+  :num: '1'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= Direction.invest.pluck(:id) %>
+    :tender_type_id: Constants::TenderTypes::ONLY_SOURCE
+- :name: Топливо
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+  :num: '2'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Газ
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+  :fuel: 0
+  :num: '2.1'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+  :fuel: 0
+- :name: Уголь
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+  :fuel: 1
+  :num: '2.2'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+  :fuel: 1
+- :name: Мазут
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+  :fuel: 2
+  :num: '2.3'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+  :fuel: 2
+- :name: Другие
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+  :fuel: -1
+  :num: '2.4'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+  :fuel: -1
+- :name: Эксплуатация
+  :filter:
+    :direction_id: <%= yaml_directions['er'] %>
+  :num: '3'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['er'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Ремонт
+  :filter:
+    :direction_id: <%= yaml_directions['erp'] %>
+  :num: '4'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['erp'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: ИТ
+  :filter:
+    :direction_id: <%= yaml_directions['it'] %>
+  :num: '5'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['it'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: НИОКР
+  :filter:
+    :direction_id: <%= yaml_directions['niokr'] %>
+  :num: '6'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['niokr'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Прочие
+  :filter:
+    :direction_id: <%= [yaml_directions['other'], yaml_directions['ahn'], yaml_directions['osu']] %>
+  :num: '7'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= [yaml_directions['other'], yaml_directions['ahn'], yaml_directions['osu']] %>
+    :tender_type_id: Constants::TenderTypes::ONLY_SOURCE
+- :name: ИТОГО
+  :filter:
+    :direction_id: <%= Direction.pluck(:id) %>
+  :num: ''
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= Direction.pluck(:id) %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>

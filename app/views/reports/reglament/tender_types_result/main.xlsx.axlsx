@@ -1,0 +1,6 @@
+wb = xlsx_package.workbook
+render 'styles', wb: wb
+
+wb.add_worksheet(name: "Лист 1", page_margins: @margins, page_setup: @setup, print_options: @options) do |sheet|
+  render 'list1', sheet: sheet
+end

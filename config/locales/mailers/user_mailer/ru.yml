@@ -1,0 +1,4 @@
+ru:
+  user_mailer:
+    subscribe:
+      subscribe_subject: 'Информация по вашим подпискам'

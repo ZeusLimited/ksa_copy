@@ -1,0 +1,74 @@
+= render "/shared/submenu_tender", tender: @tender
+= tender.integration_status
+
+.page-header
+  .btn-group.pull-right.span2
+    button.btn.btn-primary.input-block-level.dropdown-toggle data-toggle='dropdown'
+      => t('.actions')
+      span.caret
+    ul.dropdown-menu
+      li= link_to t('.copy'), copy_tender_path(@tender)
+      li= link_to t('edit'), edit_tender_path(@tender)
+      - if @tender.tender_type_id == Constants::TenderTypes::ZZC && @tender.lots_with_status?(Constants::LotStatus::BEFORE_OPEN)
+        li = link_to t('.add_zzc'), add_zzc_tender_path(@tender), method: :patch
+      - if @tender.lots_with_status?(Constants::LotStatus::NEW)
+        li = link_to t('.publish'), public_tender_path(@tender), method: :patch
+
+  h1 = t('.title')
+
+h4
+  == tender.oos_b2b_title
+  =< link_to_history_icon(@tender)
+.row
+  = view_text_field('span2', @tender, :tender_type_name)
+  = view_text_field('span2', @tender, :etp_address_name)
+  = view_text_field('span3', @tender, :local_time_zone_name)
+.row
+  = view_text_area('span10', @tender, :name)
+.row
+  = view_text_field('span4', @tender, :department_name)
+  = view_text_field('span6', @tender, :commission_name)
+.row
+  = view_text_field('span4', @tender, :user_fio_full)
+  = view_text_field('span3', @tender, :order_num)
+  = view_text_field('span3', @tender, :order_date)
+
+hr
+
+table.table.table-nonfluid
+  thead
+    tr
+      th
+      th = t('.date')
+      th = t('.place')
+  tbody
+    tr
+      th = t('.public')
+      td = text_field_tag nil, @tender.announce_date, readonly: true, id: nil, class: "input-small"
+      td = text_field_tag nil, @tender.announce_place, readonly: true, id: nil, class: "input-xxlarge"
+    tr
+      th = t('.open')
+      td = text_field_tag nil, @tender.bid_date.try(:strftime, '%d.%m.%Y %H:%M'), readonly: true, id: nil,
+        class: "input-medium"
+      td = text_field_tag nil, @tender.bid_place, readonly: true, id: nil, class: "input-xxlarge"
+    tr
+      th = t('.review')
+      td = text_field_tag nil, @tender.review_date.try(:strftime, '%d.%m.%Y %H:%M'),
+        readonly: true, id: nil, class: "input-medium"
+      td = text_field_tag nil, @tender.review_place, readonly: true, id: nil, class: "input-xxlarge"
+    tr
+      th = t('.summary')
+      td = text_field_tag nil, @tender.summary_date.try(:strftime, '%d.%m.%Y %H:%M'),
+        readonly: true, id: nil, class: "input-medium"
+      td = text_field_tag nil, @tender.summary_place, readonly: true, id: nil, class: "input-xxlarge"
+    tr
+      th = t('.contract_period')
+      td = text_field_tag nil, tender.contract_period_with_type, readonly: true, id: nil, class: "input-medium"
+      td
+    tr
+      th = t('.profitable')
+      td = text_field_tag nil, tbool(@tender.is_profitable), readonly: true, id: nil, class: "input-medium"
+      td
+
+- @tender.lots.each do |lot|
+  = render 'show_lot', lot: lot

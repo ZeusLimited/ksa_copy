@@ -1,0 +1,53 @@
+    select
+      td.department_id,
+      td.root_customer_id,
+      td.direction_id,
+      coalesce(td.count, 0) as td_count,
+      coalesce(td.sum, 0) as td_sum
+    from
+    (
+    select
+    pl.department_id, pl.root_customer_id, ps.direction_id, pl.id,
+    count(distinct l.id) as count,
+    sum(s.qty * s.cost_nds) as sum
+    from tenders t
+      inner join lots l on t.id = l.tender_id
+      inner join specifications s on s.lot_id = l.id
+      <% if directions.present? %>
+        And s.direction_id in (<%= directions.join(', ') %>)
+      <% end %>
+      inner join plan_lots pl on pl.id = l.plan_lot_id
+      inner join plan_specifications ps on pl.id = ps.plan_lot_id and ps.id = s.plan_specification_id
+      inner join
+        (select l1.plan_lot_guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+          from tenders t1
+          inner join lots l1 on (t1.id = l1.tender_id)
+          --left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+          where t1.announce_date between :start_date and :end_date
+          group by l1.plan_lot_guid, l1.frame_id
+        ) vi on (vi.plan_lot_guid = pl.guid or l.frame_id = vi.frame_id) and vi.max_announce_date = t.announce_date
+      left join (
+        select tpl.guid, max(tp.date_confirm) as can_date
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+        inner join commissions tc on tp.commission_id = tc.id
+        where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+          <% if customers.present? %>
+            and tpl.root_customer_id in (<%= customers.join(', ') %>)
+          <% end %>
+          <% if gkpz_year.present? %>
+            and tpl.gkpz_year in (:gkpz_year)
+          <% end %>
+        group by tpl.guid
+      ) can on pl.guid = can.guid
+
+    Where t.announce_date between :start_date and :end_date
+      and can.can_date is null
+      <% if tender_types.present? %>
+        And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+      <% end %>
+      <% if directions.present? %>
+        And s.direction_id in (<%= directions.join(', ') %>)
+      <% end %>
+      group by pl.department_id, pl.root_customer_id, ps.direction_id, pl.id
+    ) td

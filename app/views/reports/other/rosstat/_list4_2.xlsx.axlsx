@@ -1,0 +1,33 @@
+col_count = 16
+
+row_values = Array.new(col_count)
+row_values[0] = 'Код по ОКЕИ: единица - 642'
+row = sheet.add_row row_values, style: @styles[:title]
+sheet.merge_cells row.cells.first(col_count)
+
+head_rows = CSV.read('app/views/reports/other/rosstat/csv/part4_2_head.csv', col_sep: ';')
+
+rows = []
+head_rows.each { |head_row| rows << sheet.add_row(head_row, style: @styles[:th]) }
+rows[1].height = 40
+rows[2].height = 70
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+captions = YAML.load(File.new('app/views/reports/other/rosstat/yaml/part4.yml').read)
+
+captions.each do |cap|
+  row_values = Array.new(col_count)
+  row_values[0] = cap['name']
+  row = sheet.add_row row_values, style: @styles[:td_title]
+  sheet.merge_cells row.cells.first(col_count)
+
+  cap['lines'].each_pair do |key, value|
+    styles = Array.new(col_count) { @styles[:td_right] }
+    styles[0] = @styles[:td_wrap]
+    styles[1] = @styles[:td_center]
+
+    sheet.add_row [value, key] + Array.new(col_count - 2), style: styles
+  end
+end
+
+sheet.column_widths 50, 7, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15

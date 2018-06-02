@@ -1,0 +1,21 @@
+ru:
+  reports/pui/current_operation:
+    row_titles:
+      summary: 'ИТОГО'
+      ei: 'из них у единственного источника'
+  helpers:
+    submit:
+      reports_pui_current_operation:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/pui/current_operation: 'Информация по закупкам для обеспечения текущей операционной деятельности'
+    attributes:
+      reports/pui/current_operation:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customer: 'Заказчик'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        directions: 'Направления'
+        format: 'Формат'

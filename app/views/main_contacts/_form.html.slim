@@ -1,0 +1,16 @@
+= simple_form_for(main_contact) do |f|
+  = error_messages_for main_contact
+  .row
+    .span3
+      = f.input :role,
+          collection: main_contact.roles,
+          include_hidden: false,
+          input_html: { class: 'input-block-level' }
+  .row
+    .span3
+      = f.label :user_id
+      = f.hidden_field :user_id, class: 'autocomplete-contacts input-block-level'
+
+  .form-actions
+    => f.button :submit, t('save'), class: 'btn btn-primary'
+    = link_to_back_or_default t('cancel'), main_contacts_path, class: 'btn btn-warning'

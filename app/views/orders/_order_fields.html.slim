@@ -1,0 +1,18 @@
+.row
+  .span2= f.input :num, input_html: { class: 'input-block-level' }
+  .span2
+    = f.input :receiving_date, as: :string,
+      input_html: { value: f.object.receiving_date, class: 'datepicker input-block-level' }
+  .span2
+    = f.hidden_field :received_from_user_id
+    = f.input :received_from_fio_full, readonly: true, class: 'input-block-level'
+
+- if can?(:approve, @order)
+  br
+  .row
+    .span2
+      = f.input :agreement_date, as: :string,
+        input_html: { value: f.object.agreement_date, class: 'datepicker input-block-level' }
+    .span2
+      = f.hidden_field :agreed_by_user_id
+      = f.input :agreed_by_fio_full, readonly: true, class: 'input-block-level'

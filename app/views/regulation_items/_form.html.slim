@@ -1,0 +1,34 @@
+= simple_form_for @regulation_item do |f|
+  = error_messages_for @regulation_item
+
+  .row
+    .span2
+      = f.input :num, input_html: { class: 'input-block-level' }
+    .span2
+      = f.input :is_actual, as: :select, include_blank: false,
+        input_html: { class: 'input-block-level' }
+  .row
+    .span6
+      = f.input :tender_type_ids,
+      collection: Dictionary.tender_types,
+      include_hidden: false,
+      input_html: multi.merge(class: 'input-block-level')
+    .span6
+      = f.input :department_ids,
+        collection: Department.roots_customers(current_user.root_dept).order(:position),
+        input_html: multi.merge(class: 'input-block-level'),
+        include_hidden: false
+  .row
+    .span12
+      = f.input :name, as: :text, input_html: { class: 'input-block-level', rows: 3 }
+  .row
+    .span12
+      = f.input :dictionary_ids,
+        collection: Dictionary.order1352,
+        label_method: :fullname,
+        include_hidden: false,
+        input_html: multi.merge(class: 'input-block-level')
+
+  .form-actions
+    => f.submit t('save'), class: 'btn btn-primary btn-large input-small'
+    = link_to t('cancel'), regulation_items_url, class: 'btn btn-warning btn-large input-small'

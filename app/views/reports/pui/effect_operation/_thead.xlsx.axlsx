@@ -1,0 +1,5 @@
+head_rows = CSV.read('app/views/reports/pui/effect_operation/csv/head.csv')
+
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+AxlsxExt::AutoMergeNil.merge_rows(rows)

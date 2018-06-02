@@ -1,0 +1,40 @@
+--slide2_public_sql
+select
+count(distinct l.id) as cnt,
+sum(s.qty * s.cost_nds) as cost_nds
+from tenders t
+
+inner join lots l on l.tender_id = t.id
+inner join specifications s on s.lot_id = l.id
+left join plan_lots pl on l.plan_lot_id = pl.id
+left join plan_specifications ps on s.plan_specification_id = ps.id and ps.plan_lot_id = pl.id
+
+inner join lateral
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid) sub
+     where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) gkpz_pl on true
+inner join plan_specifications gkpz_ps on gkpz_pl.id = gkpz_ps.plan_lot_id and gkpz_ps.guid = ps.guid
+
+inner join
+  (select pl1.guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+    from tenders t1
+    inner join lots l1 on (t1.id = l1.tender_id)
+    left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+    where t1.announce_date between :begin_date and :end_date
+    group by pl1.guid, l1.frame_id
+  ) vi on (vi.guid = pl.guid or l.frame_id = vi.frame_id) and vi.max_announce_date = t.announce_date
+
+where l.gkpz_year = :gkpz_year -- год ГКПЗ
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>

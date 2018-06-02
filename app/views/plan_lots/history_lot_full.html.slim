@@ -1,0 +1,11 @@
+h3 Полная история лота
+
+= render "table_history_lot", plan_lots: @plan_lots
+
+h3 Полная история спецификаций
+- lot = @plan_lots.first
+- if lot
+  - PlanLot.all_spec_hexs(lot.guid_hex).each_with_index do |spec_hex, index|
+    - @plan_specifications = PlanSpecification.history(spec_hex)
+    h4= "Спецификация #{index + 1}"
+    = render "table_history_spec", plan_specifications: @plan_specifications.decorate

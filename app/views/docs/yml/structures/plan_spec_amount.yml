@@ -1,0 +1,32 @@
+-
+  name: "<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_specification'>..</a>"
+-
+  name: 'year'
+  data_type: 'Integer'
+  desc: 'Год'
+  required: true
+  example: '2016'
+-
+  name: 'amount_mastery'
+  data_type: 'Double'
+  desc: 'Планируемая сумма освоения на год, руб. без НДС'
+  required: true
+  example: '1000000'
+-
+  name: 'amount_mastery_nds'
+  data_type: 'Double'
+  desc: 'Планируемая сумма освоения на год, руб. с НДС'
+  required: true
+  example: '1180000'
+-
+  name: 'amount_finance'
+  data_type: 'Double'
+  desc: 'Планируемая сумма финансирования на год, руб. без НДС'
+  required: true
+  example: '1000000'
+-
+  name: 'amount_finance_nds'
+  data_type: 'Double'
+  desc: 'Планируемая сумма финансирования на год, руб. с НДС'
+  required: true
+  example: '1180000'

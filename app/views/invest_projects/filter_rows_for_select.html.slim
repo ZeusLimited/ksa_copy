@@ -1,0 +1,11 @@
+- @invest_projects.each do |invest_project|
+  = content_tag :tr, class: @invest_id == invest_project.id.to_s ? 'success' : nil do
+    td = invest_project.num
+    td = invest_project.name
+    td = invest_project.object_name
+    td = invest_project.date_install
+    td = invest_project.power_name
+    td.right-cell = invest_project.amount_financing_money
+    td
+      = link_to 'выбрать', '#', class: 'select_ip btn btn-warning',
+        data: { id: invest_project.id, fullname: invest_project.fullname }

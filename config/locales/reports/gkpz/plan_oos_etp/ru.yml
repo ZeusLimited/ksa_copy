@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_gkpz_plan_oos_etp:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/gkpz/plan_oos_etp: "План на ЕИС для ЭТП"
+    attributes:
+      reports/gkpz/plan_oos_etp:
+        gkpz_year: 'Год ГКПЗ'
+        date_gkpz_on_state: 'Состояние ГКПЗ на'
+        customers: 'Заказчик'
+        organizers: 'Организатор'
+        gkpz_type: 'ГКПЗ / Внеплановые закупки'
+        statuses: 'Статус закупки'
+        etp_addresses: 'Адрес ЭТП'
+        tender_types: 'Способ закупки'
+        directions: 'Направление закупки'
+        subject_types: 'Предмет закупки'

@@ -1,0 +1,31 @@
+- group = {}
+- @columns.each_pair do |ckey, cvalue|
+  - group["#{ckey}_total"] = 0 if cvalue[cols_part] && cvalue[:sum]
+
+tr.info
+  td{ colspan: @columns.size }= part_name
+
+- rows.each_with_index do |row, i|
+  tr data-tender=row['tender_id'] data-lot=row['lot_id'] data-spec=row['spec_id'] data-gkpz_pl=row['gkpz_pl_id']
+    - @columns.each_pair do |ckey, cvalue|
+      - group["#{ckey}_total"] += cvalue[:value].call(row) || 0 if cvalue[cols_part] && cvalue[:sum]
+
+    - @columns.each_pair do |ckey, cvalue|
+      - if cvalue[cols_part]
+        - attrs = {}
+        - attrs[:class] = report_right_cell_class(cvalue[:type], cvalue[:style])
+        - value = ckey == :c1 ? i + 1 : report_value_with_format(cvalue[:value].call(row), cvalue[:type], cvalue[:style])
+        = content_tag :td, value, attrs
+      - else
+        td
+
+tr.warning
+  td colspan="7" = part_sum_name
+  - @columns.each_pair do |ckey, cvalue|
+    - if %i(c1 c2 c3 c4 c5 c6 c7).include?(ckey)
+      - next
+    - else
+      - if cvalue[:sum] && cvalue[cols_part]
+        td.right-cell = p_money group["#{ckey}_total"]
+      - else
+        td

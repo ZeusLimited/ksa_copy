@@ -1,0 +1,61 @@
+.page-header
+  h1 = Reports::Other::Rosstat.model_name.human
+
+h2 class='text-center' Раздел 1. Количественные и стоимостные характеристики закупочной деятельности
+
+table.table.table-bordered.table-center
+  thead
+    tr
+      th rowspan="3" Наименование показателей
+      th rowspan="3" Код строки
+      th rowspan="3" Торги и другие способы закупки
+      th colspan="10" В том числе из графы 3
+    tr
+      th colspan="3" конкурсы
+      th colspan="3" аукционы
+      th rowspan="2" закупки у единственного поставщика (подрядчика, исполнителя)
+      th colspan="3" иные способы закупки
+    tr
+      th открытые
+      th закрытые
+      th открытые в электронной форме
+      th открытые
+      th закрытые
+      th открытые в электронной форме
+      th открытые
+      th закрытые
+      th открытые в электронной форме
+    tr
+      th 1
+      th 2
+      th 3
+      th 4
+      th 5
+      th 6
+      th 7
+      th 8
+      th 9
+      th 10
+      th 11
+      th 12
+      th 13
+  tbody
+    - @rows.each do |row|
+      tr
+        th colspan="13" = row['name']
+      - row['lines'].each_pair do |key, value|
+        - values = @report.sql_result(key).to_ary.first.values
+        - values = values.map { |v| v ? (v / 1000).round(2) : v } if (301..308).include?(key)
+        tr
+          td = value
+          td = key
+          - values.each_with_index do |v, i|
+            - cell_val = (301..308).include?(key) ? p_money(v) : v
+            - if cell_val
+              td.right-cell
+                - if (201..209).include?(key) || cell_val == 'x'
+                  = cell_val
+                - else
+                  = link_to_detail_rosstat(cell_val, i + 3, key)
+            - else
+              td.right-cell

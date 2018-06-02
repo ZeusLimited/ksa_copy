@@ -1,0 +1,21 @@
+col_count = 4
+
+row_values = Array.new(col_count)
+row_values[0] = "Наименование отчитывающейся организации: #{Department.find(@report.customer).name}"
+row = sheet.add_row row_values, style: @styles[:td]
+sheet.merge_cells row.cells.first(col_count)
+
+row_values = Array.new(col_count)
+row_values[0] = "Почтовый адрес: "
+row = sheet.add_row row_values, style: @styles[:td]
+sheet.merge_cells row.cells.first(col_count)
+
+head_rows = CSV.read('app/views/reports/other/rosstat/csv/list2_head.csv', col_sep: ';')
+
+rows = []
+head_rows.each { |head_row| rows << sheet.add_row(head_row, style: @styles[:th]) }
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+sheet.add_row [nil, nil, nil, nil], style: @styles[:td_center]
+
+sheet.column_widths 15, 30, 20, 20

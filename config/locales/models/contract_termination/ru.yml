@@ -1,0 +1,9 @@
+ru:
+  activerecord:
+    models:
+      contract_termination: 'Сведения о расторжении договора'
+    attributes:
+      contract_termination:
+        type: 'Способ расторжения'
+        unexec_cost_money: 'Объем неисполненных обязательств'
+        cancel_date: 'Дата расторжения'

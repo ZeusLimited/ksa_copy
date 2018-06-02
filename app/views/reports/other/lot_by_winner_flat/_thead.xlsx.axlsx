@@ -1,0 +1,10 @@
+head_row_1 = CSV.read('app/views/reports/other/lot_by_winner_flat/csv/head_1.csv')
+head_row_2 = CSV.read('app/views/reports/other/lot_by_winner_flat/csv/head_2.csv')
+
+rows = []
+head_row_1.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+head_row_2.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 30
+rows[0].height = 20
+
+AxlsxExt::AutoMergeNil.merge_rows(rows)

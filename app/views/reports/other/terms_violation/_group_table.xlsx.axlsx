@@ -1,0 +1,9 @@
+render 'group_head'
+
+@report.group_violation_rows.each do |result_row|
+  values = @columns.values.map do |val|
+    val[:value].call(result_row)
+  end
+
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end

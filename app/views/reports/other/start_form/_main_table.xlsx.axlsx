@@ -1,0 +1,11 @@
+render 'main_head'
+
+@customers.map!(&:to_i).each do |customer|
+  row_begin = @sheet.rows.size + 1
+  render 'group_rows', customer: customer, customer_name: Department.find(customer).name
+  @outlines << { start_index: row_begin, end_index: @sheet.rows.size - 1, level: 1 }
+end
+
+row_begin = @sheet.rows.size + 1
+render 'group_rows', customer: @customers, customer_name: 'Итого'
+@outlines << { start_index: row_begin, end_index: @sheet.rows.size - 1, level: 1 }

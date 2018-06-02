@@ -1,0 +1,52 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to t('.protocol_list'), tender_winner_protocols_path(tender)
+      li = link_to t('edit'), edit_tender_winner_protocol_path(tender, @winner_protocol)
+      li = link_to t('.map_bids'), map_by_lot_tender_bidders_path(tender)
+      - if can?(:update_confirm_date, winner_protocol)
+        li = link_to t('.change_confirm_date'), "#change_confirm_date", "data-toggle" => "modal"
+
+.page-header
+  .btn-group.pull-right.span2
+    button.btn.btn-primary.input-block-level.dropdown-toggle data-toggle='dropdown'
+      = t('actions')
+      span.caret
+    ul.dropdown-menu
+      - if can?(:pre_confirm, @winner_protocol)
+        li
+          = link_to t('.pre_confirm'),
+            pre_confirm_tender_winner_protocol_path(tender, winner_protocol), method: :patch
+      - if can?(:confirm, @winner_protocol)
+        li
+          = link_to t('.confirm'),
+            confirm_tender_winner_protocol_path(tender, winner_protocol), method: :patch
+      - if can?(:cancel_confirm, @winner_protocol)
+        li
+          = link_to t('.cancel_confirm'),
+            cancel_confirm_tender_winner_protocol_path(tender, winner_protocol), method: :patch
+      - if can?(:revoke_confirm, @winner_protocol)
+        li
+          = link_to t('.revoke_confirm'),
+            revoke_confirm_tender_winner_protocol_path(tender, winner_protocol), method: :patch
+      - if can?(:sign, @winner_protocol)
+        li
+          = link_to t('.sign'),
+            sign_tender_winner_protocol_path(tender, winner_protocol), method: :patch
+      - if can?(:revoke_sign, @winner_protocol)
+        li
+          = link_to t('.revoke_sign'),
+            revoke_sign_tender_winner_protocol_path(tender, winner_protocol), method: :patch
+  h1 = t('.header')
+
+= render 'tenders/tender_header', tender: tender
+
+h4
+  span.protocol-title = winner_protocol.title
+  = link_to_history_icon(winner_protocol)
+
+= render 'winner_protocol_lots'
+
+= render 'tender_partials/edit_protocol_confirm_date',
+  value: winner_protocol.confirm_date,
+  url: update_confirm_date_tender_winner_protocol_path(tender, winner_protocol)

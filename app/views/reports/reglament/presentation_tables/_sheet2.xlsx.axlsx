@@ -1,0 +1,16 @@
+render 'thead', sheet_name: 'sheet2', sheet: sheet
+
+def table_row(result, field)
+  [t(".#{field[:name]}", (field[:l] || {}).with_indifferent_access), to_thousand(result["cost_nds"].try(:to_f)), result["cnt"].try(:to_i)]
+end
+
+styles = [@styles[:td], @styles[:td_money], @styles[:td]]
+types = [:string, :float, :integer]
+
+@report.slide2_structure.each do |line|
+  method_name = [line[:method], line[:filters]].compact
+  result = @report.send(*method_name).first
+  sheet.add_row table_row(result, line), style: styles, types: types
+end
+
+sheet.column_widths 40, 20, 15

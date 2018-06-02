@@ -1,0 +1,50 @@
+<h1>Сокращения, используемые в <%= Setting.app_name %></h1>
+
+
+<h5>Виды закупаемой продукции</h5>
+<table class="table table-striped">
+  <tbody>
+  <% @product_types.each do |type| %>
+    <tr>
+      <td class="attr"><%= type.name %></td>
+      <td><%= type.fullname %></td>
+    </tr>
+  <% end%>
+  </tbody>
+</table>
+
+<h5>Способы закупок</h5>
+<table class="table table-striped">
+  <tbody>
+  <% @tender_types.each do |type| %>
+    <tr>
+      <td class="attr"><%= type.name %></td>
+      <td><%= type.fullname %></td>
+    </tr>
+  <% end%>
+  </tbody>
+</table>
+
+<h5>Направления закупок</h5>
+<table class="table table-striped">
+  <tbody>
+  <% @directions.each do |direction| %>
+    <tr>
+      <td class="attr"><%= direction.name %></td>
+      <td><%= direction.fullname %></td>
+    </tr>
+  <% end%>
+  </tbody>
+</table>
+
+<h5>Типы закупочных комиссий</h5>
+<table class="table table-striped">
+  <tbody>
+  <% @commission_types.each do |commission_type| %>
+    <tr>
+      <td class="attr"><%= commission_type.name %></td>
+      <td><%= commission_type.fullname %></td>
+    </tr>
+  <% end%>
+  </tbody>
+</table>

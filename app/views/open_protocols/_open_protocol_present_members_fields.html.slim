@@ -1,0 +1,7 @@
+= content_tag :tr, class: class_for_member(builder.object) do
+  = builder.hidden_field :user_id
+  td = builder.check_box :enable
+  td = builder.label :enable, builder.object.user_fio_full, class: 'name'
+  td
+    = builder.object.status_name
+    = builder.hidden_field :status_id

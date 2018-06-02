@@ -1,0 +1,31 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to 'Вернуться к списку', tender_expert_opinions_path(@tender)
+      li
+        = link_to 'Вернуться к просмотру',
+          show_draft_tender_expert_opinion_path(@tender, @offer, expert_id: @expert.id)
+
+.page-header
+  h1 Редактирование экспертизы по отборочным критериям
+
+= render 'info', expert: @expert, offer: @offer
+
+= hidden_field_tag 'offer_id', @offer.id
+= hidden_field_tag 'expert_id', @expert.id
+
+- @offer.draft_opinions.each do |opinion|
+  = field_set_tag nil, class: "opinion#{class_for_opinion(opinion)}" do
+    = hidden_field_tag "criterion_id", opinion.criterion_id
+    .row
+      .span1
+        label &nbsp;
+        = button_tag(type: 'button', title: 'Соответствует', class: 'btn input-block-level positive') do
+          = content_tag(:i, '', class: 'icon-thumbs-up')
+        label &nbsp;
+        = button_tag(type: 'button', title: 'Не соответствует', class: 'btn input-block-level negative') do
+          = content_tag(:i, '', class: 'icon-thumbs-down')
+      = view_text_area("span5", opinion, :draft_criterion_name, nil, rows: 3)
+      .span5
+        label Пояснения
+        = text_area_tag 'description', opinion.description, rows: 3, class: 'input-block-level description'

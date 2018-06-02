@@ -1,0 +1,99 @@
+select
+  lot_name, num_tender, num_lot, sum(cost) as cost, announce_date, order_date, tender_type_name, is_etp, organizer_name,
+  commission_type_name, monitor_service_name, delivery_date_begin, delivery_date_end, contractors,
+  <%= ActiveRecord::Base.concatinate("bp_item") %> as bp_items, curator, tech_curator
+from (
+  select
+    pl.id,
+    pl.lot_name,
+    pl.num_tender,
+    pl.num_lot,
+    ps.qty * ps.cost as cost,
+    pl.announce_date,
+    case
+      when pl.tender_type_id in
+        (<%= (Constants::TenderTypes::TENDERS + Constants::TenderTypes::AUCTIONS + Constants::TenderTypes::KP).join(', ') %>)
+        then pl.announce_date - 15
+      when
+        pl.tender_type_id in (<%= (Constants::TenderTypes::ZP + Constants::TenderTypes::ZC).join(', ') %>)
+        then pl.announce_date - 10
+      else pl.announce_date
+    end as order_date,
+    tt.name as tender_type_name,
+    decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 'Нет', 'Да') as is_etp,
+    org.name as organizer_name,
+    ctype.name as commission_type_name,
+    first_value(mon.name) over (partition by pl.id order by ps.num_spec) as monitor_service_name,
+    first_value(ps.delivery_date_begin) over (partition by pl.id order by ps.num_spec) as delivery_date_begin,
+    first_value(ps.delivery_date_end) over (partition by pl.id order by ps.num_spec) as delivery_date_end,
+    con.contractors,
+    ps.bp_item,
+    first_value(ps.curator) over (partition by pl.id order by ps.num_spec) as curator,
+    first_value(ps.tech_curator) over (partition by pl.id order by ps.num_spec) as tech_curator
+  from plan_lots pl
+    inner join
+    (select id from
+      (select tpl.id, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm < :end_date
+        where tpl.status_id in (<%= Constants::PlanLotStatus::NOT_DELETED_LIST.join(', ') %>)) sub
+       where rn = 1) gkpz_pl on (pl.id = gkpz_pl.id)
+    inner join plan_specifications ps on (ps.plan_lot_id = pl.id)
+    inner join dictionaries tt on (tt.ref_id = pl.tender_type_id)
+    --
+    left join commissions c on (c.id = pl.commission_id)
+    left join dictionaries ctype on (ctype.ref_id = c.commission_type_id)
+    --
+    inner join departments org on (org.id = pl.department_id)
+    inner join departments mon on (mon.id = ps.monitor_service_id)
+    --
+    inner join
+    (select
+      plc.plan_lot_id,
+      <%= ActiveRecord::Base.concatinate("contr.name || ' (' || ow.shortname  || ')'", "';'", "plc.id") %> as contractors
+     from plan_lot_contractors plc
+      inner join contractors contr on (contr.id = plc.contractor_id)
+      left join ownerships ow on ow.id = contr.ownership_id
+     Group By plc.plan_lot_id
+    ) con on (con.plan_lot_id = pl.id)
+
+  Where pl.gkpz_year = :gkpz_year
+    And pl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+    And pl.announce_date between :begin_date and :end_date
+    And not exists
+      (
+        Select
+          'x'
+        From plan_lots ppl
+          inner join lots l on (ppl.id = l.plan_lot_id And l.status_id != <%= Constants::LotStatus::NEW %>)
+        Where ppl.guid = pl.guid
+      )
+  <% if current_user_root_dept_id %>
+    and ps.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+
+  <% if customers.present? %>
+    and ps.customer_id in
+      (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+  <% end %>
+
+  <% if organizers.present? %>
+    and pl.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+  <% end %>
+
+  <% if tender_types.present? %>
+    and pl.tender_type_id in (<%= tender_types.join(', ') %>)
+  <% end %>
+
+  <% if statuses.present? %>
+    and pl.status_id in (<%= statuses.join(', ') %>)
+  <% end %>
+
+) pl
+Group By pl.id, pl.lot_name, pl.num_tender, pl.num_lot, pl.announce_date, tender_type_name, order_date,
+  monitor_service_name, delivery_date_begin, delivery_date_end, curator, tech_curator, is_etp, organizer_name,
+  commission_type_name, contractors
+
+Order by num_tender, num_lot

@@ -1,0 +1,81 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 16)
+@outlines = []
+
+@columns = Reports::Gkpz::PlanEisInivp::COLUMNS_EIS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@sum_styles = @columns.values.map do |c|
+  if c[:sum]
+    c[:sum_style] ? @styles[c[:sum_style]] : @styles[:sum_money]
+  else
+    @styles[:sum]
+  end
+end
+@sum_quarter_styles = @columns.values.map do |c|
+  c[:sum] ? @styles[:alt_sum_money] : @styles[:alt_sum]
+end
+
+cust_id = @report.customers.present? ? @report.customers[0] : current_user.root_dept_id
+@customer = cust_id ? Department.find(cust_id) : nil
+
+@sheet.add_row
+@simple_sheet.add_row_title(t("reports/gkpz/plan_eis_inivp.title"), style: @styles[:title], columns_count: 16)
+@simple_sheet.add_row_title(t("reports/gkpz/plan_eis_inivp.years", begin_year: @report.begin_year, end_year: @report.end_year), style: @styles[:title], columns_count: 16)
+
+@sheet.add_row
+render 'reports/gkpz/plan_eis_inivp/plan_inivp_eis/head_table'
+@sheet.add_row
+
+render 'reports/gkpz/plan_eis_inivp/plan_inivp_eis/main_table', filter: {}
+
+@sheet.add_row
+@simple_sheet.add_row_title(
+  t("reports/gkpz/plan_eis_inivp.title#{@report.with_sme.to_b ? 2 : 1}", year: @report.begin_year)
+)
+@sheet.add_row
+
+all_sum = @report.with_sme.to_b ? @report.result({}).sum { |r| r['cost'] } : 0
+for_order1352_sum = @report.with_sme.to_b ? @report.result(order1352_id: Constants::Order1352::EXCLUSIONS).sum { |r| r['cost'] } : 0
+only_sme_sum = @report.with_sme.to_b ? @report.result(sme_type_id: Constants::SmeTypes::SME).sum { |r| r['cost'] } : 0
+only_sme_sum_percent = (all_sum - for_order1352_sum) != 0 ? (only_sme_sum.to_f / (all_sum - for_order1352_sum) * 100).round(2) : 0.0
+
+@simple_sheet.add_row_title(
+  t("reports/gkpz/gkpz_oos_new.title2"),
+  style: @styles[:alt_title],
+  columns_count: 16
+)
+
+@simple_sheet.add_row_title(
+  t(
+    "reports/gkpz/gkpz_oos_new.row1",
+    cost: ActiveSupport::NumberHelper.number_to_delimited(all_sum)),
+  style: @styles[:text_left],
+  columns_count: 16
+)
+
+@simple_sheet.add_row_title(
+  t(
+    "reports/gkpz/gkpz_oos_new.row2",
+    cost: ActiveSupport::NumberHelper.number_to_delimited(for_order1352_sum)),
+  style: @styles[:text_left],
+  height: 30,
+  columns_count: 16
+)
+
+@simple_sheet.add_row_title(
+  t(
+    "reports/gkpz/gkpz_oos_new.row3",
+    cost: ActiveSupport::NumberHelper.number_to_delimited(only_sme_sum),
+    percent: ActiveSupport::NumberHelper.number_to_delimited(only_sme_sum_percent)),
+  style: @styles[:text_left],
+  columns_count: 16
+)
+
+@sheet.add_row
+
+render 'reports/gkpz/plan_eis_inivp/plan_inivp_eis/main_table', filter: { sme_type_id: @report.with_sme.to_b ? Constants::SmeTypes::SME : -1 }
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

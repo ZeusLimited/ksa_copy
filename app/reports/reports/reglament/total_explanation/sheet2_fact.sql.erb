@@ -1,0 +1,65 @@
+--sheet2_fact
+
+<% def select_fields(field)
+    fcnt = field[:subj] ? "decode(ft.subject_type_id,#{field[:subj]},rn,0)" : "rn"
+    fcost_nds = field[:subj] ? "decode(ft.subject_type_id,#{field[:subj]},ft.cost_nds,0)" : "ft.cost_nds"
+    final_cost_nds = field[:subj] ? "decode(ft.subject_type_id,#{field[:subj]},ft.final_cost_nds,0)" : "ft.final_cost_nds"
+    <<-SQL
+      --#{field[:name]}
+      sum(decode(ft.direction_id,#{field[:dir]},#{fcnt},0)) as #{field[:name]}_fcnt,
+      round(sum(decode(ft.direction_id,#{field[:dir]},#{fcost_nds},0))/1000,2) as #{field[:name]}_fcost_n,
+      round(sum(decode(ft.direction_id,#{field[:dir]},#{final_cost_nds},0))/1000,2) as #{field[:name]}_fin_cost_n
+    SQL
+  end
+
+%>
+
+select
+<%= fields.map{|f| select_fields(f) }.join(",\n") %>
+
+  --Итого
+  ,sum(ft.rn) as fcnt,
+  round(sum(ft.cost_nds) / 1000, 2) as fcost_nds,
+  round(sum(ft.final_cost_nds) / 1000, 2) as final_cost_nds
+
+From
+(
+  select
+    decode(l.main_direction_id, s.direction_id, 1, 0) as rn,
+    s.direction_id,
+    l.subject_type_id,
+    sum(case when t.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else (s.qty * s.cost_nds) end) as cost_nds,
+    sum(s.qty * os.final_cost_nds) as final_cost_nds
+  from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join offer_specifications os on (s.id = os.specification_id)
+  inner join offers o on (os.offer_id = o.id and o.lot_id = l.id and o.version = 0)
+  inner join winner_protocols wp on (l.winner_protocol_id = wp.id)
+  left join plan_lots pl on (pl.id = l.plan_lot_id)
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+  where o.status_id = 26004
+  And can.guid is null -- неотмененная
+  and l.gkpz_year = :gkpz_year -- gkpz_year
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>
+  and wp.confirm_date between :begin_date and :end_date
+  and l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  group by nvl(l.frame_id, l.id), l.plan_lot_id, s.direction_id, l.subject_type_id, l.main_direction_id
+) ft

@@ -1,0 +1,64 @@
+<%- model_class = Task -%>
+<div class="page-header">
+  <h1>Список задач</h1>
+</div>
+
+<%= form_tag tasks_path, :method => 'get' do %>
+
+  <div class="row">
+    <div class="span4">
+      <div class="control-group">
+        <%= label_tag 'status', 'Статус', class: 'control-label' %>
+        <div class="controls">
+          <%= select_tag 'status', options_from_collection_for_select(TaskStatus.order(:id), 'id', 'name', params[:status]), include_blank: true, class: 'input-block-level', data: { placeholder: 'Все' } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="span2">
+      <label>&nbsp;</label>
+      <%= button_tag 'Фильтр', class: 'btn btn-success input-block-level', name: nil %>
+    </div>
+  </div>
+<% end %>
+
+<p>
+  <%= link_to 'Создать', new_task_path, :class => 'btn btn-primary' %>
+  <%= link_to 'Поменять приоритет', change_priority_tasks_path, :class => 'btn btn-primary' %>
+</p>
+<table class="table table-hover table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>№</th>
+      <th><%= model_class.human_attribute_name(:description) %></th>
+      <th><%= model_class.human_attribute_name(:task_comment) %></th>
+      <th><%= model_class.human_attribute_name(:task_status) %></th>
+      <th>Создан</th>
+      <th>Изменён</th>
+      <th><%= model_class.human_attribute_name(:user_id) %></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @tasks.each_with_index do |task, index| %>
+      <%= tr_for_task(task) do %>
+        <td><%= index +1 %></td>
+        <td class="wrapped-text"><%= truncate(task.description, length: 100) %></td>
+        <td class="wrapped-text"><%= truncate(task.task_comment, length: 100) %></td>
+        <td><%= task.task_status.name %></td>
+        <td><%= abbr(task.created_at.strftime('%d.%m.%Y'), l(task.created_at, format: :long)) %></td>
+        <td><%= abbr(task.updated_at.strftime('%d.%m.%Y'), l(task.updated_at, format: :long)) %></td>
+        <td><%= task.user.fio_full %></td>
+        <td><%= link_to content_tag(:i, '', class: 'icon-info-sign'), task_path(task), data: { toggle: 'tooltip' }, title: 'Просмотр' %></td>
+        <td>
+          <%= link_to content_tag(:i, '', class: 'icon-edit'), edit_task_path(task), data: { toggle: 'tooltip' }, title: 'Редактировать' %>
+        </td>
+        <td>
+          <%= link_to content_tag(:i, '', class: 'icon-trash'), task_path(task), method: :delete, data: { :confirm => 'Вы уверены?', toggle: 'tooltip' }, title: 'Удалить' %>
+        </td>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>

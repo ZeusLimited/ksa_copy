@@ -1,0 +1,6 @@
+.page-header
+  h1 = t('.header')
+
+= render 'tenders/tender_header', tender: tender
+
+= render 'form', tender: tender, winner_protocol: winner_protocol

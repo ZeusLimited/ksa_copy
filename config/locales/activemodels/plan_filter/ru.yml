@@ -1,0 +1,42 @@
+ru:
+  helpers:
+    submit:
+      plan_filter:
+        create: "Поиск"
+  activemodel:
+    models:
+      plan_filter: 'Фильтр планирования'
+    attributes:
+      plan_filter:
+        years: 'Год ГКПЗ'
+        state: 'Состояние в ГКПЗ'
+        gkpz_state: 'Версия ГКПЗ'
+        gkpz_on_date_begin: 'С'
+        gkpz_on_date_end: 'По'
+        customers: 'Заказчик'
+        organizers: 'Организатор'
+        monitor_services: 'Курирующее подразделение'
+        date_begin: 'Дата объявления с'
+        date_end: 'Дата объявления по'
+        directions: 'Направление'
+        subject_types: 'Предмет закупки'
+        tender_types: 'Способ закупки'
+        statuses: 'Статус закупки'
+        etp_addresses: 'Адрес ЭТП'
+        declared: 'Публикация'
+        name: 'Фильтр по наименованию'
+        num: 'Фильтр по номеру'
+        control_lots: 'На контроле'
+        start_cost: 'Стоимость лота с'
+        end_cost: 'Стоимость лота по'
+        start_tender_cost: 'Стоимость закупки с'
+        end_tender_cost: 'Стоимость закупки по'
+        consumers: 'Потребитель'
+        sme_types: 'Отношение к МСП'
+        okdp: 'ОКДП'
+        okved: 'ОКВЭД'
+        bp_states: 'Бюджетный кодификатор'
+        bidders: 'Потенциальные участники'
+        order1352: 'Учет в совокупном годовом объеме договоров с МСП (Постановление правительства №1352 от 11.12.2014)'
+        regulation_items: 'Пункты положения'
+        selected_lots: 'Поместить в выбранные'

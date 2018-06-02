@@ -1,0 +1,17 @@
+ru:
+  helpers:
+    submit:
+      reports_other_terms_violation:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/terms_violation: 'Нарушение сроков подведения итогов'
+    attributes:
+      reports/other/terms_violation:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        consumers: 'Потребители'
+        organizers: 'Организаторы'
+        gkpz_year: 'Годы ГКПЗ'
+        directions: 'Направления закупок'
+        format: 'Формат'

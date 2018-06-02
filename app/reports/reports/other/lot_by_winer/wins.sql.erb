@@ -1,0 +1,55 @@
+
+select td.*, d.name as root_customer, row_number() over (partition by contractor_fullname order by root_id, customer, num_tender, lot_name) as rn
+From (
+  select c.name || ' (' || ow.shortname || ')' as contractor_fullname,
+    l.root_customer_id as root_id,
+    s.customer_id as customer,
+    t.num || '.' || l.num as num_tender,
+    l.name as lot_name,
+    cast(sum(s.qty * os.final_cost) as float) as final_cost,
+    t.department_id as organizer,
+    dir.name as direction_name,
+    to_char(t.bid_date,'dd.mm.yyyy') as bid_date,
+    to_char(wp.confirm_date,'dd.mm.yyyy') as protocol_confirm_date,
+    ps.bp_item
+  From tenders t
+    inner join lots l on (t.id = l.tender_id)
+    inner join specifications s on (l.id = s.lot_id)
+    inner join offer_specifications os on (s.id = os.specification_id)
+    inner join offers o on (o.id = os.offer_id and o.version = 0 and o.status_id = 26004)
+    inner join bidders b on (o.bidder_id = b.id)
+    inner join contractors c on (c.id = b.contractor_id)
+    left join ownerships ow on ow.id = c.ownership_id
+    inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+    inner join dictionaries dir on (dir.ref_id = s.direction_id)
+    left join plan_specifications ps on (ps.id = s.plan_specification_id)
+  Where wp.confirm_date Between :begin_date And :end_date
+    <% if gkpz_years.present? %>
+      And l.gkpz_year in (<%= gkpz_years.join(',') %>)
+    <% end %>
+    <% if current_user_root_dept_id.present? %>
+      And s.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+    <% end %>
+    <% if customers.present? %>
+      And s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+    <% end %>
+    <% if organizers.present? %>
+      And t.department_id in (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+    <% end %>
+    <% if directions.present? %>
+      And s.direction_id in (<%= directions.join(',') %>)
+    <% end %>
+    <% if winners.present? %>
+      And c.guid in (select con.guid from contractors con where c.id in (<%= winners %>))
+    <% end %>
+  Group By Rollup ((
+      c.name || ' (' || ow.shortname || ')'),
+      (l.root_customer_id
+    ),
+    (t.num,l.num,l.id, l.name, s.customer_id, t.department_id, dir.name,
+     wp.confirm_date, ps.bp_item, t.bid_date)
+  )
+) td
+  left join departments d on (d.id = td.root_id)
+Order By 1, 2, 3, 4, 5
+

@@ -1,0 +1,30 @@
+<%- model_class = Task -%>
+<div class="page-header">
+  <h1>Просмотр задачи</h1>
+</div>
+
+<p>Автор: <%= @task.user.fio_full %></p>
+<p>Приоритет: <%= @task.priority %></p>
+
+  <div class="row">
+    <div class="span12">
+      <%= view_text_area(Task, @task, :description, @task.description, rows: 5) %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span12">
+      <%= view_text_area(Task, @task, :task_comment, @task.task_comment, rows: 5) %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span2">
+      <%= view_text_field(Task, @task, :task_status, @task.task_status.name) %>
+    </div>
+  </div>
+
+<div class="form-actions">
+  <%= link_to 'Назад', tasks_path, :class => 'btn'  %>
+  <%= link_to 'Редактировать', edit_task_path(@task), :class => 'btn' %>
+</div>

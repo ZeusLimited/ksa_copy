@@ -1,0 +1,46 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 45)
+@outlines = []
+
+@columns = Reports::Reglament::CurrentResult::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@sum_styles = @columns.values.map do |c|
+  if c[:sum]
+    c[:sum_style] ? @styles[c[:sum_style]] : @styles[:sum_money]
+  else
+    @styles[:sum]
+  end
+end
+
+@sum_rows = []
+
+@sheet.add_row
+@simple_sheet.add_row_title(Reports::Reglament::CurrentResult.model_name.human,
+                            style: @styles[:title], columns_count: 10)
+@sheet.add_row
+
+render 'main_table', tender_types: Constants::TenderTypes::REGULATED
+
+@sheet.add_row
+@simple_sheet.add_row_title 'Нерегламентированные закупки', style: @styles[:title], columns_count: 10
+@sheet.add_row
+
+render 'main_table', tender_types: Constants::TenderTypes::UNREGULATED
+
+row = @simple_sheet.add_row_title 'I. СОСТОЯВШИЕСЯ ЗАКУПКИ С ПОДВЕДЕННЫМИ ИТОГАМИ (регламентированные и нерегламентированные)',
+  style: @sum_styles, merge_count: 7
+
+@columns.values.each_with_index do |value, index|
+  next unless value[:sum]
+  row.cells[index].value = if value[:persent_formula].present?
+    pf = value[:persent_formula]
+    format("=%s/%s", row.cells[pf[:numerator]].r, row.cells[pf[:denomenator]].r)
+  else
+    format("=%s+%s", @sheet.rows[@sum_rows[0]].cells[index].r, @sheet.rows[@sum_rows[1]].cells[index].r)
+  end
+end
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

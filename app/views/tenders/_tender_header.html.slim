@@ -1,0 +1,27 @@
+.row
+  .span12
+    table.table.table-nonfluid.table-bordered
+      tbody
+        tr
+          th.span3 = t('.num_tender')
+          td = tender.num
+          th.span3 = t('.tender_type')
+          td = tender.type_with_etp
+        tr
+          th = t('.tender_on_eis')
+          td = tender.link_to_oos
+          th = t('.tender_on_etp')
+          td = tender.link_to_etp unless tender.etp_address_id == Constants::EtpAddress::NOT_ETP
+        tr
+          th = t('.organizer')
+          td = tender.department.try(:name)
+          th = t('.comission')
+          td = tender.commission.try(:commission_type_name)
+        tr
+          th = t('.executive_user')
+          td = tender.user_fio_full
+          th = t('.time')
+          td = tender.local_time_zone.try(:name)
+
+
+hr

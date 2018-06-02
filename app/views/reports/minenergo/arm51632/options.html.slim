@@ -1,0 +1,59 @@
+= input_block_form_for @options, url: reports_minenergo_arm51632_show_path, method: :get, html: { target: '_blank' } do |f|
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+      .span2= f.input :gkpz_years, collection: gkpz_years_range, input_html: multi, include_hidden: false
+    .row
+      .span6
+        = f.input :customer, collection: Department.customers_by_root(current_user.root_dept_id),
+          include_blank: false, label_method: :name_with_depth_symbols
+    .row
+      .span6
+        = f.input :organizers, collection: Department.organizers_by_root, label_method: :name_with_depth_symbols,
+          input_html: multi, include_hidden: false
+    .row
+      .span3
+        = f.input :tender_types, collection: Dictionary.tender_types, input_html: multi, include_hidden: false
+      .span3
+        = f.input :subject_type, collection: Dictionary.subject_types
+    .row
+      .span3
+        = f.input :directions, collection: Direction.invest.order(:position), input_html: multi,
+          include_hidden: false
+      .span3
+        = f.input :financing_sources, collection: Dictionary.where(ref_id: Constants::Financing::GROUP2),
+          input_html: multi, include_hidden: false
+    .row
+      .span3.user-info
+        = f.label :par55555
+        = f.text_field :par55555_name, class: 'user-name input-block-level'
+        = f.hidden_field :par55555, class: 'user-id'
+      .span3.user-info
+        = f.label :par77777
+        = f.text_field :par77777_name, class: 'user-name input-block-level'
+        = f.hidden_field :par77777, class: 'user-id'
+    .row
+      .span3
+        = f.label :winners
+        = f.hidden_field :winners, class: 'autocomplete-winners-select input-block-level'
+      .span3
+        = f.input :consumers, collection: Department.rank_array(current_user.root_dept_id),
+          label_method: :name_with_depth_symbols, input_html: multi, include_hidden: false
+    = field_set_tag "Объем финансирования ИП текущего года, законтрактованный по состоянию на начало года" do
+      .row
+        .span3= f.input :par22222
+        .span3= f.input :par22222_ps
+    = field_set_tag "Объем финансирования ИП текущего года, законтрактованный по состоянию на конец отчетного периода" do
+      .row
+        .span3= f.input :par33333
+        .span3= f.input :par33333_ps
+    = field_set_tag "Объем финансирования ИП текущего года, законтрактованный в соответствии с ГКПЗ по состоянию на конец отчетного периода" do
+      .row
+        .span3= f.input :par44444
+        .span3= f.input :par44444_ps
+    .row
+      .span2= f.input :format, collection: { 'Excel' => 'xlsx', "Арм Минэнерго" => "text" }, include_blank: false
+
+    .form-actions
+      = f.button :button, class: 'btn btn-primary', name: nil

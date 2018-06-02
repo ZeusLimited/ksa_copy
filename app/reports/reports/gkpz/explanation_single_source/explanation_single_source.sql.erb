@@ -1,0 +1,90 @@
+select
+  --1
+  ps.bp_item,
+  --2
+  ps.name as specification_name,
+  --3
+  tt.name as tender_type_name,
+  --4
+  ps.qty * ps.cost_nds as cost_nds,
+  --5
+  contr.id as is_contr,
+  contr.name || ' (' || coalesce(ow.shortname,'') || ')' as potential_bidder,
+  ps.potential_participants,
+  --6
+  pl.tender_type_explanations,
+  ps.note,
+  --7
+  pl.explanations_doc,
+  --8
+  nvl(ri.num, pl.point_clause) as regulation_item_num,
+  ps.direction_id,
+  pl.subject_type_id,
+  row_number() over (order by pl.num_tender, pl.num_lot, ps.num_spec, ps.id) as sort_order
+From plan_lots pl
+  inner join plan_specifications ps on (pl.id = ps.plan_lot_id)
+  inner join dictionaries tt on (tt.ref_id = pl.tender_type_id)
+  left join plan_lot_contractors plc on (plc.plan_lot_id = pl.id)
+  left join contractors contr on (contr.id = plc.contractor_id)
+  left join ownerships ow on ow.id = contr.ownership_id
+  left join regulation_items ri on ri.id = pl.regulation_item_id
+<% if gkpz_type != 'current' %>
+  inner join protocols p on (pl.protocol_id = p.id)
+  inner join commissions c on (p.commission_id = c.id)
+  inner join (
+    select l.guid, max(p1.date_confirm) as date_confirm
+    from plan_lots l
+      inner join protocols p1 on (p1.id = l.protocol_id)
+      inner join commissions c1 on (p1.commission_id = c1.id)
+    where p1.date_confirm <= :date_gkpz_on_state
+    <% if gkpz_type == 'gkpz' %>
+      and c1.commission_type_id = <%= Constants::CommissionType::SD %>
+    <% end %>
+    Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+<% end %>
+Where pl.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+  And pl.announce_date between :begin_date and :end_date
+<% if gkpz_year.present? %>
+  And pl.gkpz_year in (<%= gkpz_year.join(', ') %>)
+<% end %>
+
+<% if gkpz_type == 'unplanned' %>
+  And not exists (select 'x' from plan_lots l where l.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %> and l.guid = pl.guid)
+<% elsif gkpz_type == 'current' %>
+  And pl.version = 0
+<% end %>
+
+<% if current_user_root_dept_id %>
+  And ps.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customer.present? %>
+  And ps.customer_id in
+    (<%= Department.subtree_ids_for(customer).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  And pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if directions.present? %>
+  And ps.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  And ps.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  And pl.subject_type_id = <%= subject_type %>
+<% end %>
+
+<% if statuses.present? %>
+  And pl.status_id in (<%= statuses.join(', ') %>)
+<% end %>
+
+<% if gkpz_state.present? %>
+  And pl.state = <%= PlanLot.states[gkpz_state] %>
+<% end %>

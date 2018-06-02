@@ -1,0 +1,55 @@
+-- line 308 Rosstat Part1
+select
+<% if detail %>
+  <%= detail_select.html_safe %>
+<% else %>
+  coalesce(sum(cost_all), 0) as cost_all,
+  coalesce(sum(cost_ok), 0) as cost_ok,
+  coalesce(sum(cost_zk), 0) as cost_zk,
+  coalesce(sum(cost_ok_etp), 0) as cost_ok_etp,
+  coalesce(sum(cost_oa), 0) as cost_oa,
+  coalesce(sum(cost_za), 0) as cost_za,
+  coalesce(sum(cost_oa_etp), 0) as cost_oa_etp,
+  coalesce(sum(cost_ei), 0) as cost_ei,
+  coalesce(sum(cost_other_o), 0) as cost_other_o,
+  coalesce(sum(cost_other_z), 0) as cost_other_z,
+  coalesce(sum(cost_other_etp), 0) as cost_other_etp
+from (
+select
+  sum(s.qty * scs.cost_nds) as cost_all,
+  <%= line308_row('cost_ok', Constants::TenderTypes::OK.join(','), false) %>,
+  <%= line308_row('cost_zk', Constants::TenderTypes::ZK.join(',')) %>,
+  <%= line308_row('cost_ok_etp', Constants::TenderTypes::OK.join(','), true) %>,
+  <%= line308_row('cost_oa', Constants::TenderTypes::OA, false) %>,
+  <%= line308_row('cost_za', Constants::TenderTypes::ZA) %>,
+  <%= line308_row('cost_oa_etp', Constants::TenderTypes::OA, true) %>,
+  <%= line308_row('cost_ei', Constants::TenderTypes::ROSSTAT_EI.join(', ')) %>,
+  <%= line308_row('cost_other_o', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), false) %>,
+  <%= line308_row('cost_other_z', Constants::TenderTypes::ROSSTAT_OTHER_CLOSE.join(',')) %>,
+  <%= line308_row('cost_other_etp', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), true) %>
+<% end %>
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (l.frame_id = fr.id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  inner join specifications s on (l.id = s.lot_id)
+  inner join contracts c on (c.lot_id = l.id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+  inner join sub_contractors sc on (c.id = sc.contract_id)
+  inner join sub_contractor_specs scs on (scs.sub_contractor_id = sc.id and scs.specification_id = s.id)
+  inner join contractors contr on (contr.id = sc.contractor_id and cast(contr.is_sme as integer) = 1)
+<% if detail %>
+  <%= detail_join.html_safe %>
+<% end %>
+Where t.tender_type_id not in (<%= Constants::TenderTypes::FRAMES.join(', ') %>)
+  And l.status_id = <%= Constants::LotStatus::CONTRACT %>
+  And c.confirm_date between :begin_date and :end_date
+  And l.root_customer_id = :customer
+<% if detail %>
+  <%= additional_filter(col) %>
+<% end %>
+Group By l.id, t.tender_type_id, t.etp_address_id, pl.num_tender, t.num, l.frame_id, pl.num_lot, l.num, l.name,
+  wp.confirm_date, c.confirm_date, c.id <%= ", gkpz_pl.id" if detail %>
+<% unless detail %>
+) sub
+<% end %>

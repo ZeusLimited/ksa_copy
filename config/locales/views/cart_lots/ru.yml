@@ -1,0 +1,16 @@
+ru:
+  cart_lots:
+    index:
+      header: 'Папка исполняемых лотов'
+      actions: 'Действия'
+      remove_all: 'Очистить корзину'
+      exec_zzc: 'Провести ЗЗЦ'
+      remove: 'Удалить из корзины'
+      confirm: 'Вы уверены?'
+      show: 'Просмотр'
+      table:
+        lot_num: 'Номер лота'
+        lot_name: 'Наименование'
+        cost: 'Начальная предельная цена'
+        status: 'Статус'
+        tender_type: 'Способ'

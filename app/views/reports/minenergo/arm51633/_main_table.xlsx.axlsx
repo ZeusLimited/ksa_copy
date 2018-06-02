@@ -1,0 +1,10 @@
+render 'thead'
+
+p_name = 'Открытые конкурсы на право заключения рамочных соглашений на поставку товаров'
+p_sum_name = 'Итого'
+render 'part_rows', rows: @report.part1_sql_rows, no_merge: :part1_no_merge, part_name: p_name, part_sum_name: p_sum_name
+
+
+p_name = 'Не состоявшиеся процедуры по итогам которых не планируется заключение договоров'
+p_sum_name = 'Итого'
+render 'part_rows', rows: @report.part3_sql_rows, no_merge: :part3_no_merge, part_name: p_name, part_sum_name: p_sum_name

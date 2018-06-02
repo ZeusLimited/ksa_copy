@@ -1,0 +1,9 @@
+group = {}
+
+@unfair_contractor.each do |unfair_contractor|
+  values = @columns.map do |key, value|
+    value[:value].call(unfair_contractor)
+  end
+  excel_row = @sheet.add_row values, types: @column_types, style: @column_styles
+
+end

@@ -1,0 +1,78 @@
+select
+	row_number() over(order by pl.num_tender, pl.num_lot, pl.id) as rn,
+	count(*) over(partition by pl.id) as spec_cnt,
+	case when t.announce_date is not null then 1 else 0 end as publish_cnt,
+	case when t.announce_date is null then 1 else 0 end as not_publish_cnt,
+	pl.num_tender || '.' || pl.num_lot as lot_num,
+	cons."name" as consumer_name,
+	org."name" as organizer_name,
+	org.id as organizer_id,
+	pl.lot_name as lot_name,
+	tt.name as tender_type_name,
+	ps.cost * ps.qty as cost,
+	s.cost * s.qty as nmcd,
+	dir.name as direction_name,
+	pl.announce_date plan_announce,
+	t.announce_date as fact_announce,
+	t.summary_date as summary_plan,
+	wp.confirm_date as summary_fact,
+	coalesce(wp.confirm_date, :end_date) as date_to,
+	coalesce(t.announce_date, pl.announce_date) as date_from,
+	wp.violation_reason as violation_reason
+from plan_lots pl
+inner join
+	(
+		select ttp.id, ttp.guid from
+		(
+			select tpl.id, tpl.guid, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) as rn
+			from plan_lots tpl
+			inner join protocols tp on tp.id = tpl.protocol_id
+			where tpl.status_id in (<%= PlanLotStatus::AGREEMENT_LIST.join(', ')%>)
+		)ttp
+		where ttp.rn = 1
+	) gkpz_plan on gkpz_plan.id = pl.id
+left join dictionaries tt on tt.ref_id = pl.tender_type_id
+left join plan_specifications ps on ps.plan_lot_id = pl.id
+left join departments org on org.id = pl.department_id
+left join lots l on l.plan_lot_guid = pl.guid
+left join specifications s on s.lot_id = l.id and s.plan_specification_guid = ps.guid
+left join departments cons on cons.id = ps.consumer_id
+left join winner_protocols wp on l.winner_protocol_id = wp.id and wp.confirm_date <= :end_date
+left join winner_protocol_lots wpl on wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id
+left join tenders t on t.id = l.tender_id
+left join directions dir on dir.id = ps.direction_id
+left join (
+	select tpl.guid, max(tp.date_confirm) as can_date
+	from plan_lots tpl
+	inner join protocols tp on tp.id = tpl.protocol_id
+	inner join commissions tc on tp.commission_id = tc.id
+	where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+	group by tpl.guid
+) can on gkpz_plan.guid = can.guid
+
+where
+	coalesce(wp.confirm_date, :end_date) > interval_business_date(coalesce(t.announce_date, pl.announce_date), 30)
+
+  and coalesce(t.announce_date, pl.announce_date) between :begin_date and :end_date
+
+	and can.guid is null -- неотмененная
+
+	and (l.status_id is null or l.status_id not in (<%= LotStatus::FATAL.join(', ') %>))
+
+  <% if gkpz_years.present? %>
+    And pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+  <% end %>
+
+  <% if directions.present? %>
+    And s.direction_id in (<%= directions.join(', ') %>)
+  <% end %>
+
+  <% if organizers.present? %>
+    And pl.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+  <% end %>
+
+  <% if consumers.present? %>
+    and s.consumer_id in (<%= Department.subtree_ids_for(consumers).join(', ') %>) -- потребитель
+  <% end %>
+order by pl.num_tender, pl.num_lot, pl.id

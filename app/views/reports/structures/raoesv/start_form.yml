@@ -1,0 +1,14 @@
+- :dir: <%= Direction.pluck(:id) %>
+  :style: :td_title
+- :name: 'рем + экспл.'
+  :dir: <%= [yaml_directions['erp'], yaml_directions['er']] %>
+  :style: :td_right
+- :name: 'инвестиции'
+  :dir: <%= Direction.invest.pluck(:id) %>
+  :style: :td_right
+- :name: 'топливо'
+  :dir: <%= [yaml_directions['fuel']] %>
+  :style: :td_right
+- :name: 'прочие'
+  :dir: <%= [yaml_directions['osu'], yaml_directions['it'], yaml_directions['ahn'], yaml_directions['other'], yaml_directions['niokr'], yaml_directions['inivp']] %>
+  :style: :td_right

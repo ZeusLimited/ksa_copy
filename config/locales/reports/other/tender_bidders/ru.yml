@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_tender_bidders:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/tender_bidders: 'Участие поставщиков в закупках'
+    attributes:
+      reports/other/tender_bidders:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчик'
+        gkpz_years: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        contractors: 'Участники'
+        directions: 'Направления'
+        format: 'Формат'
+        etp_addresses: 'Адреса ЭТП'
+        tender_types: 'Способы закупки'

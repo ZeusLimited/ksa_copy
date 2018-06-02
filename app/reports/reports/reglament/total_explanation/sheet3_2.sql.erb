@@ -1,0 +1,93 @@
+select
+  lot_num,
+  lot_name,
+  tender_type_name,
+  round(sum(gkpz_cost_nds) / 1000, 2) as gkpz_cost_nds,
+  round(sum(winner_cost_nds) / 1000, 2) as winner_cost_nds,
+  winner,
+  tender_type_explanations,
+  point_clause,
+  sum(rn) as cnt
+from (
+select
+  pl.num_tender || (case when fr.id is not null then '.' || t.num else '' end) || '.' || (case when fr.id is not null then l.num else pl.num_lot end) as lot_num,
+  l.name as lot_name,
+  case when fr.id is not null then pt.name else tt.name end as tender_type_name,
+  sum(s.qty * s.cost_nds) as gkpz_cost_nds,
+  sum(s.qty * os.final_cost_nds) as winner_cost_nds,
+  c.name || ' (' || coalesce(ow.shortname, '') || ')' as winner,
+  nvl(ri.num,
+    case
+      when pl.point_clause like '%5.9.1.1%' then replace(pl.point_clause, '5.9.1.1', '5.11.1.1')
+      when pl.point_clause like '%5.9.1.2%' then replace(pl.point_clause, '5.9.1.2', '5.11.1.2')
+      when pl.point_clause like '%5.9.1.3%' then replace(pl.point_clause, '5.9.1.3', '5.11.1.3')
+      when pl.point_clause like '%5.9.1.4%' then replace(pl.point_clause, '5.9.1.4', '5.11.1.5')
+      when pl.point_clause like '%5.9.2%' then replace(pl.point_clause, '5.9.2', '5.11.2')
+      when pl.point_clause like '%5.9.3%' then replace(pl.point_clause, '5.9.3', '5.11.3')
+      when pl.point_clause like '%5.9.4%' then replace(pl.point_clause, '5.9.4', '5.11.4')
+      when pl.point_clause like '%5.9.5%' then replace(pl.point_clause, '5.9.5', '5.11.5')
+      when pl.point_clause like '%5.9.6%' then replace(pl.point_clause, '5.9.6', '5.11.6')
+      else pl.point_clause
+    end) as point_clause,
+  pl.tender_type_explanations,
+  case when
+    row_number() over (partition by nvl(l.frame_id, l.id), l.plan_lot_id
+                       order by decode(l.main_direction_id, s.direction_id, 0, 1)) = 1
+    then decode(l.main_direction_id, s.direction_id, 1, 0) else 0 end as rn,
+  t.tender_type_id
+from tenders t
+  inner join lots l on (l.tender_id = t.id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join offer_specifications os on (os.specification_id = s.id)
+  inner join offers o on (o.id = os.offer_id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+  inner join bidders b on (b.id = o.bidder_id)
+  inner join contractors c on (c.id = b.contractor_id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (fr.id = l.frame_id)
+  left join specifications fs on (fs.id = s.frame_id and fs.lot_id =fr.id)
+  left join ownerships ow on ow.id = c.ownership_id
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  inner join plan_specifications ps
+    on (pl.id = ps.plan_lot_id and ps.id = nvl(s.plan_specification_id,fs.plan_specification_id))
+  inner join lateral
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+      where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+     where rn = 1) gkpz_pl on true
+  inner join dictionaries tt on (tt.ref_id = gkpz_pl.tender_type_id)
+  inner join dictionaries pt on (pt.ref_id = t.tender_type_id)
+  inner join plan_specifications gkpz_ps on (gkpz_ps.plan_lot_id = gkpz_pl.id and gkpz_ps.guid = ps.guid)
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+  left join regulation_items ri on ri.id = pl.regulation_item_id
+Where l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And can.guid is null -- неотмененная
+  and l.gkpz_year = :gkpz_year -- gkpz_year
+  and wp.confirm_date between :begin_date and :end_date
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>
+  And wp.confirm_date between :begin_date and :end_date
+Group By l.id, pl.num_tender, fr.id, t.num, l.num, pl.num_lot, l.plan_lot_id,
+  l.frame_id,l.main_direction_id, s.direction_id, pl.point_clause,
+  t.tender_type_id, ri.num,
+  l.name, case when fr.id is not null then pt.name else tt.name end,
+  c.name || ' (' || coalesce(ow.shortname, '') || ')',pl.tender_type_explanations) sub
+Where tender_type_id in (10015, 10017)
+Group By lot_num, lot_name, tender_type_name, winner, point_clause, tender_type_explanations

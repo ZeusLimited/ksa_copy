@@ -1,0 +1,7 @@
+ru:
+  activerecord:
+    models:
+      user_config: 'Настройки'
+    attributes:
+      user_config:
+        subscribe_send_time: 'Время доставки оповещений'

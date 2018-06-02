@@ -1,0 +1,70 @@
+- :name: Инвестиции
+  :filter:
+    :direction_id: <%= Direction.invest.pluck(:id) %>
+    :num: '1'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= Direction.invest.pluck(:id) %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Операционная деятельность
+  :filter:
+    :direction_id: <%= Direction.routine.pluck(:id) %>
+    :num: '2'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= Direction.routine.pluck(:id) %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Топливо
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+    :num: '2.1'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Энергия
+  :filter:
+    :num: '2.2'
+- :name: из них у единственного источника
+  :filter:
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Эксплуатация
+  :filter:
+    :direction_id: <%= yaml_directions['er'] %>
+    :num: '2.3'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['er'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Ремонт
+  :filter:
+    :direction_id: <%= yaml_directions['erp'] %>
+    :num: '2.4'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['erp'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: ИТ
+  :filter:
+    :direction_id: <%= yaml_directions['it'] %>
+    :num: '2.5'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['it'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: НИОКР
+  :filter:
+    :direction_id: <%= yaml_directions['niokr'] %>
+    :num: '2.6'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= yaml_directions['niokr'] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>
+- :name: Прочие
+  :filter:
+    :direction_id: <%= [yaml_directions['other'], yaml_directions['ahn'], yaml_directions['osu']] %>
+    :num: '2.7'
+- :name: из них у единственного источника
+  :filter:
+    :direction_id: <%= [yaml_directions['other'], yaml_directions['ahn'], yaml_directions['osu']] %>
+    :tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>

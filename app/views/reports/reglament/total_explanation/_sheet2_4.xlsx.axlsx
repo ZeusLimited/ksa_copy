@@ -1,0 +1,49 @@
+@sheet = sheet
+@col_count = 7
+
+def print_group(name, options = {})
+  values = Array.new(@col_count)
+  values[0] = name
+  group_row = @sheet.add_row values, options
+  @sheet.merge_cells group_row.cells[0..(@col_count - 1)]
+  group_row
+end
+
+months = "#{@report.months} #{t(:month, count: @report.months)}"
+
+print_group t('.text1'), style: @styles[:text_left_bold]
+
+count = @report.sheet2_4_rows.count
+sum = @report.sheet2_4_rows.sum { |n| n['cost_nds'] }
+
+print_group(
+  t('.text2',
+    count: "#{count} #{t(:tender, count: count)}",
+    cost: to_money_str(sum)), style: @styles[:text_left], height: 30)
+
+sheet.add_row
+
+@head_rows = CSV.read('app/views/reports/reglament/total_explanation/csv/head_2_4.csv', col_sep: ';')
+
+rows = []
+@head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 60
+rows[1].height = 15
+
+@report.sheet2_4_rows.each_with_index do |row, index|
+  sheet.add_row [
+    index + 1,
+    row['lot_num'],
+    row['lot_name'],
+    row['tender_type_name'],
+    row['cost_nds'],
+    nil,
+    nil
+  ], style: [@styles[:td], @styles[:td], @styles[:td], @styles[:td], @styles[:td_money], @styles[:td], @styles[:td]]
+end
+
+sheet.add_row
+
+print_group t('.text3', months: months, year: @report.gkpz_year), style: @styles[:text_left]
+
+sheet.column_widths 5, 10, 30, 12, 12, 20, 20

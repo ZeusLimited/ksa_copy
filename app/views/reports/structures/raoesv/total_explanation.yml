@@ -1,0 +1,64 @@
+- :name: 'erp'
+  :dir: <%= yaml_directions['erp'] %>
+- :name: 'erp_services'
+  :dir: <%= yaml_directions['erp'] %>
+  :subj: <%= Constants::SubjectType::SERVICES %>
+- :name: 'erp_materials'
+  :dir: <%= yaml_directions['erp'] %>
+  :subj: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'ks'
+  :dir: <%= yaml_directions['ks'] %>
+- :name: 'ks_services'
+  :dir: <%= yaml_directions['ks'] %>
+  :subj: <%= Constants::SubjectType::SERVICES %>
+- :name: 'ks_materials'
+  :dir: <%= yaml_directions['ks'] %>
+  :subj: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'tpir'
+  :dir: <%= yaml_directions['tpir'] %>
+- :name: 'tpir_services'
+  :dir: <%= yaml_directions['tpir'] %>
+  :subj: <%= Constants::SubjectType::SERVICES %>
+- :name: 'tpir_materials'
+  :dir: <%= yaml_directions['tpir'] %>
+  :subj: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'it_invest'
+  :dir: <%= yaml_directions['it_invest'] %>
+- :name: 'it_invest_services'
+  :dir: <%= yaml_directions['it_invest'] %>
+  :subj: <%= Constants::SubjectType::SERVICES %>
+- :name: 'it_invest_materials'
+  :dir: <%= yaml_directions['it_invest'] %>
+  :subj: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'it_other'
+  :dir: <%= yaml_directions['it'] %>
+- :name: 'it_other_services'
+  :dir: <%= yaml_directions['it'] %>
+  :subj: <%= Constants::SubjectType::SERVICES %>
+- :name: 'it_other_materials'
+  :dir: <%= yaml_directions['it'] %>
+  :subj: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'er'
+  :dir: <%= yaml_directions['er'] %>
+- :name: 'er_services'
+  :dir: <%= yaml_directions['er'] %>
+  :subj: <%= Constants::SubjectType::SERVICES %>
+- :name: 'er_materials'
+  :dir: <%= yaml_directions['er'] %>
+  :subj: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'fuel'
+  :dir: <%= yaml_directions['fuel'] %>
+- :name: 'niokr_invest'
+  :dir: <%= yaml_directions['niokr_invest'] %>
+- :name: 'niokr_other'
+  :dir: <%= yaml_directions['niokr'] %>
+- :name: 'inivp_invest'
+  :dir: <%= yaml_directions['inivp_invest'] %>
+- :name: 'inivp_other'
+  :dir: <%= yaml_directions['inivp'] %>
+- :name: 'axn'
+  :dir: <%= yaml_directions['ahn'] %>
+- :name: 'osu'
+  :dir: <%= yaml_directions['osu'] %>
+- :name: 'other'
+  :dir: <%= yaml_directions['other'] %>

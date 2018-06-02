@@ -1,0 +1,100 @@
+ru:
+  plan_lot_state:
+    plan: "План"
+    unplan: "Внеплан"
+  plan_lot_options:
+    public: 'Лот опубликован'
+    delay: 'Просрочена дата старта'
+  activerecord:
+    models:
+      plan_lot: 'Лот'
+    attributes:
+      plan_lot:
+        gkpz_year: "Год ГКПЗ"
+        department: "Организатор"
+        department_id: "Организатор"
+        full_num: '№ закупки'
+        num_tender: "№ закуп."
+        num_lot: "№ лота"
+        lot_name: "Наименование лота"
+        name: "Наименование лота"
+        amount_mastering1: "Планируемая сумма освоения1"
+        amount_mastering2: "Планируемая сумма освоения2"
+        amount_mastering3: "Планируемая сумма освоения3"
+        amount_mastering4: "Планируемая сумма освоения4"
+        amount_mastering5: "Планируемая сумма освоения5"
+        announce_date: "Дата объявления"
+        commission: "Закупочная комиссия"
+        commission_id: "Закупочная комиссия"
+        etp_address: "Адрес ЭТП"
+        etp_address_id: "Адрес ЭТП"
+        explanations_doc: "Обосновывающий документ (только для ЕИ)"
+        point_clause: "Пункт положения"
+        subject_type: "Предмет закупки"
+        subject_type_id: "Предмет закупки"
+        subject_type_name: "Предмет закупки"
+        status: 'Статус'
+        tender_type_explanations: "Обоснование выбора способа закупки"
+        tender_type: "Способ закупки"
+        tender_type_id: "Способ закупки"
+        plan_specifications: 'Спецификация'
+        protocol_id: 'Протокол'
+        additional_to_hex: 'Дополнительная закупка к'
+        additional_to: 'Дополнительная закупка к'
+        additional_num: 'Номер доп. соглашения'
+        is_additional: 'Дополнительная закупка?'
+        state: 'Состояние в ГКПЗ'
+        sme_type: 'Отношение к участию МСП'
+        sme_type_id: 'Отношение к участию МСП'
+        sme_type_name: 'Отношение к участию МСП'
+        version: 'Версия'
+        direction_name: 'Направление'
+        order1352_fullname: "Учет в совокупном годовом объеме договоров с МСП (Постановление правительства №1352 от 11.12.2014)"
+        order1352_id: "Учет в совокупном годовом объеме договоров с МСП (Постановление правительства №1352 от 11.12.2014)"
+        preselection_guid_hex: "По результатам предварительного отбора"
+        regulation_item_id: "Пункт положения"
+        announce_year: "Год объявления"
+        delivery_year_begin: "Год начала поставки"
+        delivery_year_end: "Год окончания поставки"
+        deadline_charge_date: 'Крайний срок в АО "РГС"'
+        charge_date: 'Дата направления поручения'
+        cost: 'Начальная цена без НДС'
+        cost_nds: 'Начальная цена с НДС'
+        plan_lot_contractors: 'Потенциальный участник'
+        non_eis: 'Не публикуется в план закупок ЕИС'
+    errors:
+      models:
+        plan_lot:
+          attributes:
+            base:
+              not_uniq_contractors: "В закупке не может быть повторяющихся потенциальных участников!"
+              zero_contractors: 'В закупке не должно быть участников!'
+              less_then_minimum_contractors: "В закупке должно быть минимум три потенциальных участника!"
+              less_then_minimum_contractors_ei: "В закупке должен быть минимум один потенциальный участник!"
+              must_have_one_contractor: "В закупке должен быть только один потенциальный участник"
+              must_have_limits: "В закупке должен быть хотя бы один лимит"
+              must_have_no_limits: "В закупке не должно быть лимитов"
+            department_id:
+              different_organizer: "не может быть сторонним"
+            additional_to_hex:
+              contract: "У основной закупки отсутсвует или расторгнут договор"
+              customer: "У основной закупки другой заказчик"
+              lot_not_public: 'Закупка не опубликована'
+            sme_type_id:
+              non_sme: "не может иметь значения МСП/СубМСП, т.к. не учитывается в совокупном годовом объеме договоров с МСП"
+              non_sme_not_etp: "не может иметь значение МСП, т.к. закупка не публикуется на ЭТП"
+              non_sme_okdp: "не может иметь значение МСП, т.к. код ОКДП не в перечне МСП"
+              non_sme_cost_200: "не может иметь значение МСП, т.к. закупка более 200 млн. руб. без НДС"
+              non_sme_cost_400: "не может иметь значение МСП, т.к. закупка более 400 млн. руб. без НДС"
+              sme_only: "должно быть МСП"
+            announce_date:
+              after_preselect: "не может быть раньше, чем через 25 дней после даты объявления предварительного отбора"
+            etp_address_id:
+              not_etp: "должен быть вне ЭТП"
+            regulation_item_id:
+              non_valid: "имеет неверное значение"
+            commission_id:
+              present: должно быть пустым для закупок способом ЕИ и НЗ
+              restrict_not_level1kk: "Можно выбрать комиссию только 1 уровня КК"
+            plan_lots_files:
+              nmcd: "необходимо подгрузить файл с начальной максимальной ценой договора"

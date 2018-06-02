@@ -1,0 +1,18 @@
+<div class="page-header">
+  <h1>Просмотр параметров часового пояса</h1>
+</div>
+
+<% content_for :subnav do %>
+  <div class="subnav" data-spy="affix" data-offset-top="20">
+    <ul class="nav nav-pills">
+      <%= my_menu_item 'Вернуться к списку', local_time_zones_path, current_page?(local_time_zones_path) %>
+      <%= menu_item 'Редактировать', edit_local_time_zone_path(@local_time_zone) if can?(:update, @local_time_zone) %>
+    </ul>
+  </div>
+<% end %>
+
+
+<div class="row">
+  <%= view_text_field('span6', @local_time_zone, :time_zone) %>
+  <%= view_text_field('span6', @local_time_zone, :name) %>
+</div>

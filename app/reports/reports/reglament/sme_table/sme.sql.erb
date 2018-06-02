@@ -1,0 +1,96 @@
+select
+  t1.name,
+  coalesce(sum(contract_cost_nds), 0) as contract_cost_nds,
+  coalesce(sum(non_sme_contract_cost_nds), 0) + coalesce(sum(sme_contract_cost_nds), 0) + coalesce(sum(subsme_contract_cost_nds), 0) as all_contract_cost_nds,
+  coalesce(sum(sme_contract_cost_nds), 0)  as sme_contract_cost_nds,
+  coalesce(sum(subsme_contract_cost_nds), 0) as subsme_contract_cost_nds
+From (
+select
+  case when s.direction_id in (<%= Direction.invest.pluck(:id).join(', ') %>) then 1 else 0 end as type_row,
+  sum(ca.amount_finance_nds) as contract_cost_nds,
+  sum(case when l.sme_type_id is null And cast(contr.is_sme as integer) = 1 then ca.amount_finance_nds end) as non_sme_contract_cost_nds,
+  sum(case when l.sme_type_id = <%= Constants::SmeTypes::SME %> And cast(contr.is_sme as integer) = 1 then ca.amount_finance_nds end) as sme_contract_cost_nds,
+  sum(case when l.sme_type_id = <%= Constants::SmeTypes::SUB_SME %>
+    then (select sum(sca.amount_finance_nds)
+          from sub_contractors sub_c
+          inner join contractors tc on sub_c.contractor_id = tc.id
+          inner join sub_contractor_specs tscs on tscs.sub_contractor_id = sub_c.id
+          inner join contract_amounts sca on sca.contract_specification_id = tscs.id and sca.year = EXTRACT(YEAR FROM DATE :end_date)
+          where sub_c.contract_id = c.id and cast(tc.is_sme as integer) = 1) end) as subsme_contract_cost_nds
+From tenders t
+  inner join lots l on (l.tender_id = t.id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join offers o on (o.lot_id = l.id and o.status_id = <%= Constants::OfferStatuses::WIN %> and o.version = 0)
+  inner join offer_specifications os on (os.specification_id = s.id and o.id = os.offer_id) --
+  inner join bidders b on (b.id = o.bidder_id)
+  inner join contractors contr on (contr.id = b.contractor_id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id) --
+  inner join contracts c on (c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %> and c.confirm_date <= :end_date)
+  inner join contract_specifications cs on (cs.contract_id = c.id and cs.specification_id = s.id)
+  inner join contract_amounts ca on ca.contract_specification_id = cs.id and ca.year = EXTRACT(YEAR FROM DATE :end_date)
+  left join lots fr on (fr.id = l.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  inner join lateral
+    (select * from
+      (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+        where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+       where rn = 1) gkpz_pl on true
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+Where can.guid is null
+  And EXTRACT(YEAR FROM c.confirm_date) > 2016
+  And c.confirm_date <= :end_date
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+  And gkpz_pl.order1352_id = <%= Constants::Order1352::SELECT %>
+
+<% if gkpz_years.present? %>
+  and l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  and t.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  and s.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  and s.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  and l.subject_type_id = <%= subject_type %>
+<% end %>
+
+Group By c.id, contr.is_sme, s.direction_id
+) t
+right join (select 0 as id, 'Раздел I. Текущая производственная деятельность' as name from dual
+            union all
+            select 1 as id, 'Раздел II. Инвестиционная деятельность' as name from dual) t1 on (t.type_row = t1.id)
+Group By t1.id, t1.name
+Order By t1.id

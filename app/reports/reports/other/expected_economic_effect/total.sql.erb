@@ -1,0 +1,53 @@
+-- total
+
+<% only_source = Constants::TenderTypes::ONLY_SOURCE %>
+<% unregulated = Constants::TenderTypes::UNREGULATED %>
+<% ork = Constants::TenderTypes::ORK %>
+<% zrk = Constants::TenderTypes::ZRK %>
+
+select
+  -- col 1
+  dd.fullname as tender_type,
+  -- col 2
+  tt.gkpz_cost,
+  -- col 3
+  tt.winner_cost,
+  -- col 4 calculated
+  -- col 5 calculated
+  -- col 6
+  tt.contract_cost,
+  -- col 7
+  tt.count_lots
+
+from
+
+(
+  select
+    d.ref_id, d.name, d.fullname
+  from dictionaries d
+  where d.ref_type = 'Tender_Types'
+  union
+  select
+    d.ref_id, d.name || ' ЭТП', d.fullname || ' ЭТП'
+  from dictionaries d
+  where d.ref_type = 'Tender_Types' and d.ref_id not in (<%= only_source %>, <%= unregulated %>)
+) dd
+
+left join
+
+(
+  select
+    t.fact_type,
+    sum(t.gkpz_cost) as gkpz_cost,
+    sum(t.winner_cost) as winner_cost,
+    sum(t.contract_cost) as contract_cost,
+    count(distinct t.lot_id) as count_lots
+  from
+    (
+      <%= render_sql '_main.sql.erb' %>
+    ) t
+  group by t.fact_type
+) tt on dd.name = tt.fact_type
+
+where dd.ref_id not in (<%= ork %>, <%= zrk %>, <%= Constants::TenderTypes::PO %>)
+order by dd.ref_id

@@ -1,0 +1,19 @@
+ru:
+  activerecord:
+    models:
+      bidder: 'Участник'
+    attributes:
+      bidder: &bidder
+        contractor_id: 'Участник'
+        contractor_name_inn: 'Участник'
+        tender_id: 'Закупка'
+        is_presence: 'Присутствовал на процедуре проведения закупки'
+      tender/bidders:
+        contractor_id: 'Наименование контрагента'
+    errors:
+      models:
+        bidder:
+          attributes:
+            contractor_id:
+              non_uniq: "уже зарегистрирован в данной закупке"
+              actual_sme: "не актуализирован по МСП"

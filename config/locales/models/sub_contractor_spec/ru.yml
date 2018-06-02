@@ -1,0 +1,13 @@
+ru:
+  activerecord:
+    models:
+      sub_contractor_spec: 'Доля субподрядчика'
+    attributes:
+      sub_contractor_spec:
+        sub_contractor_id: 'Субподрядчик'
+        specification_id: 'Спецификация'
+        contract_specification_id: 'Спецификация договора'
+        cost: 'Цена, руб. без НДС'
+        cost_nds: 'Цена, руб. с НДС'
+        cost_money: 'Цена, руб. без НДС'
+        cost_nds_money: 'Цена, руб. с НДС'

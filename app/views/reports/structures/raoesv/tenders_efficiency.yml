@@ -1,0 +1,50 @@
+--- # структура для отчета 4.11
+- report_name: 'КПЭ "Эффективность закупочной деятельности"'
+  children:
+  - period_name: 'Годовой КПЭ'
+    common: 'Эффективность закупочной деятельности, в т.ч.'
+    children:
+    - part_name: '1. КПЭ "Доля закупок у единственного участника конкурентной закупки"'
+      work_name: 'single_source'
+      children:
+      - name: 'количество закупок с решением в протоколе Выбора победителя "Признать несостоявшейся. Осуществить закупку у ЕИ"'
+        filter:
+          statuses: <%= Constants::LotStatus::HELD %>
+          wp_solution: <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>
+          begin_date: <%= Date.new(default_params[:end_date].year, 1, 1) %>
+      - name: 'общее количество закупок со статусом в Исполнении "Победитель определен", "Договор заключен"'
+        filter:
+          statuses: <%= Constants::LotStatus::HELD %>
+          wp_solution: <%= Constants::WinnerProtocolSolutionTypes::WINNER %>
+          begin_date: <%= Date.new(default_params[:end_date].year, 1, 1) %>
+    - part_name: '2. КПЭ "Достижение экономического эффекта по итогам конкурентных процедур"'
+      work_name: 'competitive_efficiency'
+      children:
+      - name: 'количество закупок с решением в протоколе Выбора победителя "Признать несостоявшейся. Осуществить закупку у ЕИ"'
+        filter:
+          statuses: <%= Constants::LotStatus::HELD %>
+          wp_solution: <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>
+          begin_date: <%= Date.new(default_params[:end_date].year, 1, 1) %>
+  - period_name: 'Квартальный КПЭ'
+    common: 'Качество закупочной деятельности, в т.ч.'
+    children:
+    - part_name: '1. КПЭ "Доля процедур закупок, по которым жалобы на действия организатора закупки признаны обоснованными"'
+      work_name: 'appeals'
+      children:
+      - name: 'доля конкурентных процедур закупок, по которым жалобы на действия организатора закупки признаны обоснованными'
+        filter:
+          statuses: <%= Constants::LotStatus::HELD_WITH_CANCEL %>
+          fas_appeal: 1
+      - name: 'общее количество закупок, у которых статус в Исполнении "Отменен", "Победитель определен", "Договор заключен"'
+        filter:
+          statuses: <%= Constants::LotStatus::HELD_WITH_CANCEL %>
+    - part_name: '2. КПЭ "Доля конкурентных закупок, по которым нарушены регламентные сроки начала проведения закупочных процедур"'
+      work_name: 'terms_violated'
+      children:
+      - name: 'количество закупок, по которым дата публикации в Исполнении позже Даты поступления поручения'
+        filter:
+          statuses: <%= Constants::LotStatus::HELD_WITH_CANCEL %>
+          not_check_overdue: 0
+      - name: 'общее количество закупок, у которых статус в Исполнении "Отменен", "Победитель определен", "Договор заключен"'
+        filter:
+          statuses: <%= Constants::LotStatus::HELD_WITH_CANCEL %>

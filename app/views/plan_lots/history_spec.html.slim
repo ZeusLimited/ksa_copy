@@ -1,0 +1,19 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to 'Назад', :back
+      li= link_to_session_or_default 'Вернуться к списку', :filter_path, plan_lots_path
+
+.page-header
+  h1 История изменения спецификации
+
+.pull-right
+  p
+    .btn-group data-toggle="buttons-radio"
+      button#versoinAll.btn.active type="button" Все версии
+      button#versoinAgreement.btn type="button" С протоколом
+
+.clearfix
+
+.horizontal-scroll
+  = render "table_history_spec", plan_specifications: @plan_specifications

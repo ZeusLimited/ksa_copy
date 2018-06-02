@@ -1,0 +1,32 @@
+= simple_form_for commission do |f|
+  = error_messages_for commission
+
+  = f.hidden_field :department_id
+
+  .row
+    .span10
+      = f.input :name, input_html: { class: 'input-block-level' }
+
+    .span2
+      = f.association :commission_type, collection: Dictionary.commission_types, include_blank: false, input_html: { class: 'input-block-level' }
+
+  .row
+    .span6
+      label Подразделение
+      = text_field_tag nil, f.object.department.try(:name), readonly: true, class: 'input-block-level'
+    - if current_user.can?(:choose_for_customers, commission)
+      .span4
+        = f.input :for_customers, as: :select, include_blank: false, input_html: { class: 'input-block-level' }
+
+  legend Члены комиссии
+
+  = f.simple_fields_for :commission_users do |builder|
+    = render 'commission_user_fields', f: builder
+
+  = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + ' Добавить', f, :commission_users
+
+  .clearfix
+
+  .form-actions
+    = f.button :submit, 'Сохранить', class: 'btn-primary'
+    = link_to_session_or_default 'Отмена', :filter_commission_path, commissions_path, class: 'btn'

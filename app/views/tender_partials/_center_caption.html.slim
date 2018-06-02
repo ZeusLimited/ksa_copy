@@ -1,0 +1,14 @@
+td colspan='6'
+  strong
+    = tender.index_row_caption
+td
+  strong
+    = abbr(tender.announce_date.strftime('%d.%m'), tender.announce_date.strftime('%d.%m.%Y'))
+td
+  strong
+    = abbr(tender.bid_date.strftime('%d.%m'), tender.bid_date.strftime('%d.%m.%Y'))
+td
+  strong
+    = abbr(tender.summary_date&.strftime('%d.%m'), tender.summary_date&.strftime('%d.%m.%Y'))
+td
+  = link_icon_title 'icon-info-sign', t('.info'), tender_path(tender.id)

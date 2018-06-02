@@ -1,0 +1,35 @@
+Rails:
+  Enabled: true
+
+AllCops:
+  TargetRubyVersion: 2.4
+
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+
+AsciiComments:
+  Enabled: false
+
+StringLiterals:
+  Enabled: false
+
+ClassLength:
+  Enabled: false
+
+MethodLength:
+  Enabled: false
+
+Documentation:
+  Enabled: false
+
+LineLength:
+  Max: 119
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Metrics/BlockLength:
+  Description: 'Avoid long blocks with many lines.'

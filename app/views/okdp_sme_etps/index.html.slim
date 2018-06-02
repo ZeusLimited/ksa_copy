@@ -1,0 +1,26 @@
+.page-header
+  h1 = t('.head')
+
+= form_tag okdp_sme_etps_path, method: :get, class: 'form-search' do
+  .input-append
+    = text_field_tag 'q', params[:q], class: "span3 search-query"
+    = button_tag t('.search'), class: 'btn', name: nil
+
+  .pull-right
+    = link_to 'Добавить', new_okdp_sme_etp_path, class: "btn btn-primary"
+
+table.table.table-bordered
+  thead
+    tr
+      th = t('.code')
+      th = t('.type_code')
+      th
+      th
+
+  tbody
+    - @okdp_sme_etps.each do |okdp_sme_etp|
+      tr
+        td = okdp_sme_etp.code
+        td = okdp_sme_etp.okdp_type
+        td = link_icon_title 'icon-edit', t('.edit'), edit_okdp_sme_etp_path(okdp_sme_etp)
+        td = link_icon_title 'icon-trash', t('.destroy'), okdp_sme_etp, method: :delete, data: { confirm: 'Вы уверены?' }

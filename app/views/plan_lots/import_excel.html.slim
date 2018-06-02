@@ -1,0 +1,41 @@
+.page-header
+  h1 Импорт планируемых лотов из Excel
+
+ul
+  li
+    => link_to "Инструкция по импорту плана ГКПЗ из Excel-файла", page_path('import_excel'), target: '_blank'
+    - link_word = link_to "Word", "/instructions/import_excel.docx"
+    - link_pdf = link_to "PDF", "/instructions/import_excel.pdf"
+    | (#{{link_word}}, #{{link_pdf}})
+  li
+    = link_to "Пример Excel-файла (с справочниками; красным выделены обязательные столбцы)",
+      import_plan_lots_example_path(format: 'xlsx')
+
+= field_set_tag "Шаг 1. Загрузка Excel-файла со списком планируемых лотов" do
+  p На этом шаге вы должны загрузить Excel-файл со списком планируемых лотов в нужном формате (читайте инструкцию).
+
+  = form_tag upload_excel_plan_lots_path, multipart: true do
+    p = file_field_tag :file
+    p = submit_tag "Загрузить", class: 'btn btn-primary'
+
+= field_set_tag "Шаг 2. Проверка загруженного списка" do
+  p На этом шаге вы должны проверить загруженный список на отсутсвие ошибок.
+    Если есть ошибки, возвращайтесь к первому шагу и загружайте исправленный файл.
+  p.text-success = "Кол-во закупок без ошибок: #{@valid_lots_size}"
+  p.text-error = "Кол-во закупок с ошибками: #{@invalid_lots_size}"
+
+  p = link_to "Просмотр загруженного списка", import_lots_plan_lots_path, target: '_blank', class: 'btn'
+
+= field_set_tag "Шаг 3. Импорт данных в ГКПЗ" do
+  - if @invalid_lots_size > 0
+    p.text-warning Загруженный список закупок содержит ошибки. Импортировать можно только список без ошибок.
+  - else
+    - if @valid_lots_size > 0
+      = form_tag import_plan_lots_path, class: 'form-inline' do
+        => label_tag 'root_dept', 'Головное подразделение'
+        => select_tag 'root_dept',
+          options_from_collection_for_select(@root_depts, 'id', 'name'),
+          class: 'input-xlarge'
+        = submit_tag "Импортировать", class: 'btn btn-success'
+    - else
+      p.text-info Нет данных для импорта.

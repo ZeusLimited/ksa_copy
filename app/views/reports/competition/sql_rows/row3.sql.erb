@@ -1,0 +1,57 @@
+select
+  sum(decode(gkpz_pl.main_direction_id, gkpz_ps.direction_id, 1, 0)) as count_lots,
+  sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_lots
+from
+  (select * from
+    (select
+      tpl.*,
+      row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm < :end_date
+      where tpl.status_id in (15003, 15006, 15007))
+     where rn = 1) gkpz_pl
+
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm < :end_date
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = 15004 and tc.commission_type_id = 28004
+  group by tpl.guid
+) can on gkpz_pl.guid = can.guid
+
+
+left join (
+  select max(tp.date_confirm) as sd_date, tc.department_id, tp.gkpz_year
+  from protocols tp
+  inner join commissions tc on tp.commission_id = tc.id
+  where tc.commission_type_id = 28005
+  and tp.date_confirm < :end_date
+  group by tc.department_id, tp.gkpz_year
+) sd on gkpz_pl.root_customer_id = sd.department_id and gkpz_pl.gkpz_year = sd.gkpz_year
+
+
+inner join plan_specifications gkpz_ps on gkpz_pl.id = gkpz_ps.plan_lot_id
+
+where gkpz_pl.announce_date between :begin_date and :end_date
+  And gkpz_pl.status_id != 15007
+  And (sd_date is null or can_date is null or can_date > sd_date)
+
+  And gkpz_pl.gkpz_year in (:gkpz_years)
+  And gkpz_ps.customer_id in (Select Id From Departments Start With Id In (:customer) Connect By Prior Id = Parent_Dept_Id)
+  And gkpz_pl.tender_type_id not in (<%= [Constants::TenderTypes::FRAMES, Constants::TenderTypes::UNREGULATED].flatten.join(', ') %>)
+  And gkpz_ps.direction_id in (:directions)
+  And gkpz_pl.guid not in (
+    select pl.guid
+    from tenders t
+    inner join lots l on t.id = l.tender_id
+    inner join plan_lots pl on l.plan_lot_id = pl.id
+    where t.announce_date between :begin_date and :end_date
+    group by pl.guid
+  )
+  <% if @org_rao %>
+    And gkpz_pl.department_id = 2 -- RAO
+  <% end %>
+  <% if @canceled %>
+    And gkpz_pl.status_id = 15004
+  <% end %>

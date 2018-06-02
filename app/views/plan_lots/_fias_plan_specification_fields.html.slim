@@ -1,0 +1,13 @@
+fieldset.fias
+  = f.hidden_field :_destroy
+
+  .row
+    .span9
+      = f.input :fias_name, input_html: { class: 'fias-address input-block-level' }
+      = f.hidden_field :fias_id
+      = f.hidden_field :addr_aoid_hex, class: 'address-id input-block-level'
+    .span3
+      label &nbsp;
+      .controls
+        = link_to content_tag(:i, '', class: 'icon-minus') + t('.remove_address'), '#',
+          class: "remove_fias_fields btn btn-danger pull-right input-large"

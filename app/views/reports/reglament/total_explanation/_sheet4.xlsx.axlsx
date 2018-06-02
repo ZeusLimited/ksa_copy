@@ -1,0 +1,143 @@
+@sheet = sheet
+@col_count = 5
+
+def print_group(name, options = {})
+  values = Array.new(@col_count)
+  values[0] = name
+  group_row = @sheet.add_row values, options
+  @sheet.merge_cells group_row.cells[0..(@col_count - 1)]
+  group_row
+end
+
+def print_vals(name, name_f, styles)
+  col2 = @report.sheet4_row["#{name_f}_cost_nds"]
+  col3 = @report.sheet4_row["#{name_f}_fcost_nds"]
+
+  values = Array.new(@col_count)
+  values[0] = name
+  values[1] = col2
+  values[2] = col3
+  # values[3] = begin (col2 - col3).round(2) rescue 0 end
+  # values[4] = begin ((col2 - col3).to_f / col2).round(2) rescue 0 end
+  row_index = @sheet.rows.count + 1
+
+  values[3] = "=B#{row_index}-C#{row_index}"
+  values[4] = "=IF(B#{row_index}=0,0,D#{row_index}/B#{row_index})"
+
+  @sheet.add_row values, style: styles
+end
+
+months = "#{@report.months} #{t(:month, count: @report.months)}"
+
+print_group(t('.text1', months: months, year: @report.gkpz_year), style: @styles[:text_left_bold])
+print_group(t('.text2'), style: @styles[:text_left_bold])
+
+sheet.add_row
+
+head_rows = CSV.read('app/views/reports/reglament/total_explanation/csv/head_4_1.csv', col_sep: ';')
+rows = []
+head_rows.each { |head_row| rows << sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 30
+rows[1].height = 30
+rows[2].height = 15
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+vals_styles = [
+  @styles[:td], @styles[:td_money], @styles[:td_money], @styles[:td_money], @styles[:td_percent]
+]
+sum_vals_styles = [
+  @styles[:sum], @styles[:sum_money], @styles[:sum_money], @styles[:sum_money], @styles[:sum_percent]
+]
+
+print_group t('.r1'), style: @styles[:group_row_h1]
+
+print_group t('.r1_1'), style: @styles[:group_row_h1]
+print_vals t('.r1_1_1'), 'ks_services', vals_styles
+print_vals t('.r1_1_2'), 'ks_materials', vals_styles
+print_vals t('.r1_1_sum'), 'ks', sum_vals_styles
+
+print_group t('.r1_2'), style: @styles[:group_row_h1]
+print_vals t('.r1_2_1'), 'tpir_services', vals_styles
+print_vals t('.r1_2_2'), 'tpir_materials', vals_styles
+print_vals t('.r1_2_sum'), 'tpir', sum_vals_styles
+
+print_group t('.r1_3'), style: @styles[:group_row_h1]
+print_vals t('.r1_3_1'), 'it_invest_services', vals_styles
+print_vals t('.r1_3_2'), 'it_invest_materials', vals_styles
+print_vals t('.r1_3_sum'), 'it_invest', sum_vals_styles
+
+print_group t('.r1_4'), style: @styles[:group_row_h1]
+print_vals t('.r1_4_sum'), 'niokr_invest', sum_vals_styles
+
+print_group t('.r1_5'), style: @styles[:group_row_h1]
+print_vals t('.r1_5_sum'), 'inivp_invest', sum_vals_styles
+
+sum_rows = %w(11 15 19 21 23)
+formula = ->(rows, column) { "=#{rows.map { |r| "#{column}#{r}" }.join('+')}" }
+
+sheet.add_row [
+  t('.r1_sum'),
+  formula.call(sum_rows, 'B'),
+  formula.call(sum_rows, 'C'),
+  formula.call(sum_rows, 'D'),
+  "=IF(B24=0,0,D24/B24)"
+], style: sum_vals_styles
+
+print_group t('.r2'), style: @styles[:group_row_h1]
+
+print_group t('.r2_1'), style: @styles[:group_row_h1]
+print_vals t('.r2_1_1'), 'erp_services', vals_styles
+print_vals t('.r2_1_2'), 'erp_materials', vals_styles
+print_vals t('.r2_1_sum'), 'erp', sum_vals_styles
+
+print_group t('.r2_2'), style: @styles[:group_row_h1]
+print_vals t('.r2_2_1'), 'it_other_services', vals_styles
+print_vals t('.r2_2_2'), 'it_other_materials', vals_styles
+print_vals t('.r2_2_sum'), 'it_other', sum_vals_styles
+
+print_group t('.r2_3'), style: @styles[:group_row_h1]
+print_vals t('.r2_3_1'), 'er_services', vals_styles
+print_vals t('.r2_3_2'), 'er_materials', vals_styles
+print_vals t('.r2_3_sum'), 'er', sum_vals_styles
+
+print_group t('.r2_4'), style: @styles[:group_row_h1]
+print_vals t('.r2_4_sum'), 'fuel', sum_vals_styles
+
+print_group t('.r2_5'), style: @styles[:group_row_h1]
+print_vals t('.r2_5_sum'), 'niokr_other', sum_vals_styles
+
+print_group t('.r2_6'), style: @styles[:group_row_h1]
+print_vals t('.r2_6_sum'), 'inivp_other', sum_vals_styles
+
+print_group t('.r2_7'), style: @styles[:group_row_h1]
+print_vals t('.r2_7_sum'), 'axn', sum_vals_styles
+
+print_group t('.r2_8'), style: @styles[:group_row_h1]
+print_vals t('.r2_8_sum'), 'osu', sum_vals_styles
+
+print_group t('.r2_9'), style: @styles[:group_row_h1]
+print_vals t('.r2_9_sum'), 'other', sum_vals_styles
+
+sum_rows = %w(29 33 37 39 41 43 45 47 49)
+sheet.add_row [
+  t('.r2_sum'),
+  formula.call(sum_rows, 'B'),
+  formula.call(sum_rows, 'C'),
+  formula.call(sum_rows, 'D'),
+  "=IF(B50=0,0,D50/B50)"
+], style: sum_vals_styles
+
+sum_rows = %w(24 50)
+sheet.add_row [
+  t('.sum'),
+  formula.call(sum_rows, 'B'),
+  formula.call(sum_rows, 'C'),
+  formula.call(sum_rows, 'D'),
+  "=IF(B51=0,0,D51/B51)"
+], style: sum_vals_styles
+
+sheet.add_row
+
+print_group(t('.text3'), style: @styles[:text_left])
+
+sheet.column_widths 50, 20, 20, 20, 20

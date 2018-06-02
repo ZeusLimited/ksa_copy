@@ -1,0 +1,45 @@
+select
+  gkpz_pl.num_tender || '.' || gkpz_pl.num_lot as lot_num,
+  gkpz_pl.lot_name,
+ 'Протокол ЦЗК №' || can_pl.num || ' от ' || to_char(can_pl.date_confirm, 'dd.mm.yyyy') as reason_cancel_quot,
+  tt.name as tender_type_name,
+  sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_nds
+from
+  (select * from
+    (select
+      tpl.*,
+      row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      inner join commissions c on (tp.commission_id = c.id)
+      where c.commission_type_id = <%= Constants::CommissionType::SD %>) sub
+     where rn = 1) gkpz_pl
+  inner join
+    (select * from
+      (select
+        tpl.guid, tpl.version, tp.num, tp.date_confirm,
+        row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+        inner join commissions tc on tc.id = tp.commission_id and tc.commission_type_id = <%= Constants::CommissionType::CZK %>
+        where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>) sub
+       where rn = 1) can_pl on (gkpz_pl.guid = can_pl.guid and gkpz_pl.version > can_pl.version)
+  inner join plan_specifications gkpz_ps on (gkpz_pl.id = gkpz_ps.plan_lot_id)
+  inner join dictionaries tt on (tt.ref_id = gkpz_pl.tender_type_id)
+where gkpz_pl.gkpz_year = :gkpz_year -- gkpz_year
+  and gkpz_pl.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+  and gkpz_pl.announce_date between :begin_date and :end_date
+<% if current_user_root_dept_id %>
+  and gkpz_ps.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+<% if customers.present? %>
+  and gkpz_ps.customer_id in
+      (<%= Department.subtree_ids_for(customers).join(', ') %>)-- customers
+<% end %>
+<% if organizers.present? %>
+  and gkpz_pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+<% end %>
+
+group By gkpz_pl.id, gkpz_pl.num_tender, gkpz_pl.num_lot, gkpz_pl.lot_name, tt.name, can_pl.num, can_pl.date_confirm

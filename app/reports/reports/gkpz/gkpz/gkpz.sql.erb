@@ -1,0 +1,237 @@
+select tab.*,
+       sum(tab.cost) over (partition by tab.pl_id, tab.spec) as s_cost,
+       sum(tab.cost_nds) over (partition by tab.pl_id, tab.spec) as s_cost_nds,
+       sum(tab.amount_mastery1) over (partition by tab.pl_id, tab.spec) as s_amount_mastery1,
+       sum(tab.amount_mastery2) over (partition by tab.pl_id, tab.spec) as s_amount_mastery2,
+       sum(tab.amount_mastery3) over (partition by tab.pl_id, tab.spec) as s_amount_mastery3,
+       sum(tab.amount_mastery4) over (partition by tab.pl_id, tab.spec) as s_amount_mastery4,
+       sum(tab.amount_mastery5) over (partition by tab.pl_id, tab.spec) as s_amount_mastery5,
+       sum(tab.amount_mastery_nds1) over (partition by tab.pl_id, tab.spec) as s_amount_mastery_nds1,
+       sum(tab.amount_mastery_nds2) over (partition by tab.pl_id, tab.spec) as s_amount_mastery_nds2,
+       sum(tab.amount_mastery_nds3) over (partition by tab.pl_id, tab.spec) as s_amount_mastery_nds3,
+       sum(tab.amount_mastery_nds4) over (partition by tab.pl_id, tab.spec) as s_amount_mastery_nds4,
+       sum(tab.amount_mastery_nds5) over (partition by tab.pl_id, tab.spec) as s_amount_mastery_nds5,
+       sum(tab.amount_finance1) over (partition by tab.pl_id, tab.spec) as s_amount_finance1,
+       sum(tab.amount_finance2) over (partition by tab.pl_id, tab.spec) as s_amount_finance2,
+       sum(tab.amount_finance3) over (partition by tab.pl_id, tab.spec) as s_amount_finance3,
+       sum(tab.amount_finance4) over (partition by tab.pl_id, tab.spec) as s_amount_finance4,
+       sum(tab.amount_finance5) over (partition by tab.pl_id, tab.spec) as s_amount_finance5,
+       sum(tab.amount_finance_nds1) over (partition by tab.pl_id, tab.spec) as s_amount_finance_nds1,
+       sum(tab.amount_finance_nds2) over (partition by tab.pl_id, tab.spec) as s_amount_finance_nds2,
+       sum(tab.amount_finance_nds3) over (partition by tab.pl_id, tab.spec) as s_amount_finance_nds3,
+       sum(tab.amount_finance_nds4) over (partition by tab.pl_id, tab.spec) as s_amount_finance_nds4,
+       sum(tab.amount_finance_nds5) over (partition by tab.pl_id, tab.spec) as s_amount_finance_nds5
+from
+(
+SELECT
+    count(*) over (partition by ps.id) span,
+    case when row_number() over (partition by ps.id order by ps.id, fias.name) = 1 then 1 else 0 end as spec,
+    row_number() over (partition by ps.id order by nvl(preselect.num_tender, pl.num_tender), pl.num_tender,
+        pl.num_lot, ps.num_spec, ps.id, fias.name) as rn,
+    row_number() over (partition by pl.id order by nvl(preselect.num_tender, pl.num_tender), pl.num_tender,
+        pl.num_lot, ps.num_spec, ps.id, fias.name) as rn_lot,
+    row_number() over (order by nvl(preselect.num_tender, pl.num_tender), pl.num_tender,
+        pl.num_lot, ps.num_spec, ps.id, fias.name) as sort_order,
+    case when
+      row_number() over (partition by pl.id order by decode(pl.main_direction_id, ps.direction_id, 0, 1)) = 1
+      then decode(pl.main_direction_id, ps.direction_id, 1, 0)
+      else 0
+    end as cnt,
+    ps.id as ps_id,
+    pl.id as pl_id,
+    fias.name as fias_name,
+    fias.okato as fias_okato,
+    root.name as root_customer_name,
+    root.id as root_customer_id,
+    cons.name as consumer_name,
+    case when pl.preselection_guid is not null then preselect.num_tender || '.' else '' end || pl.num_tender || '.' || pl.num_lot as lot_num,
+    ps.name as specifiaction_name,
+    fin.name as financing_name,
+    ps.qty,
+    ps.qty*ps.cost as cost,
+    ps.qty*ps.cost_nds as cost_nds,
+    pl.announce_date,
+    rtype.name as tender_type_name,
+    pre_rtype.name as pre_tender_type_name,
+    sme.name as sme_type_name,
+    case when ord.ref_id in (<%= Constants::Order1352::EXCLUSIONS.join(', ') %>) then ord.name end as order1352_name,
+    decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 'нет', 'да') as is_elform,
+    org.name as org_name,
+    pg_type.name as commission_type_name,
+    mon.name as mon_dept,
+    ps.requirements,
+    ps.delivery_date_begin,
+    ps.delivery_date_end,
+    case
+    when pl.preselection_guid is null then
+      (select <%= ActiveRecord::Base.concatinate("coalesce(ow.shortname,'') || ' ' || contr.name", "'; '", "contr.name").html_safe %>
+       from plan_lot_contractors plc
+       left join contractors contr on (contr.id = plc.contractor_id)
+       left join ownerships ow on ow.id = contr.ownership_id
+       Where plc.plan_lot_id = pl.id
+      )
+    else 'Победители предварительного отбора № ' || preselect.num_tender || '.' || preselect.num_lot
+    end as contractor_names,
+    ps.potential_participants,
+    ps.bp_item,
+    units.code as unit_code,
+    units.name as unit_name,
+    okved.code as okved_code,
+    okdp.code as okdp_code,
+    psa1.amount_mastery as amount_mastery1,
+    psa2.amount_mastery as amount_mastery2,
+    psa3.amount_mastery as amount_mastery3,
+    psa4.amount_mastery as amount_mastery4,
+    psa5.amount_mastery as amount_mastery5,
+    psa1.amount_mastery_nds as amount_mastery_nds1,
+    psa2.amount_mastery_nds as amount_mastery_nds2,
+    psa3.amount_mastery_nds as amount_mastery_nds3,
+    psa4.amount_mastery_nds as amount_mastery_nds4,
+    psa5.amount_mastery_nds as amount_mastery_nds5,
+    psa1.amount_finance as amount_finance1,
+    psa2.amount_finance as amount_finance2,
+    psa3.amount_finance as amount_finance3,
+    psa4.amount_finance as amount_finance4,
+    psa5.amount_finance as amount_finance5,
+    psa1.amount_finance_nds as amount_finance_nds1,
+    psa2.amount_finance_nds as amount_finance_nds2,
+    psa3.amount_finance_nds as amount_finance_nds3,
+    psa4.amount_finance_nds as amount_finance_nds4,
+    psa5.amount_finance_nds as amount_finance_nds5,
+    <% if show_status.try(:to_b) %>
+      st.name
+    <% else %>
+      null
+    <% end %> as status_name,
+    ps.note,
+    nvl(ri.num, pl.point_clause) as regulation_item_num,
+    pl.tender_type_explanations,
+    ps.curator,
+    ps.tech_curator,
+    ps.direction_id,
+    pl.subject_type_id,
+    pl.tender_type_id,
+    ord.ref_id as order1352_id,
+    pl.num_tender,
+    pl.num_lot,
+    pl.status_id,
+    <% if show_color.try(:to_b) %>
+    (case
+      when  pl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>) then 'green'
+      when  pl.status_id = <%= Constants::PlanLotStatus::CANCELED %> then 'red'
+      when exists (select 1 from plan_lots pl2 where pl2.protocol_id is not null and pl2.guid = pl.guid) then 'light_green'
+      else 'white'
+    end)
+    <% else %>
+    'white'
+    <% end %> as style
+    <% if status_tender.try(:to_b) %>
+      ,wl.state_from_lot
+    <% end %>
+FROM plan_specifications ps
+inner join plan_lots pl on pl.id = ps.plan_lot_id
+left join units on (units.id = ps.unit_id)
+left join okved on (okved.id = ps.okved_id)
+left join okdp on (okdp.id = ps.okdp_id)
+left join commissions pg on (pg.id = pl.commission_id)
+left join dictionaries pg_type on (pg_type.ref_id = pg.commission_type_id)
+left join dictionaries fin on (ps.financing_id = fin.ref_id)
+left join dictionaries rtype on (rtype.ref_id = pl.tender_type_id)
+left join dictionaries st on (pl.status_id = st.ref_id)
+left join departments org on (pl.department_id = org.id)
+left join departments root on (pl.root_customer_id = root.id)
+left join departments cons on (ps.consumer_id = cons.id)
+left join departments mon on (ps.monitor_service_id = mon.id)
+left join plan_spec_amounts psa1 on (ps.id = psa1.plan_specification_id and psa1.year = pl.gkpz_year)
+left join plan_spec_amounts psa2 on (ps.id = psa2.plan_specification_id and psa2.year = pl.gkpz_year + 1)
+left join plan_spec_amounts psa3 on (ps.id = psa3.plan_specification_id and psa3.year = pl.gkpz_year + 2)
+left join plan_spec_amounts psa4 on (ps.id = psa4.plan_specification_id and psa4.year = pl.gkpz_year + 3)
+left join plan_spec_amounts psa5 on (ps.id = psa5.plan_specification_id and psa5.year = pl.gkpz_year + 4)
+left join fias_plan_specifications fs on (fs.plan_specification_id = ps.id)
+left join plan_lots preselect on (preselect.guid = pl.preselection_guid and preselect.version = 0)
+left join dictionaries pre_rtype on (pre_rtype.ref_id = preselect.tender_type_id)
+left join fias on fias.id = fs.fias_id
+left join dictionaries sme on (sme.ref_id = pl.sme_type_id)
+left join dictionaries ord on (ord.ref_id = pl.order1352_id)
+left join regulation_items ri on (ri.id = pl.regulation_item_id)
+<% if status_tender.try(:to_b) %>
+  left join
+  (select * from
+    (select l.plan_lot_guid,
+      case
+        when wpl.solution_type_id = <%= Constants::WinnerProtocolSolutionTypes::CANCEL %> then 'Отменена'
+        when wpl.solution_type_id = <%= Constants::WinnerProtocolSolutionTypes::FAIL %> then 'Не состоялась'
+        when l.id is not null then 'Есть старт'
+      end as state_from_lot,
+      row_number() over (partition by  l.plan_lot_guid order by wp.confirm_date desc) as row_num
+    from lots l
+      left join winner_protocols wp on wp.id = l.winner_protocol_id and wp.confirm_date <= :date_gkpz_on_state
+      left join winner_protocol_lots wpl on l.id = wpl.lot_id and wp.id = wpl.winner_protocol_id
+    ) sub
+  where row_num = 1
+  ) wl on pl.guid = wl.plan_lot_guid
+<% end %>
+<% if gkpz_type != 'current' %>
+  inner join protocols p on (pl.protocol_id = p.id)
+  inner join commissions c on (p.commission_id = c.id)
+  inner join (
+    select l.guid, max(p1.date_confirm) as date_confirm
+    from plan_lots l
+      inner join protocols p1 on (p1.id = l.protocol_id)
+      inner join commissions c1 on (p1.commission_id = c1.id)
+    where p1.date_confirm <= :date_gkpz_on_state
+    <% if gkpz_type == 'gkpz' %>
+      and c1.commission_type_id = <%= Constants::CommissionType::SD %>
+    <% end %>
+    Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+<% end %>
+WHERE pl.announce_date between :begin_date and :end_date
+<% if gkpz_type == 'unplanned' %>
+  And not exists (select 'x' from plan_lots l where l.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %> and l.guid = pl.guid)
+<% elsif gkpz_type == 'current' %>
+  And pl.version = 0
+<% end %>
+
+<% if customers.present? %>
+  And ps.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if current_user_root_dept_id %>
+  And ps.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if gkpz_years.present? %>
+  And pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if organizers.present? %>
+  And pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if etp_addresses.present? %>
+  And pl.etp_address_id in (<%= etp_addresses.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  And ps.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if subject_types.present? %>
+  And pl.subject_type_id in (<%= subject_types.join(', ') %>)
+<% end %>
+
+<% if statuses.present? %>
+  And pl.status_id in (<%= statuses.join(', ') %>)
+<% end %>
+
+<% if gkpz_state.present? %>
+  And pl.state = <%= PlanLot.states[gkpz_state] %>
+<% end %>
+) tab
+order by sort_order

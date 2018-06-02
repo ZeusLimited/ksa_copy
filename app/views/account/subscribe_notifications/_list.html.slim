@@ -1,0 +1,4 @@
+- notifications.each do |notify|
+  fieldset.coloring.frame
+    p.text-right = notify.created_at
+    = notify.format_html.html_safe

@@ -1,0 +1,89 @@
+- :name: Топливо
+  :filter:
+    :direction_id: <%= yaml_directions['fuel'] %>
+  :num: '1'
+- :name: в т.ч. Газ
+  :filter:
+    :direction_id: nil
+- :name: '  уголь'
+  :filter:
+    :direction_id: nil
+- :name: '  мазут'
+  :filter:
+    :direction_id: nil
+- :name: '  прочее'
+  :filter:
+    :direction_id: nil
+- :name: 'Энергия'
+  :filter:
+    :direction_id: nil
+  :num: '2'
+- :name: в т.ч. электроэнергия
+  :filter:
+    :direction_id: nil
+- :name: '  мощность'
+  :filter:
+    :direction_id: nil
+- :name: '  теплоэнергия'
+  :filter:
+    :direction_id: nil
+- :name: 'Эксплуатация'
+  :filter:
+    :direction_id: <%= yaml_directions['er'] %>
+  :num: '3'
+- :name: 'в т.ч. материалы'
+  :filter:
+    :direction_id: <%= yaml_directions['er'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'услуги'
+  :filter:
+    :direction_id: <%= yaml_directions['er'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: 'Ремонт'
+  :filter:
+    :direction_id: <%= yaml_directions['erp'] %>
+  :num: '4'
+- :name: 'в т.ч. материалы'
+  :filter:
+    :direction_id: <%= yaml_directions['erp'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'услуги'
+  :filter:
+    :direction_id: <%= yaml_directions['erp'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: 'ИТ'
+  :filter:
+    :direction_id: <%= yaml_directions['it'] %>
+  :num: '5'
+- :name: 'в т.ч. материалы'
+  :filter:
+    :direction_id: <%= yaml_directions['it'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'услуги'
+  :filter:
+    :direction_id: <%= yaml_directions['it'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: 'НИОКР'
+  :filter:
+    :direction_id: <%= yaml_directions['niokr'] %>
+    :num: '6'
+- :name: 'в т.ч. материалы'
+  :filter:
+    :direction_id: <%= yaml_directions['niokr'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'услуги'
+  :filter:
+    :direction_id: <%= yaml_directions['niokr'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: 'Прочие'
+  :filter:
+    :direction_id: <%= [yaml_directions['other'], yaml_directions['ahn'], yaml_directions['osu']] %>
+  :num: '7'
+- :name: 'в т.ч. материалы'
+  :filter:
+    :direction_id: <%= [yaml_directions['other'], yaml_directions['ahn'], yaml_directions['osu']] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: 'услуги'
+  :filter:
+    :direction_id: <%= [yaml_directions['other'], yaml_directions['ahn'], yaml_directions['osu']] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>

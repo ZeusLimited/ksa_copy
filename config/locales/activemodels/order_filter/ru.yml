@@ -1,0 +1,15 @@
+ru:
+  helpers:
+    submit:
+      order_filter:
+        create: "Поиск"
+  activemodel:
+    models:
+      order_filter: 'Фильтр поручений'
+    attributes:
+      order_filter:
+        year: 'Год'
+        department: 'Организатор'
+        customers: 'Заказчик'
+        num: 'Номер поручения'
+        not_confirmed: 'Поручения'

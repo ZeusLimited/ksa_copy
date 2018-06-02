@@ -1,0 +1,206 @@
+- num: '1'
+  name: 'План по ГКПЗ <%= gkpz_year %> года, в т.ч.:'
+  sql: 'gkpz'
+  filters: { }
+  styles: ['td', 'td', 'td', 'td_money', 'td', 'td', 'td', 'td']
+  types: ['string', 'string', 'integer', 'float', 'string', 'string', 'string', 'string']
+- num: '1.1'
+  name: 'текущая деятельность'
+  sql: 'gkpz'
+  filters: { direction_id: <%= Direction.routine.pluck(:id) %> }
+  styles: ['td', 'td', 'td', 'td_money', 'td', 'td', 'td', 'td']
+  types: ['string', 'string', 'integer', 'float', 'string', 'string', 'string', 'string']
+- num: '1.2'
+  name: 'инвестиционная деятельность'
+  sql: 'gkpz'
+  filters: { direction_id: <%= Direction.invest.pluck(:id) %> }
+  styles: ['td', 'td', 'td', 'td_money', 'td', 'td', 'td', 'td']
+  types: ['string', 'string', 'integer', 'float', 'string', 'string', 'string', 'string']
+- num: '2'
+  name: >-
+    Внеплановые закупки <%= gkpz_year %> года, согласованные ЦЗК, дозакупки по решению ЗК-1, ЗК-2, СЗК
+    (дозакупки до 20%)  и внеплановые нерегламентированные без ЦЗК**, в т.ч.:'
+  sql: 'unplan'
+  filters: { }
+  styles: ['td', 'td', 'td', 'td_money', 'td', 'td', 'td_money', 'td']
+  types: ['string', 'string', 'integer', 'float', 'string', 'integer', 'float', 'string']
+- num: '2.1'
+  name: 'текущая деятельность'
+  sql: 'unplan'
+  filters: { direction_id: <%= Direction.routine.pluck(:id) %> }
+  styles: ['td', 'td', 'td', 'td_money', 'td', 'td', 'td_money', 'td']
+  types: ['string', 'string', 'integer', 'float', 'string', 'integer', 'float', 'string']
+- num: '2.2'
+  name: 'инвестиционная деятельность'
+  sql: 'unplan'
+  filters: { direction_id: <%= Direction.invest.pluck(:id) %> }
+  styles: ['td', 'td', 'td', 'td_money', 'td', 'td', 'td_money', 'td']
+  types: ['string', 'string', 'integer', 'float', 'string', 'integer', 'float', 'string']
+- num: '3'
+  name: 'Проведено закупочных процедур (есть протокол по выбору победителя или подписанный договор (доп.согл.) по ЕИ)***'
+  sql: 'all_tenders'
+  filters: { }
+- num: '3.1'
+  name: 'текущая деятельность'
+  sql: 'all_tenders'
+  filters: { direction_id: <%= Direction.routine.pluck(:id) %> }
+- num: '3.2'
+  name: 'инвестиционная деятельность'
+  sql: 'all_tenders'
+  filters: { direction_id: <%= Direction.invest.pluck(:id) %> }
+- num: '4'
+  name: 'Состоявшиеся закупки у единственного источника, всего, в т.ч. по пунктам Положения о закупке продукции:'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %> }
+- num: '4.1'
+  name: '5.11.1.1'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>, regulation_item_num: '5.11.1.1' }
+- num: '4.2'
+  name: '5.11.1.2'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>, regulation_item_num: '5.11.1.2' }
+- num: '4.3'
+  name: '5.11.1.3'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>, regulation_item_num: '5.11.1.3' }
+- num: '4.4'
+  name: '5.11.1.4'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>, regulation_item_num: '5.11.1.4' }
+- num: '4.5'
+  name: '5.11.1.5'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= Constants::TenderTypes::ONLY_SOURCE %>, regulation_item_num: '5.11.1.5' }
+- num: '5'
+  name: 'Закупки, проведенные открытыми процедурами'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::OA, Constants::TenderTypes::PO, Constants::TenderTypes::OOK, Constants::TenderTypes::OMK, Constants::TenderTypes::OZC, Constants::TenderTypes::OZP, Constants::TenderTypes::OKP, Constants::TenderTypes::ZPP, Constants::TenderTypes::ORK] %> }
+- num: '5.1'
+  name: 'Электронный аукцион'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::OA] %> }
+- num: '5.2'
+  name: 'Открытый конкурс'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::OOK, Constants::TenderTypes::OMK] %> }
+- num: '5.3'
+  name: 'Открытый запрос цен'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::OZC] %> }
+- num: '5.4'
+  name: 'Открытый запрос предложений'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::OZP, Constants::TenderTypes::ZPP] %> }
+- num: '5.5'
+  name: 'Открытые конкурентные переговоры'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::OKP] %> }
+- num: '5.6'
+  name: 'Открытые конкурсы на заключение рамочных соглашений'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::ORK] %> }
+- num: '5.7'
+  name: 'Предварительный отбор'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::PO] %> }
+- num: '6'
+  name: 'Закупки, проведенные закрытыми процедурами'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::ZOK, Constants::TenderTypes::ZMK, Constants::TenderTypes::ZZC, Constants::TenderTypes::ZZP, Constants::TenderTypes::ZKP] %> }
+- num: '6.1'
+  name: 'Закрытый конкурс'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::ZOK, Constants::TenderTypes::ZMK] %> }
+- num: '6.2'
+  name: 'Закрытый запрос цен'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::ZZC] %> }
+- num: '6.3'
+  name: 'Закрытый запрос предложений'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::ZZP] %> }
+- num: '6.4'
+  name: 'Закрытые конкурентные переговоры'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::ZKP] %> }
+- num: '7'
+  name: 'Нерегламентированные закупки'
+  sql: 'all_tenders'
+  filters: { tender_type_id: <%= [Constants::TenderTypes::UNREGULATED] %> }
+- num: '8'
+  name: 'Закупки в электронной форме'
+  sql: 'all_tenders'
+  filters: { etp_address_id: <%= [Constants::EtpAddress::B2B_ENERGO] %> }
+- num: '9'
+  name: 'Закупки, проведенные только у субъектов малого и среднего предпринимательства'
+  sql: 'all_tenders'
+  filters: { sme_type_id: <%= [Constants::SmeTypes::SME] %> }
+- num: '10'
+  name: 'Закупки, проведенные с установлением требования о привлечении к исполнению договора субподрядчиков (соисполнителей) из числа субъектов малого и среднего предпринимательства'
+  sql: 'all_tenders'
+  filters: { sme_type_id: <%= [Constants::SmeTypes::SUB_SME] %> }
+- num: '11'
+  name: 'Процент исполнения ГКПЗ'
+  sql: 'gkpz_ps'
+  filters: { direction: <%= Direction.pluck(:id) %> }
+  styles: ['td', 'td', 'td_percent', 'td_percent', 'td', 'td', 'td', 'td']
+  types: ['string', 'string', 'float', 'float', 'string', 'string', 'string', 'string']
+  not_detail: true
+- num: '12'
+  name: 'ВСЕГО в работе:'
+  sql: 'all_in_work'
+  filters: { }
+  not_detail: true
+- num: '13'
+  name: 'Необъявленные'
+  sql: 'unpublic'
+  filters: { }
+- num: '14'
+  name: 'Отменены (не планируются к проведению в текущем году) (или решение ЦЗК или решение ДЗО по текущей деятельности)'
+  sql: 'cancelled'
+  filters: { }
+- num: '15'
+  name: 'Дата вскрытия не наступила'
+  sql: 'public_tenders'
+  filters: { }
+- num: '16'
+  name: 'Экпертиза заявок участников'
+  sql: 'open_tenders'
+  filters: { }
+- num: '17'
+  name: 'Ожидание согласования Генерального директора ПАО "РусГидро" выбора победителя'
+  sql: 'null_values'
+  filters: { }
+  not_detail: true
+- num: '18'
+  name: 'Договор (доп.согл.) по ЕИ на согласовании'
+  sql: 'null_values'
+  filters: { }
+  not_detail: true
+- num: '19'
+  name: 'Ожидание согласования Генерального директора ПАО "РусГидро" подписания договора/доп.согл. (по ЕИ)'
+  sql: 'null_values'
+  filters: { }
+  not_detail: true
+- num: '20'
+  name: 'Несостоявшиеся закупки, по которым нет дальнейшего решения (об отмене либо повторном проведении)'
+  sql: 'fail_tenders'
+  filters: { }
+- num: '21'
+  name: 'Справочно'
+  sql: 'dictionaries'
+  filters: { etp_address_id: <%= [Constants::EtpAddress::NOT_ETP, Constants::EtpAddress::B2B_ENERGO] %>, is_profitable: 1 }
+  not_detail: true
+- num: '21.1'
+  name: 'Закупки, запланированные к проведению в прошлых годах, итоги по которым подведены в <%= gkpz_year %> году'
+  sql: 'old_tenders'
+  filters: { etp_address_id: <%= [Constants::EtpAddress::NOT_ETP, Constants::EtpAddress::B2B_ENERGO] %> }
+- num: '21.1.1'
+  name: 'в т.ч. закупки, проведенные в электронной форме'
+  sql: 'old_tenders'
+  filters: { etp_address_id: <%= [Constants::EtpAddress::B2B_ENERGO] %> }
+- num: '21.2'
+  name: 'Закупки, проводимые в счет доходных договоров****'
+  sql: 'all_tenders'
+  filters: { is_profitable: 1 }

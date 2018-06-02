@@ -1,0 +1,13 @@
+--- # структура для очётов
+- name: 1 квартал <%= gkpz_year %>
+  filters:
+    quarter: "1"
+- name: 2 квартал <%= gkpz_year %>
+  filters:
+    quarter: "2"
+- name: 3 квартал <%= gkpz_year %>
+  filters:
+    quarter: "3"
+- name: 4 квартал <%= gkpz_year %>
+  filters:
+    quarter: "4"

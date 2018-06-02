@@ -1,0 +1,21 @@
+ru:
+  helpers:
+    submit:
+      reports_reglament_intermediate_form:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/intermediate_form: 'Форма доклада (промежуточная форма)'
+    attributes:
+      reports/reglament/intermediate_form:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_years: 'Годы ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        vz: 'План/Внеплан'
+        format: 'Формат'

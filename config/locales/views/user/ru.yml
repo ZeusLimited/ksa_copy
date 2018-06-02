@@ -1,0 +1,10 @@
+ru:
+  user:
+    index:
+      header: 'Справочник пользователей'
+      search: 'Поиск'
+    edit:
+      header: 'Редактирование пользователя'
+    form:
+      ability: "Права Доступа"
+      activate: 'активирован'

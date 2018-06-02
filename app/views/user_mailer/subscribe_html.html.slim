@@ -1,0 +1,33 @@
+table.table.table-hover.table-bordered
+  thead
+    tr
+      th Номер
+      th Наименование
+      th Год ГКПЗ
+      th Способ
+      th Заказчик
+  tbody
+    - @actions.decorate.each do |action|
+      tr
+        td colspan="5"
+          h4 = action.title
+      - Subscribe.for_action(action.action_id, action.days_before).each do |subscribe|
+        tr
+          - if action.link_to_plan?
+            td = subscribe.plan_lot_full_num
+            td = link_to subscribe.lot_name, history_plan_lot_url(subscribe.plan_lot_guid_hex)
+            td = subscribe.plan_lot_gkpz_year
+            td = subscribe.plan_lot_tender_type_name
+            td = subscribe.plan_lot_root_customer_fullname
+          - elsif subscribe.lot
+            td = subscribe.lot.fullnum
+            td = link_to subscribe.lot.name, tender_url(subscribe.lot.tender_id)
+            td = subscribe.lot.gkpz_year
+            td = subscribe.lot.tender_type_name
+            td = subscribe.lot.root_customer_fullname
+          - else
+            td = "#{subscribe.plan_object["num_tender"]}.#{subscribe.plan_object["num_lot"]}"
+            td = subscribe.plan_object["lot_name"]
+            td = subscribe.plan_object["gkpz_year"]
+            td = Dictionary.find_by_ref_id(subscribe.plan_object["tender_type_id"])&.name
+            td = Department.find_by_id(subscribe.plan_object["root_customer_id"])&.fullname

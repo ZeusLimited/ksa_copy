@@ -1,0 +1,160 @@
+select
+<% if gkpz_years.count == 1 %>
+  decode(root.name, '','Итого:',root.name) as name,
+<% else %>
+  case when root.name is null then 'Итого:'
+    when table2.gkpz_year is null then root.name
+    else cast(table2.gkpz_year as varchar2(4))
+  end as name,
+<% end %>
+  coalesce(sum(table1.cost_gr_1),0) as cost_gr_1,
+  coalesce(sum(table2.cost_gr_2),0) as cost_gr_2,
+<% if gkpz_years.count == 1 %>
+    'sum'
+<% else %>
+  case
+    when table2.gkpz_year is null
+      then 'sum'
+    else 'legal'
+  end
+<% end %>
+  as style
+from
+  (select
+    root_customer_id, gkpz_year,
+    sum(cost_gr_1)/1000 as cost_gr_1
+    from
+      (SELECT
+        pl.root_customer_id, pl.gkpz_year,
+        ps.qty*ps.cost_nds as cost_gr_1
+        FROM plan_specifications ps
+        inner join plan_lots pl on pl.id = ps.plan_lot_id
+        inner join protocols p on (pl.protocol_id = p.id)
+
+        inner join (
+              select l.guid, max(p1.date_confirm) as date_confirm
+              from plan_lots l
+              inner join protocols p1 on (p1.id = l.protocol_id)
+              where p1.date_confirm between :begin_date and :end_date
+              Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+
+        left join
+          (select
+            plc.plan_lot_id,
+            (<%= ActiveRecord::Base.concatinate("ow.shortname || ' ' || c.name","'; '","plc.contractor_id").html_safe %>) as plan_contractors
+          from plan_lot_contractors plc
+          inner join contractors c on c.id = plc.contractor_id
+          left join ownerships ow on c.ownership_id = ow.id
+          group by plc.plan_lot_id) pc on pc.plan_lot_id = pl.id
+
+        WHERE pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+        And (pl.announce_date <= :end_date)
+        And pl.status_id IN (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+        And (pl.guid not in
+              (select l.guid from lots ql
+                inner join plan_lots l on ql.plan_lot_id = l.id
+               where ql.status_id <> (<%= Constants::LotStatus::NEW %>)
+              )
+            )
+      <% if organizers.present? %>
+        And pl.department_id in
+          (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+      <% end %>
+
+      <% if current_user_root_dept_id.present? %>
+        And pl.root_customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+      <% end %>
+
+      <% if customers.present? %>
+        And pl.root_customer_id in
+          (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+      <% end %>
+      )t1
+    group by gkpz_year,root_customer_id
+    order by root_customer_id
+    ) table1
+    full join
+    (
+    select
+      root_customer_id,
+      cost_gr_2,
+      gkpz_year
+      from
+       (
+        select root_customer_id,gkpz_year,
+        sum(cost_gr_2)/1000 as cost_gr_2
+        from (
+          select
+            pl.root_customer_id, l.gkpz_year,
+            case
+              when pl.tender_type_id in (<%= Constants::TenderTypes::NONCOMPETITIVE.join(', ') %>) and contracts.id is null
+                then s.qty * s.cost_nds
+              when pl.tender_type_id not in (<%= Constants::TenderTypes::NONCOMPETITIVE.join(', ') %>) and wp.id is null
+                then s.qty * s.cost_nds
+              else 0
+            end as cost_gr_2
+
+          from tenders t
+            inner join lots l on l.tender_id = t.id
+            inner join specifications s on s.lot_id = l.id
+            left join plan_lots pl on l.plan_lot_id = pl.id
+            left join plan_specifications ps on s.plan_specification_id = ps.id
+
+            left join
+              (select * from
+                (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+                  from plan_lots tpl
+                  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_gkpz_on_state
+                  where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+                 where rn = 1) gkpz_pl on (pl.guid = gkpz_pl.guid)
+
+            left join (
+              select tpl.guid, max(tp.date_confirm) as can_date
+              from plan_lots tpl
+              inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_gkpz_on_state
+              inner join commissions tc on tp.commission_id = tc.id
+              where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+              group by tpl.guid
+            ) can on gkpz_pl.guid = can.guid
+
+            left join open_protocols op on op.tender_id = t.id
+            left join winner_protocols wp on wp.id = l.winner_protocol_id and wp.confirm_date <= :date_gkpz_on_state
+            left join winner_protocol_lots wpl on (wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id)
+
+            left join offers o on o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>
+            left join offer_specifications os on os.specification_id = s.id and os.offer_id = o.id
+
+            left join contracts on o.id = contracts.offer_id
+              and contracts.type_id = <%= Constants::ContractTypes::BASIC %> and contracts.confirm_date <= :date_gkpz_on_state
+            left join contract_specifications contract_spec on
+              (contract_spec.specification_id = s.id and contracts.id = contract_spec.contract_id)
+
+          where
+            t.announce_date between :begin_date and :end_date
+            and can.guid is null
+            and l.status_id <> (<%= Constants::LotStatus::NEW %>)
+            and l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+
+          <% if customers.present? %>
+            and s.customer_id in
+              (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+          <% end %>
+
+          <% if organizers.present? %>
+            and t.department_id in
+              (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+          <% end %>
+
+        ) t2
+        group by root_customer_id, gkpz_year
+        order by root_customer_id
+      ) t3
+  ) table2 on table2.root_customer_id = table1.root_customer_id and table2.gkpz_year = table1.gkpz_year
+  inner join departments root on coalesce(table1.root_customer_id,table2.root_customer_id) = root.id
+
+<% if gkpz_years.count == 1 %>
+  group by rollup((root.name,table2.gkpz_year))
+<% else %>
+  group by rollup(root.name,table2.gkpz_year)
+<% end %>
+order by root.name asc, table2.gkpz_year desc

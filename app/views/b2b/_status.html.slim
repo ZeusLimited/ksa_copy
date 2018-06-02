@@ -1,0 +1,10 @@
+- unless @responce["status_id"] == 1
+  .alert class=@responce["status_class"]
+    strong Интеграция с b2b-center.ru
+    br
+    - if @responce["message"]
+      strong = @responce["message"]
+      | :
+      =< @responce["ret_message"] if @responce["ret_message"]
+    - else
+      => @responce["status_line"]

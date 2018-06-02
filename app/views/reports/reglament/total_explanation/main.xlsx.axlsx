@@ -1,0 +1,29 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+@holding_name = @report.holding_name
+
+@styles = @styles.merge(
+  text_center_bold: wb.styles.add_style(b: true,
+                                        alignment: {
+                                          horizontal: :center,
+                                          wrap_text: true
+                                        }),
+  text_left_bold: wb.styles.add_style(b: true,
+                                      alignment: {
+                                        horizontal: :left,
+                                        wrap_text: true
+                                      })
+)
+
+wb.add_worksheet(name: '1') { |sheet| render 'sheet1', sheet: sheet }
+wb.add_worksheet(name: '2') { |sheet| render 'sheet2', sheet: sheet }
+wb.add_worksheet(name: '2.2') { |sheet| render 'sheet2_2', sheet: sheet }
+wb.add_worksheet(name: '2.3') { |sheet| render 'sheet2_3', sheet: sheet }
+wb.add_worksheet(name: '2.4') { |sheet| render 'sheet2_4', sheet: sheet }
+wb.add_worksheet(name: '3') { |sheet| render 'sheet3', sheet: sheet }
+wb.add_worksheet(name: '4') { |sheet| render 'sheet4', sheet: sheet }
+wb.add_worksheet(name: '4.2') { |sheet| render 'sheet4_2', sheet: sheet }
+wb.add_worksheet(name: '4.3') { |sheet| render 'sheet4_3', sheet: sheet }
+wb.add_worksheet(name: '5') { |sheet| render 'sheet5', sheet: sheet }
+wb.add_worksheet(name: '6') { |sheet| render 'sheet6', sheet: sheet }

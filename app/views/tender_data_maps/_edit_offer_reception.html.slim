@@ -1,0 +1,13 @@
+h3 = t('.offer_reception')
+fieldset.frame
+  .row
+    .span5
+      = f.input :offer_reception_place, input_html: { class: 'input-block-level' }
+    .span2
+      = f.input :offer_reception_start, as: :string,
+        input_html: { value: f.object.offer_reception_stop, class: 'datepicker input-block-level' }
+    .span2
+      = f.input :offer_reception_stop, as: :string,
+        input_html: { value: f.object.offer_reception_stop, class: 'datepicker input-block-level' }
+    .span2
+      = f.input :life_offer, input_html: { class: 'input-block-level' }

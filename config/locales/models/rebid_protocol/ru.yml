@@ -1,0 +1,29 @@
+ru:
+  activerecord:
+    models:
+      rebid_protocol: 'Протокол рассмотрения'
+    attributes:
+      rebid_protocol:
+        num: 'Номер протокола'
+        confirm_date: 'Дата вступления в силу'
+        vote_date: 'Дата голосования'
+        confirm_city: 'Место утверждения'
+        rebid_date: 'Дата начала переторжки'
+        location: 'Место проведения переторжки'
+        clerk_id: 'Ответственный секретарь'
+        commission_id: 'Коммиссия'
+        resolve: 'Решение'
+        tender_id: 'Закупка'
+    errors:
+      models:
+        rebid_protocol:
+          attributes:
+            base:
+              must_have_lots: 'Должен быть выбран хотя бы один лот'
+            confirm_date:
+              less_then_review_date: "не может быть ранее даты голосования в протоколе рассмотрения №%{num} от %{date}"
+              less_then_open_date: "не может быть ранее даты вскрытия конвертов %{date}"
+            rebid_date:
+              not_equal_rebid_date_review: "должна равняться дате вскрытия в протоколе рассмотрения %{time}"
+            confirm_date:
+              less_then_vote_date: "не может быть раньше дня голосования"

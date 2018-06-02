@@ -1,0 +1,28 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 Список протоколов переторжки
+
+= render 'tenders/tender_header', tender: tender
+
+p.text-right
+  = link_to 'Создать протокол', new_tender_rebid_protocol_path(@tender), class: "btn btn-primary"
+
+table.table.table-bordered.table-striped.table-nonfluid
+  thead
+    tr
+      th Номер
+      th Дата вступления в силу
+      th
+      th
+      th
+  tbody
+  - @tender.rebid_protocols.each do |rebid_protocol|
+    tr
+      td = rebid_protocol.num
+      td = rebid_protocol.confirm_date
+      td = link_icon_title 'icon-info-sign', 'Просмотр', [@tender, rebid_protocol]
+      td = link_icon_title 'icon-edit', 'Редактировать', edit_tender_rebid_protocol_path(@tender, rebid_protocol)
+      td
+        = link_icon_title 'icon-trash', 'Удалить', [@tender, rebid_protocol], method: :delete,
+          data: { confirm: 'Вы уверены?' }

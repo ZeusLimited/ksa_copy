@@ -1,0 +1,5 @@
+== render '/contractors/menu'
+
+p.text-right
+  = link_to t('edit'), edit_all_contractor_documents_path(@contractor), class: 'btn btn-warning'
+  = render 'shared/table_files', files: @contractor.files, type: true

@@ -1,0 +1,15 @@
+render 'thead'
+
+@report.rows.each do |row|
+  result = @report.result_row(row[:filter])
+  values = @columns.values.map do |v|
+    to_thousand(v[:value].call(result))
+  end
+  @sheet.add_row [row[:num], row[:name], values].flatten, style: @column_styles, types: @column_types
+end
+
+summary = %w(C D E F G H I J K L M N O P Q).map do |column|
+  AxlsxExt::Formula.sum_numbers_by_column(column, [5, 10, 14, 17, 20, 23, 26])
+end
+
+@sheet.add_row [nil, t("reports/pui/effect_operation.row_titles.summary")].concat(summary), style: @column_styles

@@ -1,0 +1,24 @@
+ru:
+  activerecord:
+    models:
+      review_protocol: 'Протокол рассмотрения'
+    attributes:
+      review_protocol:
+        num: 'Номер протокола'
+        confirm_date: 'Дата вступления в силу'
+        vote_date: 'Дата голосования'
+        tender_id: 'Закупка'
+        review_lots: 'Рассматриваемый лот'
+    errors:
+      models:
+        review_protocol:
+          attributes:
+            base:
+              must_have_lots: 'Должен быть выбран хотя бы один лот'
+            num:
+              must_uniq: "в этой закупке уже есть протокол с таким номером"
+            confirm_date:
+              confirm_date_bigger_then_vote_date: "не может быть раньше даты голосования"
+              confirm_date_already_use: "уже используется в одном из протоколов для выбранных лотов"
+            confirm_date:
+              less_then_open_date: "не может быть ранее даты вскрытия конвертов %{date}"

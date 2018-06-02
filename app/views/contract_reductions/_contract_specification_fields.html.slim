@@ -1,0 +1,6 @@
+= field_set_tag f.object.specification_fullname, class: "specifications" do
+  = f.hidden_field :specification_id
+  .row
+    = view_text_field('span1', f.object.specification, :qty, f.object.specification.count_with_unit)
+    .span2= f.input :cost_money, input_html: { class: "input-medium text-right money" }
+    .span2= f.input :cost_nds_money, input_html: { class: "input-medium text-right money" }

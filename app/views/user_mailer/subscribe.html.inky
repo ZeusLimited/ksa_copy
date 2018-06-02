@@ -1,0 +1,25 @@
+wrapper
+  = email_image_tag("#{Setting.company}.png")
+  h6.text-center = t('mailer.autoheader')
+
+- @actions.decorate.each do |action|
+  callout.container-big class=action.background_class style="width:100%"
+    row.container-big
+      columns.container-big small="12" large="12"
+        h5 = action.title
+        - Subscribe.for_action(action.action_id, action.days_before).each do |subscribe|
+          p
+            - if action.link_to_plan?
+              = link_to history_plan_lot_url(subscribe.plan_lot_guid_hex) do
+                =< subscribe.plan_lot_title
+                == t('.gkpz_plan', year: subscribe.plan_lot_gkpz_year, customer: subscribe.plan_lot_root_customer_shortname)
+            - elsif subscribe.lot
+              - lot = subscribe.lot
+              = link_to tender_url(lot.tender_id) do
+                =< lot.name_with_cust
+                == t('.gkpz_fact', year: lot.gkpz_year)
+            - else
+              =< subscribe.plan_object["lot_name"]
+              == t('.gkpz_deleted', year: subscribe.plan_object["gkpz_year"],
+                num: "#{subscribe.plan_object["num_tender"]}.#{subscribe.plan_object["num_lot"]}",
+                department: Department.find_by_id(subscribe.plan_object["root_customer_id"])&.fullname)

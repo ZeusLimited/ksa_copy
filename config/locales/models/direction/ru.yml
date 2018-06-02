@@ -1,0 +1,15 @@
+ru:
+  direction_type:
+    routine: "Текущая"
+    invest: "Инвестиционная"
+  activerecord:
+    models:
+      direction: "Разделы ГКПЗ"
+    attributes:
+      direction:
+        name: 'Наименование'
+        fullname: 'Полное наименование'
+        type_id: 'Тип деятельности'
+        yaml_key: 'Ключ для отчета'
+        position: 'Порядок'
+        is_longterm: 'Долгосрочное планирование'

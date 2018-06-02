@@ -1,0 +1,70 @@
+select
+  tender_type_name,
+  min(delta) as min_delta,
+  min(min_tender_num) as min_tender_num,
+  max(delta) as max_delta,
+  max(max_tender_num) as max_tender_num,
+  avg(delta) as avg_delta
+From (
+  select
+    distinct
+    t.num || '.' || l.num as lot_num,
+    first_value(t.num || '.' || l.num) OVER (order by nvl(c.confirm_date,:end_date) - wp.confirm_date) min_tender_num,
+    last_value(t.num || '.' || l.num) OVER (order by nvl(c.confirm_date,:end_date) - wp.confirm_date) max_tender_num,
+    tt.name
+      || decode(t.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, null, ' (ЭТП)')
+      || decode(wpl.solution_type_id, <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>, ' ЕИ', null)
+    as tender_type_name,
+    nvl(c.confirm_date,:end_date) - wp.confirm_date as delta
+  from tenders t
+    inner join lots l on t.id = l.tender_id
+    inner join specifications s on l.id = s.lot_id
+    inner join offer_specifications os on s.id = os.specification_id
+    inner join offers o on o.id = os.offer_id and o.status_id = <%= Constants::OfferStatuses::WIN %> and o.version = 0
+    inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+    inner join winner_protocol_lots wpl on wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id
+    inner join dictionaries tt on (tt.ref_id = t.tender_type_id)
+    left join contracts c on (c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+    left join plan_lots pl on l.plan_lot_id = pl.id
+    left join (
+      select tpl.guid, max(tp.date_confirm) as can_date
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      inner join commissions tc on tp.commission_id = tc.id
+      where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+      group by tpl.guid
+    ) can on pl.guid = can.guid
+
+  Where wp.confirm_date between :begin_date and :end_date
+    And can.guid is null -- неотмененная
+    And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+    And l.gkpz_year = :gkpz_year
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+  <% if tender_types.present? %>
+    and t.tender_type_id in (<%= tender_types.join(', ') %>)
+  <% end %>
+
+  <% if directions.present? %>
+    and s.direction_id in (<%= directions.join(', ') %>)
+  <% end %>
+
+  <% if financing_sources.present? %>
+    and s.financing_id in (<%= financing_sources.join(', ') %>)
+  <% end %>
+
+  <% if subject_type.present? %>
+    and l.subject_type_id = <%= subject_type %>
+  <% end %>
+) tr
+Group By tender_type_name
+Order By tender_type_name

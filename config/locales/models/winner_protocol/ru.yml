@@ -1,0 +1,34 @@
+ru:
+  activerecord: &winner_form
+    models:
+      winner_protocol: 'Протокол выбора победителя'
+    attributes:
+      winner_protocol:
+        num: 'Номер протокола'
+        confirm_date: 'Дата вступления в силу'
+        vote_date: 'Дата голосования'
+        tender_id: 'Закупка'
+        violation_reason: 'Причина неисполнения срока подведения итогов'
+    errors:
+      models:
+        winner_protocol:
+          attributes:
+            base:
+              must_have_lots: 'Должен быть выбран хотя бы один лот!'
+              must_have_winner: 'У лота №%{lot} должен быть победитель!'
+              non_sme: "Все участники должены быть субъектами МСП"
+              must_have_violation_reason: 'Должна быть заполнена причина неисполнения срока подведения итогов!'
+            num:
+              must_uniq: "в этой закупке уже есть протокол с таким номером"
+            confirm_date:
+              bigger_then_vote_date: "не может раньше даты голосования"
+              bigger_then_vote_date_3: "не может раньше чем через 3 рабочих дня после даты голосования"
+              already_use: "уже используется в одном из протоколов для выбранных лотов"
+              less_then_review_date: "не может быть меньше даты вступления в силу протокола рассмотрения"
+              not_equal_vote_date: "должна равняться дате голосования"
+            confirm_date:
+              less_then_rebid_date: "не может быть раньше даты голосования протокола переторжки №%{num} от %{date}"
+              less_then_review_date: "не может быть раньше даты голосования протокола рассмотрения №%{num} от %{date}"
+              less_then_open_date: "не может быть раньше даты вскрытия конвертов %{date}"
+  activemodel:
+    <<: *winner_form

@@ -1,0 +1,11 @@
+th #
+th = t('.name')
+th = abbr t("cost_short_#{Setting.company}", default: t('.cost')),
+  t("cost_#{Setting.company}", default: t('.cost_long'))
+th = abbr t('.winner_cost'), t('.winner_cost_long')
+th = t('.winner')
+th = t('.customer')
+th.span1 = abbr t('.announce'), t('.announce_long')
+th.span1 = abbr t('.bid'), t('.bid_long')
+th.span1 = abbr t('.protocol'), t('.protocol_long')
+th.column-icon

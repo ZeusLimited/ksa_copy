@@ -1,0 +1,4 @@
+ru:
+  web_service_mailer:
+    contract_notification:
+      subject: 'Обновление информации по договору'

@@ -1,0 +1,186 @@
+.page-header
+  h2 = @report.row_title('report_title', year: @report.year_end)
+
+- if @report.customer_info
+  table.table.table-bordered.table-center
+    tbody
+      tr
+        th = @report.row_title('customer_name')
+        td = @report.customer_info.name
+      tr
+        th = @report.row_title('ownership')
+        td = @report.customer_info.ownership_fullname
+      tr
+        th = @report.row_title('address')
+        td = @report.address_info
+      tr
+        th = @report.row_title('inn')
+        td = @report.customer_info.inn
+      tr
+        th = @report.row_title('kpp')
+        td = @report.customer_info.kpp
+
+h3 = @report.row_title('partI_title')
+
+- head_rows = CSV.read('app/views/reports/other/inovation_product_amount/csv/main_head.csv')
+table.table.table-bordered.table-center
+  thead
+    - head_rows.each do |row|
+      tr
+        - row.each do |cell|
+          th = cell
+  tbody
+    tr
+      - result = @report.part1_row
+      td 1
+      td = @report.row_title('row1')
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts"],1, 'row1','cnt') if result
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_amount"],1, 'row1','cnt_amount') if result
+    tr
+      - result = @report.part1_row
+      td 2
+      td = @report.row_title('row2')
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts"])), 1, 'row2','cnt') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_nds"])), 1, 'row2','cnt') if result
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount"])), 1, 'row2','cnt_amount') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount_nds"])), 1, 'row2','cnt_amount') if result
+      td.right-cell -
+    tr
+      - result = @report.part2_row
+      td 3
+      td = @report.row_title('row3')
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts"],2,'row3','cnt') if result
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_amount"],2,'row3','cnt_amount') if result
+    tr
+      - result = @report.part2_row
+      td 4
+      td = @report.row_title('row4')
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts"])), 2,'row4','cnt') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_nds"])), 2,'row4','cnt') if result
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount"])), 2,'row4','cnt_amount') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount_nds"])), 2,'row4','cnt_amount') if result
+      td.right-cell -
+    tr
+      - result = @report.part1_row
+      - result2= @report.part2_row
+      td 5
+      td = @report.row_title('row5')
+      - @report.purchase_increase(@report.part1_row, @report.part2_row).each do |el|
+        td.right-cell = [el, el == '-' ? '' : '%'].join
+
+    tr
+      td 6
+      td = @report.row_title('row6')
+      - @report.purchase_share(@report.part2_row).each do |el|
+        td.right-cell = [el, el == '-' ? '' : '%'].join
+
+h3 = @report.row_title('partII_title')
+
+- head_rows = CSV.read('app/views/reports/other/inovation_product_amount/csv/main_head.csv')
+table.table.table-bordered.table-center
+  thead
+    - head_rows.each do |row|
+      tr
+        - row.each do |cell|
+          th = cell
+  tbody
+    tr
+      - result = @report.part3_row
+      td 1
+      td = @report.row_title('row101')
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts"],3,'row101','cnt') if result
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_amount"],3,'row101','cnt_amount') if result
+    tr
+      - result = @report.part3_row
+      td 2
+      td = @report.row_title('row102')
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts"])), 3, 'row102','cnt') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_nds"])), 3, 'row102','cnt') if result
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount"])), 3, 'row102','cnt_amount') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount_nds"])), 3, 'row102','cnt_amount') if result
+      td.right-cell -
+    tr
+      - result = @report.part3_row
+      td 3
+      td = @report.row_title('row103')
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_sme"], 3, 'row103','cnt') if result
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_sme_amount"], 3, 'row103','cnt_amount') if result
+    tr
+      - result = @report.part3_row
+      td 4
+      td = @report.row_title('row104')
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme"])),3,'row104','cnt') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme_nds"])),3,'row104','cnt') if result
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme_amount"])),3,'row104','cnt_amount') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme_amount_nds"])),3,'row104','cnt_amount') if result
+      td.right-cell -
+    tr
+      - result = @report.part4_row
+      td 5
+      td = @report.row_title('row105')
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts"], 4, 'row105','cnt') if result
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_amount"], 4, 'row105','cnt_amount') if result
+    tr
+      - result = @report.part4_row
+      td 6
+      td = @report.row_title('row106')
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts"])), 4, 'row106','cnt') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_nds"])), 4, 'row106','cnt') if result
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount"])), 4, 'row106','cnt') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_amount_nds"])), 4, 'row106','cnt_amount') if result
+      td.right-cell -
+    tr
+      - result = @report.part4_row
+      td 7
+      td = @report.row_title('row107')
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_sme"], 4, 'row107','cnt') if result
+      td.right-cell -
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, result["count_contracts_sme_amount"], 4, 'row107','cnt_amount') if result
+    tr
+      - result = @report.part4_row
+      td 8
+      td = @report.row_title('row108')
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme"])), 4, 'row108','cnt') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme_nds"])), 4, 'row108','cnt') if result
+      td.right-cell -
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme_amount"])), 4, 'row108','cnt_amount') if result
+      td.right-cell = inovation_product_amount_detail(@detail_params, p_money(to_thousand(result["sum_contracts_sme_amount_nds"])), 4, 'row108','cnt_amount') if result
+      td.right-cell -
+    tr
+      td 9
+      td = @report.row_title('row109')
+      - @report.purchase_increase(@report.part3_row, @report.part4_row, '_sme').each do |el|
+        td.right-cell = [el, el == '-' ? '' : '%'].join
+    tr
+      td 10
+      td = @report.row_title('row110')
+      - @report.purchase_share(@report.part4_row,'_sme').each do |el|
+        td.right-cell = [el, el == '-' ? '' : '%'].join

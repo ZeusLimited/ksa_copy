@@ -1,0 +1,18 @@
+tr
+  td
+    = f.check_box :enable, readonly: f.object.lot_status_id != Constants::LotStatus::OPEN
+    = f.hidden_field :lot_id
+    = f.hidden_field :review_protocol_id
+  td= f.object.lot_name_with_cust
+  td.right-cell= p_money f.object.lot_specs_cost
+  td
+    = f.input :rebid, as: :radio_buttons, collection: [['Да', true] ,['Нет', false]], label: false,
+      input_html: { disabled: f.object.lot_status_id != Constants::LotStatus::OPEN, class: 'rebid_switch' }
+  td.no-wrap
+    = f.input :rebid_date, label: false do
+      = f.fields_for :compound_rebid_date do |fields|
+        = fields.text_field :date, disabled: !f.object.rebid.to_b, class: "datepicker input-small"
+        = timepicker_div { fields.text_field :time, disabled: !f.object.rebid.to_b, class: "timepicker input-mini" }
+  td
+    = f.input :rebid_place, label: false,
+      input_html: { disabled: !f.object.rebid.to_b, class: 'input-block-level address_name' }

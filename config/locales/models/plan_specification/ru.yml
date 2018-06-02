@@ -1,0 +1,70 @@
+ru:
+  activerecord:
+    models:
+      plan_specification: 'Cпецификация'
+    attributes:
+      plan_specification: &plan_spec
+        bp_item: "Номер пункта ФБ / Строка бизнес-плана"
+        bp_state_id: "Бюджетный кодификатор"
+        name: "Наименование спецификации"
+        unit_name: "Ед. измерения (ОКЕИ)"
+        num_spec: "№ спец."
+        cost: "Цена, руб. без НДС"
+        cost_money: "Цена, руб. без НДС"
+        cost_doc: "Документ определяющий цену"
+        delivery_date_begin: "Начало поставки"
+        delivery_date_end: "Окончание поставки"
+        consumer: "Потребитель"
+        consumer_name: "Потребитель"
+        consumer_id: "Потребитель"
+        production_unit_ids: "Производственные подразделения"
+        customer: "Заказчик"
+        customer_id: "Заказчик"
+        customer_name: "Заказчик"
+        potential_participants: "Потенциальные участники"
+        monitor_service: "Курирующее подразделение"
+        note: "Примечания"
+        requirements: "Мин. необходимые требования к закупаемой продукции"
+        curator: "Куратор"
+        tech_curator: "Технический куратор"
+        okdp_id: "ОКДП"
+        okved_id: "ОКВЭД"
+        okdp_name: "ОКДП"
+        okved_name: "ОКВЭД"
+        okdp_fullname: "ОКДП"
+        okved_fullname: "ОКВЭД"
+        direction_id: "Направление закупки"
+        direction_name: "Направление закупки"
+        financing: "Источник финансирования"
+        financing_id: "Источник финансирования"
+        financing_name: "Источник финансирования"
+        cost_nds: "Цена, руб. с НДС"
+        cost_nds_money: "Цена, руб. с НДС"
+        product_type_id: "Вид продукции"
+        invest_name: "Наименование инвест. проекта"
+        qty: "Кол-во"
+        unit: "Единицы измерения"
+        monitor_service_id: "Курирующее подразделение"
+        monitor_service_name: "Курирующее подразделение"
+        fias_plan_specifications: 'Адрес поставки'
+      plan_specifications:
+        <<: *plan_spec
+        base: "Спецификация: "
+    errors:
+      models:
+        plan_specification:
+          attributes:
+            okdp_name:
+              okdp_level: "Первый и второй уровни выбирать нельзя, выберите раздел уровнём ниже."
+              okdp_type_new: 'должен быть выбран из обновленного справочника ОК 034-2014 (КПЕС 2008)'
+              okdp_type_old: 'должен быть выбран из справочника ОК 004-93'
+            okved_name:
+              okved_type_new: 'должен быть выбран из обновленного справочника ОК 029-2014 (КДЕС Ред. 2)'
+              okved_type_old: 'должен быть выбран из справочника ОК 029-2001 (КДЕС Ред. 1)'
+            cost_money:
+              eq_0: "не может быть 0"
+              not_eq_0: "должна быть 0"
+            cost_nds_money:
+              eq_0: "не может быть 0"
+              not_eq_0: "должна быть 0"
+              not_less_cost: "не может быть меньше цены без НДС"

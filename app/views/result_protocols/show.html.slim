@@ -1,0 +1,43 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top=20
+    ul.nav.nav-pills
+      li= link_to t('.list'), tender_result_protocols_path(tender)
+      li= link_to t('edit'), edit_tender_result_protocol_path(tender, result_protocol)
+      li= link_to t('.map'), map_by_lot_tender_bidders_path(tender)
+
+.page-header
+  .btn-group.pull-right.span2
+    button.btn.btn-primary.input-block-level.dropdown-toggle(data-toggle='dropdown')
+      ' Действия
+      span.caret
+    ul.dropdown-menu
+      - if can?(:sign, @result_protocol)
+        li
+          = link_to t('.sign'),
+            sign_tender_result_protocol_path(tender, result_protocol), method: :patch
+      - if can?(:revoke_sign, @result_protocol)
+        li
+          = link_to t('.cancel_sign'),
+            revoke_sign_tender_result_protocol_path(tender, result_protocol), method: :patch
+  h1 = t('.header')
+
+= render 'tenders/tender_header', tender: tender
+
+h4
+  => t('.subtitle', num: result_protocol.num, date: result_protocol.sign_date)
+  = link_to_history_icon(result_protocol)
+
+legend = t('lots')
+table.table.table-bordered.table-striped
+  thead
+    tr
+      th.span7 = t('.table.name')
+      th.span3 = t('.table.cost')
+      th.span2 = t('.table.status')
+  tbody
+    - result_protocol.lots.order(:num).each do |lot|
+      tr
+        td= lot.name_with_cust
+        td.right-cell= p_money lot.specs_cost
+        td style=(lot.status_stylename_html)
+          = lot.status_name

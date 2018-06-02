@@ -1,0 +1,7 @@
+head_rows_2 = CSV.read('app/views/reports/other/execute_gkpz/csv/main_head_II.csv')
+
+rows = []
+head_rows_2.each { |head_row_2| rows << @sheet.add_row(head_row_2, style: @styles[:th]) }
+rows[0].height = 50
+rows[1].height = 20
+AxlsxExt::AutoMergeNil.merge_rows(rows)

@@ -1,0 +1,27 @@
+ru:
+  activerecord:
+    models:
+      unfair_contractor: 'Недобросовестные контрагенты'
+    attributes:
+      unfair_contractor:
+        num: 'Номер реестровой записи'
+        date_in: 'Дата включения в реестр'
+        date_out: 'Дата исключения из реестра'
+        contractor_reg_date: 'Дата регистрации юр. лица'
+        contractor_fullname: 'Контрагент'
+        contractor_legal_addr: 'Адрес контрагента'
+        inn_ogrn: 'ИНН и ОГРН'
+        note: 'Примечание'
+        lots: 'Сведения о проведенных закупочных процедурах'
+        contractor_id: 'Контрагент'
+        contract_info: 'Сведения о договоре'
+        unfair_info: 'Основание для расторжения договора'
+        lot_ids: 'Выберите лот или тендер, с котором были проблемы'
+    errors:
+      models:
+        unfair_contractor:
+          attributes:
+            inn:
+              uniq_inn: "уже есть контрагент с таким номером"
+            name:
+              with_quots: "Кавычки запрещены"

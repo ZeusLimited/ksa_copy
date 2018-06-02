@@ -1,0 +1,14 @@
+wb.add_worksheet(name: name, page_margins: margins, page_setup: setup, print_options: options) do |sheet|
+
+  sheet.add_row [fullname, nil, nil, nil], style: style_title
+  sheet.add_row ["Период: #{time}", nil, nil, nil]
+  sheet.add_row ["Номер закупки", "Наименование закупки", "Дата заключения договора", "Сумма договора (руб. с НДС)"], style: style_th
+  rep.each do |row|
+    sheet.add_row [row['tender_num'], row['lot_name'], row['contract_date'], row['contract_cost_nds']], style: style
+  end
+
+  sheet.merge_cells sheet.rows[0].cells[0..3]
+  sheet.merge_cells sheet.rows[1].cells[0..3]
+  sheet.column_widths 15, 75, 15, 15
+
+end

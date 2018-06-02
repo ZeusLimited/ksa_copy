@@ -1,0 +1,11 @@
+= simple_form_for @monitor_service do |f|
+  = error_messages_for @monitor_service
+
+  .row
+    .span12
+      = f.input :department_id do
+        = f.hidden_field :department_id, class: 'monitor_service input-block-level'
+
+  .form-actions
+    => f.submit t('save'), class: 'btn btn-primary'
+    = link_to_back_or_default t('cancel'), monitor_services_path, class: 'btn btn-warning'

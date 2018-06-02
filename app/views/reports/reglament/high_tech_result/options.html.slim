@@ -1,0 +1,52 @@
+= input_block_form_for @options, url: reports_reglament_high_tech_result_show_path,
+  method: :get, html: { target: '_blank' } do |f|
+
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2 = f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2 = f.input :date_end, input_html: { class: 'datepicker' }
+      .span2 = f.input :gkpz_year, collection: gkpz_years_range, include_blank: false
+    .row
+      .span6
+        = f.input :customers,
+          collection: Department.customers_by_root(current_user.root_dept_id),
+          label_method: :name_with_depth_symbols,
+          input_html: multi,
+          include_hidden: false,
+          label_html: { class: 'select-all-clear-roots' }
+    .row
+      .span6
+        = f.input :organizers,
+          collection: Department.organizers_by_root,
+          label_method: :name_with_depth_symbols,
+          input_html: multi,
+          include_hidden: false,
+          label_html: { class: 'select-all-clear-roots' }
+    .row
+      .span3
+        = f.input :tender_types,
+          collection: Dictionary.tender_types,
+          input_html: multi,
+          include_hidden: false,
+          label_html: { class: 'select-all-clear' }
+      .span3
+        = f.input :subject_type, collection: Dictionary.subject_types, input_html: { data: { placeholder: 'Все' } }
+    .row
+      .span3
+        = f.input :directions,
+          collection: Direction.order(:position),
+          input_html: multi,
+          include_hidden: false,
+          label_html: { class: 'select-all-clear' }
+      .span3
+        = f.input :financing_sources,
+          collection: Dictionary.financing_sources,
+          input_html: multi,
+          include_hidden: false,
+          label_html: { class: 'select-all-clear' }
+    .row
+      .span3 = f.input :show_root, as: :boolean
+      .span2= f.input :format, collection: { 'Excel' => 'xlsx' }, include_blank: false
+
+    .form-actions
+      = f.button :button, class: 'btn btn-primary', name: nil

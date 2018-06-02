@@ -1,0 +1,7 @@
+ru:
+  activerecord:
+    models:
+      monitor_service: 'Курирующие подразделения'
+    attributes:
+      monitor_service:
+        department_id: 'Курирующее подразделение'

@@ -1,0 +1,310 @@
+wb = xlsx_package.workbook
+
+def row_height(names)
+  max_length = names.map(&:to_s).map(&:length).max
+  max_length > 0 ? (max_length.to_f / 33).ceil * 20 : 20
+end
+
+def bp_item
+  'bp_item'
+end
+
+# style_shout = wb.styles.add_style sz: 16, b: true, alignment: { horizontal: :center }
+style_th = wb.styles.add_style b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: { horizontal: :center, vertical: :center, wrap_text: true }
+style_td = wb.styles.add_style border: Axlsx::STYLE_THIN_BORDER, alignment: { horizontal: :center, vertical: :center, wrap_text: true }
+style_td_left = wb.styles.add_style border: Axlsx::STYLE_THIN_BORDER, alignment: { horizontal: :left, vertical: :center, wrap_text: true }
+style_td_right = wb.styles.add_style border: Axlsx::STYLE_THIN_BORDER, alignment: { horizontal: :right, vertical: :center, wrap_text: true }
+style_td_money = wb.styles.add_style format_code: '#,##0.00', border: Axlsx::STYLE_THIN_BORDER, alignment: { horizontal: :right, vertical: :center, wrap_text: true }
+wb.add_worksheet(name: "ГКПЗ") do |sheet|
+  # head
+  # row 1
+  sheet.add_row [
+    'Заказчик',
+    'Потребитель',
+    'Наименование закупаемой продукции',
+    'Номер лота',
+    t('.dir_name'),
+    'Источник финансирования',
+    'Планируемая цена лота (руб. БЕЗ учета НДС)',
+    'Планируемая цена лота (руб. с учетом НДС)',
+    'Дата официального объявления о начале процедур',
+    'Планируемый способ закупки',
+    'Использование электронной торговой площадки (да/нет)',
+    'Предприятие - организатор закупки',
+    'Конкурсная комиссия организатора (1 или 2 уровень, специальная комиссия)',
+    'Подразделение АО "РАО Энергетические системы Востока" - куратор закупки',
+    'Дата начала поставки товаров, выполнения работ, услуг',
+    '',
+    'Дата окончания поставки товаров, выполнения работ, услуг',
+    '',
+    'Участники процедуры (указываются все потенциальные участники процедуры, для открытых процедур указываются особо значимые участники)',
+    t(".#{bp_item}"),
+    'Отношение к участию МСП',
+    'Учет в совокупном годовом объеме договоров с МСП (Постановление правительства №1352 от 11.12.2014)',
+    'Планируемая сумма освоения - затраты, на основании планируемого выполнения работ, оказания услуг, поставки товара в соответствующем году:',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'Примечание',
+    "Куратор (Фамилия И.О.)",
+    "Технический куратор (Фамилия И.О.)",
+    "Статус",
+    "Статус в исполнении",
+    "Причина отсутсвия старта",
+    "Дата направления поручения",
+    "Крайний срок направления поручения",
+    "ОКДП",
+    "ОКВЭД",
+    "Регион поставки",
+    ''
+  ], height: 30, style: style_th
+  # row 2
+  sheet.add_row [
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'Планируемая сумма освоения в планируемом году, руб.',
+    '',
+    'Планируемая сумма освоения в году следующем за планируемым, руб.',
+    '',
+    "Планируемая сумма освоения в ... году, руб.",
+    '',
+    "Планируемая сумма освоения в ... году, руб.",
+    '',
+    "Планируемая сумма освоения в ... году, руб.",
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    "Код по ОКАТО",
+    "Наименование"
+  ], height: 30, style: style_th
+  # row 3
+  sheet.add_row [
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'дата (дд.мм.гггг)',
+    'год',
+    'дата (дд.мм.гггг)',
+    'год',
+    '',
+    '',
+    '',
+    '',
+    'без учета НДС',
+    'с учетом НДС',
+    'без учета НДС',
+    'с учетом НДС',
+    'без учета НДС',
+    'с учетом НДС',
+    'без учета НДС',
+    'с учетом НДС',
+    'без учета НДС',
+    'с учетом НДС',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
+  ], height: 30, style: style_th
+  # row 4
+  sheet.add_row %w(1 x 2 3 4 5 6 7 8 9 10 11 12 13 x 14 x 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41), style: style_th
+
+  sheet.merge_cells("A1:A3")
+  sheet.merge_cells("B1:B3")
+  sheet.merge_cells("C1:C3")
+  sheet.merge_cells("D1:D3")
+  sheet.merge_cells("E1:E3")
+  sheet.merge_cells("F1:F3")
+  sheet.merge_cells("G1:G3")
+  sheet.merge_cells("H1:H3")
+  sheet.merge_cells("I1:I3")
+  sheet.merge_cells("J1:J3")
+  sheet.merge_cells("K1:K3")
+  sheet.merge_cells("L1:L3")
+  sheet.merge_cells("M1:M3")
+  sheet.merge_cells("N1:N3")
+
+  sheet.merge_cells("O1:P2")
+  sheet.merge_cells("Q1:R2")
+  sheet.merge_cells("O4:P4")
+  sheet.merge_cells("Q4:R4")
+
+  sheet.merge_cells("S1:S3")
+  sheet.merge_cells("T1:T3")
+  sheet.merge_cells("U1:U3")
+  sheet.merge_cells("V1:V3")
+
+  sheet.merge_cells("W1:AF1")
+  sheet.merge_cells("W2:X2")
+  sheet.merge_cells("Y2:Z2")
+  sheet.merge_cells("AA2:AB2")
+  sheet.merge_cells("AC2:AD2")
+  sheet.merge_cells("AE2:AF2")
+
+  sheet.merge_cells("AG1:AG3")
+  sheet.merge_cells("AH1:AH3")
+  sheet.merge_cells("AI1:AI3")
+  sheet.merge_cells("AJ1:AJ3")
+  sheet.merge_cells("AK1:AK3")
+  sheet.merge_cells("AL1:AL3")
+  sheet.merge_cells("AM1:AM3")
+  sheet.merge_cells("AN1:AN3")
+  sheet.merge_cells("AO1:AO3")
+  sheet.merge_cells("AP1:AP3")
+
+  sheet.merge_cells("AQ1:AR1")
+  sheet.merge_cells("AQ2:AQ3")
+  sheet.merge_cells("AR2:AR3")
+
+  # body
+  @plan_lots.each do |plan_lot|
+    sheet.add_row [
+      plan_lot['root_customer_name'],
+      plan_lot['consumer_name'],
+      plan_lot['name'],
+      plan_lot['lot_number'],
+      plan_lot['dir_name'],
+      plan_lot['source_finance'],
+      plan_lot['price'],
+      plan_lot['price_nds'],
+      plan_lot['announce_date'].try(:strftime, '%d.%m.%Y'),
+      plan_lot['tend_type_name'],
+      plan_lot['etp_address_id'].nil? || plan_lot['etp_address_id'] == Constants::EtpAddress::NOT_ETP ? 'Нет' : 'Да',
+      plan_lot['org_name'],
+      plan_lot['comm_type_name'],
+      plan_lot['dep_kurator'],
+      plan_lot['delivery_date_begin'].try(:strftime, '%d.%m.%Y'),
+      plan_lot['delivery_date_begin_year'],
+      plan_lot['delivery_date_end'].try(:strftime, '%d.%m.%Y'),
+      plan_lot['delivery_date_end_year'],
+      plan_lot['plan_contractors'],
+      plan_lot[bp_item],
+      plan_lot['sme_type'],
+      plan_lot['order1352'],
+      plan_lot['amount_mastery1'],
+      plan_lot['amount_mastery_nds1'],
+      plan_lot['amount_mastery2'],
+      plan_lot['amount_mastery_nds2'],
+      plan_lot['amount_mastery3'],
+      plan_lot['amount_mastery_nds3'],
+      plan_lot['amount_mastery4'],
+      plan_lot['amount_mastery_nds4'],
+      plan_lot['amount_mastery5'],
+      plan_lot['amount_mastery_nds5'],
+      plan_lot['note'],
+      plan_lot['curator'],
+      plan_lot['tech_curator'],
+      plan_lot['status_name'],
+      plan_lot['lot_status_fullname'],
+      plan_lot['non_execute'],
+      plan_lot['charge_date'].try(:strftime, '%d.%m.%Y'),
+      plan_lot['deadline_charge_date'].try(:strftime, '%d.%m.%Y'),
+      plan_lot['okdp'],
+      plan_lot['okved'],
+      plan_lot['fias_okato'],
+      plan_lot['fias_name']
+    ], height: row_height([plan_lot['name'], plan_lot['note']]),
+       style: [
+         style_td_left,
+         style_td_left,
+         style_td_left,
+         style_td,
+         style_td,
+         style_td,
+         style_td_money,
+         style_td_money,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td_left,
+         style_td,
+         style_td,
+         style_td,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_money,
+         style_td_left,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td,
+         style_td
+       ]
+
+  end
+
+  sheet.column_widths 25, 25, 30, 10, 15, 10, 14, 14, 14, 30, 15, 20, 15, 15, 15, 15, 15, 15, 30, 30, 15, 30, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 30, 25, 25, 25, 25, 25, 15, 15, 20, 20, 20, 20
+
+end

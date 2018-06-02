@@ -1,0 +1,24 @@
+- files = files.includes(:file_type) if type
+table.table.table-hover.table-striped
+  thead
+    tr
+      th &nbsp;
+      th = t('modal_files.file')
+      th = t('modal_files.size')
+      - if type
+        th = t('modal_files.type')
+      th = t('modal_files.note')
+      th = t('modal_files.load')
+      th = t('modal_files.owner')
+  tbody.tender_files
+    - files.includes(tender_file: :user).each do |file|
+      - tender_file = file.tender_file
+      tr
+        td = link_to icon_for_tender_file(tender_file, '32px'), tender_file.document.valid_url, target: '_blank'
+        td = link_to truncate(tender_file.read_attribute(:document)), tender_file.document.valid_url, target: '_blank'
+        td = number_to_human_size tender_file.file_size
+        - if type
+          td = text_field_tag(nil, file.file_type.try(:name), id: nil, readonly: true)
+        td = text_area_tag nil, file.note, rows: 2, id: nil, readonly: true
+        td = abbr(l(tender_file.created_at), l(tender_file.created_at, format: :long))
+        td = abbr(tender_file.user.fio_short, tender_file.user.fio_full)

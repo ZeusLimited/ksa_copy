@@ -1,0 +1,252 @@
+select sub.*,
+  case
+    when amounts_cnt > 1 then 1
+    else 0
+  end as is_long_term,
+  case
+    when amounts_cnt > 1 then amounts_text
+    else null
+  end as amount_long_term,
+  case
+    when amounts_cnt > 1 and sub.sme_type_id = <%= Constants::SmeTypes::SME %> then amounts_text
+    when amounts_cnt > 1 and coalesce(sub.sme_type_id,'0') != <%= Constants::SmeTypes::SME %> then amounts_text_sme
+    else null
+  end as amount_long_term_sme
+from
+(
+  select
+  pl.id,
+  okved,
+  okdp,
+  pl.lot_name,
+  requirements,
+  'x' as unit_code,
+  'x' as unit_name,
+  'x' as qty,
+  'x' as fias_okato,
+  'x' as fias_name,
+  case when announce_year = :begin_year then sum(cost) else 0 end as cost,
+  case when announce_year = :begin_year then sum(cost_nds) else 0 end as cost_nds,
+  announce_year,
+  extract (year from delivery_date_end) as delivery_date_end,
+  'x' as tender_type_name,
+  'x' as is_elform,
+  pl.sme_type_id,
+  pl.order1352_id,
+  pl.ord,
+  pl.eis_num,
+  'x' as tender_type_fullname,
+  decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 0, 1) as is_elform_roseltorg,
+  'x' as tender_type_code_roseltorg,
+  decode(pl.sme_type_id, <%= Constants::SmeTypes::SME %>, 1, 0) as sme_roseltorg,
+
+  case
+    when pl.order1352_id = <%= Constants::Order1352::SELECT %> or order1352_name is null then '0'
+    else REPLACE(order1352_name, '1.', '')
+  end as order1352_roseltorg,
+
+  null as exchange_rate,
+  null as date_exchange_rate,
+
+  case
+    when pl.main_direction_id in (<%= [yaml_directions['inivp_invest'], yaml_directions['inivp']].join(', ') %>)
+      then 1
+    else 0
+  end as innovation_roseltorg,
+
+  pl.eis_num as rn,
+  (row_number() over (partition by pl.id order by lot_id nulls first) - 1) as lot_num,
+  pl.gkpz_first_cost,
+  pl.gkpz_last_cost,
+  pl.first_announce_date,
+  pl.second_announce_date,
+  pl.first_tender_type,
+  pl.second_tender_type,
+  pl.first_delivery_date,
+  pl.second_delivery_date,
+  pl.gkpz_first_state,
+  null as additional_info,
+
+  case
+    when pl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+      then 'A'
+    when pl.lot_status_id > <%= Constants::LotStatus::NEW %>
+      then 'P'
+    else
+      'N'
+  end as status,
+
+  case
+    when pl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+      then  1
+    when pl.lot_status_id in (<%= Constants::LotStatus::FATAL.join(', ') %>)
+      then 3
+    else
+      0
+  end as cancellation_reason
+  from (
+    select
+    distinct
+    pl.id,
+    pl.tender_type_id,
+    pl.etp_address_id,
+    extract (year from pl.announce_date) as announce_year,
+    pl.root_customer_id,
+    pl.sme_type_id,
+    pl.lot_name,
+    pl.status_id,
+    pl.version,
+    pl.order1352_id,
+    pl.subject_type_id,
+    pl.state,
+    pl.department_id,
+    ps.id as spec_id,
+    ps.num_spec,
+    ps.OKVED_ID,
+    first_value(okved.code) over (partition by pl.id order by ps.num_spec) as okved,
+    ps.OKDP_ID,
+    first_value(okdp.code) over (partition by pl.id order by ps.num_spec) as okdp,
+    first_value(ps.REQUIREMENTS) over (partition by pl.id order by ps.num_spec) as requirements,
+    ps.UNIT_ID,
+    ps.qty * ps.cost as cost,
+    ps.qty * ps.cost_nds as cost_nds,
+    ps.customer_id,
+    ps.direction_id,
+    first_value(ps.delivery_date_end) over (partition by pl.id order by ps.num_spec) as delivery_date_end,
+    first_value(pl.created_at) over (partition by pl.guid order by pl.created_at) as ord,
+    epl.num as eis_num,
+    order1352.name as order1352_name,
+    pl.announce_date,
+    pl.main_direction_id,
+    l.id as lot_id,
+    l.status_id as lot_status_id,
+    gkpz_first.sum_cost as gkpz_first_cost,
+    gkpz_last.sum_cost as gkpz_last_cost,
+    gkpz_first.announce_date as first_announce_date,
+    gkpz_last.announce_date as second_announce_date,
+    gkpz_first.tender_type_id as first_tender_type,
+    gkpz_last.tender_type_id as second_tender_type,
+    gkpz_first.delivery_date as first_delivery_date,
+    gkpz_last.delivery_date as second_delivery_date,
+    gkpz_first.state as gkpz_first_state
+    from plan_lots pl
+      inner join plan_specifications ps on (pl.id = ps.plan_lot_id)
+      left join okdp on (okdp.id = ps.okdp_id)
+      left join okved on (okved.id = ps.okved_id)
+      left join dictionaries order1352 on order1352.ref_id = pl.order1352_id
+      left join lots l on pl.guid = l.plan_lot_guid
+      left join
+      (select * from
+        (select tpl.*, tps.sum_cost, tps.delivery_date, row_number() over (partition by tpl.guid order by tp.date_confirm) rn
+            from plan_lots tpl
+            inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_gkpz_on_state
+              inner join
+                (
+                  select plan_lot_id, sum(cost * qty) as sum_cost, max(delivery_date_end) as delivery_date from plan_specifications ps group by plan_lot_id
+                ) tps on tps.plan_lot_id = tpl.id
+           where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+         ) sub
+         where rn = 1
+       ) gkpz_first on (pl.guid = gkpz_first.guid)
+      left join
+       (select * from
+         (select tpl.*, tps.sum_cost, tps.delivery_date, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+             from plan_lots tpl
+             inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_gkpz_on_state
+             inner join
+               (
+                 select plan_lot_id, sum(cost * qty) as sum_cost, max(delivery_date_end) as delivery_date from plan_specifications ps group by plan_lot_id
+               ) tps on tps.plan_lot_id = tpl.id
+          where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+        ) sub
+        where rn = 1
+      ) gkpz_last on (pl.guid = gkpz_last.guid)
+      left join eis_plan_lots epl on epl.plan_lot_guid = pl.guid and epl.year = EXTRACT (YEAR FROM pl.announce_date)
+    where EXTRACT (YEAR FROM pl.announce_date) in (:years)
+      And ps.direction_id in (<%= Direction.inivp.select(:id).to_sql %>)
+    ) pl
+    <% unless gkpz_type == 'current' %>
+    inner join
+      (select * from
+        (
+          select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc, tpl.version) as rn
+          from plan_lots tpl
+            inner join protocols tp on (tpl.protocol_id = tp.id)
+          Where tp.date_confirm <= :date_gkpz_on_state
+        ) sub
+        Where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+      ) gkpz_pl
+      on pl.id = gkpz_pl.id
+    <% end %>
+    left join units u on (u.id = pl.unit_id)
+    left join dictionaries order1352 on order1352.ref_id = pl.order1352_id
+    Where pl.announce_year in (:years)
+
+<% case gkpz_type
+  when 'gkpz' %>
+  And pl.state = 1
+<% when 'unplanned' %>
+  And pl.state = 0
+<% when 'current' %>
+  And pl.version = 0
+<% end %>
+
+<% unless current_user_root_dept_id.nil? %>
+  And pl.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customers.present? %>
+  And pl.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  And pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if statuses.present? %>
+  And pl.status_id in (<%= statuses.join(', ') %>)
+<% end %>
+
+<% if etp_addresses.present? %>
+  And pl.etp_address_id in (<%= etp_addresses.join(', ') %>)
+<% end %>
+
+<% if tender_types.present? %>
+  And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  And pl.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if subject_types.present? %>
+  And pl.subject_type_id in (<%= subject_types.join(', ') %>)
+<% end %>
+
+Group By pl.id, pl.lot_name, pl.etp_address_id, pl.sme_type_id, pl.root_customer_id, pl.okved, pl.okdp, pl.requirements,
+         pl.announce_year, pl.ord, pl.order1352_id, order1352.name, pl.delivery_date_end,
+         pl.announce_date,pl.eis_num,pl.order1352_name,pl.main_direction_id,pl.status_id,pl.lot_id,pl.lot_status_id,
+         pl.gkpz_first_cost, pl.gkpz_last_cost, pl.first_announce_date, pl.second_announce_date,
+         pl.first_tender_type, pl.second_tender_type, pl.first_delivery_date, pl.second_delivery_date, pl.gkpz_first_state
+
+) sub
+
+left join lateral
+    (select psa_year_sum.id, sum(amount_cnt) as amounts_cnt,
+            string_agg(psa_year_sum.amount_year || ':' || psa_year_sum.amount_finance,';' order by psa_year_sum.amount_year) as amounts_text,
+            string_agg(psa_year_sum.amount_year || ':0',';' order by psa_year_sum.amount_year) as amounts_text_sme
+       from
+         (select pl.id, psa.year as amount_year, count(distinct ps_a.id) as spec_count, count(distinct psa.year) as amount_cnt, sum(amount_finance) as amount_finance
+           from plan_lots pl
+                inner join plan_specifications ps_a on pl.id = ps_a.plan_lot_id
+                inner join plan_spec_amounts psa  on psa.plan_specification_id = ps_a.id
+           where sub.id = pl.id
+           group by pl.id,psa.year
+         ) psa_year_sum
+       group by psa_year_sum.id
+    ) psa_sum_text on true
+
+where sub.lot_num = 0

@@ -1,0 +1,35 @@
+.page-header
+  .btn-group.pull-right.span2
+    button.btn.btn-primary.input-block-level.dropdown-toggle data-toggle='dropdown'
+      = t('.actions')
+      span.caret
+    ul.dropdown-menu
+      li= link_to t('.remove_all'), clear_cart_lots_path, method: :delete
+      li= link_to t('.exec_zzc'), new_from_frame_tenders_path
+  h1 = t('.header')
+
+.alert.alert-info = t('exec_from_frame_info')
+
+table.table.table-bordered.table-striped.tenders_list
+  thead
+    tr
+      th &nbsp;
+      th = t('.table.lot_num')
+      th = t('.table.lot_name')
+      th = t('.table.cost')
+      th = t('.table.status')
+      th = t('.table.tender_type')
+      th &nbsp;
+  tbody
+    - @cart.each do |lot|
+      tr
+        td
+          = link_icon_title 'icon-remove', t('.remove'), cart_lot_path(lot), method: :delete,
+              data: { confirm: t('.confirm') }
+        td= lot.fullnum
+        td= lot.name
+        td.right-cell= p_money lot.specs_cost
+        td= lot.status_name
+        td= lot.tender_type_name
+        td
+          = link_icon_title 'icon-info-sign', t('.show'), tender_path(lot.tender)

@@ -1,0 +1,28 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 = t('.header')
+
+= render 'tenders/tender_header', tender: tender
+
+p.text-right
+  = link_to t('.create_protocol'), new_tender_winner_protocol_path(tender), class: "btn btn-primary"
+
+table.table.table-bordered.table-striped.table-nonfluid
+  thead
+    tr
+      th = t('.table.num')
+      th = t('.table.date')
+      th
+      th
+      th
+  tbody
+  - tender.winner_protocols.each do |winner_protocol|
+    tr
+      td = winner_protocol.num
+      td = winner_protocol.confirm_date
+      td = link_icon_title 'icon-info-sign', t('icon-show'), [tender, winner_protocol]
+      td = link_icon_title 'icon-edit', t('edit'), edit_tender_winner_protocol_path(tender, winner_protocol)
+      td
+        = link_icon_title 'icon-trash', t('icon-delete'), [tender, winner_protocol], method: :delete,
+          data: { confirm: t('confirm') }

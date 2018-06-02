@@ -1,0 +1,33 @@
+ru:
+  activerecord:
+    models:
+      offer_specification: 'Спецификация оферты'
+    attributes:
+      offer_specification: &offer_specification
+        cost: 'Цена'
+        cost_money: 'Цена без НДС'
+        nds: 'НДС'
+        cost_nds: 'Цена с НДС'
+        cost_nds_money: 'Цена с НДС'
+        final_cost: 'Окончательная цена'
+        final_cost_money: 'Окончательная цена без НДС'
+        final_cost_nds: 'Окончательная цена с НДС'
+        final_cost_nds_money: 'Окончательная цена с НДС'
+        offer_id: 'Оферта'
+        specification_id: 'Спецификация'
+      tender/bidders/offers/offer_specifications:
+        <<: *offer_specification
+      offer_specifications:
+        <<: *offer_specification
+    errors:
+      models:
+        offer_specification:
+          attributes:
+            cost_money:
+              non_zero: "не может быть 0"
+            cost_nds_money:
+              non_zero: "не может быть 0"
+            final_cost_money:
+              non_zero: "не может быть 0"
+            final_cost_nds_money:
+              non_zero: "не может быть 0"

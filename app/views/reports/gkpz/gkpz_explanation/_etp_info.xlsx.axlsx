@@ -1,0 +1,15 @@
+@simple_sheet.add_row_title(t('.etp_title', holding: @holding_name), style: @styles[:title], column_count: 4)
+
+row_begin = @sheet.rows.size
+
+add_text_row t(".etp_info",
+               count: @report.gkpz_row['cnt_etp'],
+               cost: xlsx_money(@report.gkpz_row['cost_nds_etp']),
+               holding: @holding_name,
+               percent: xlsx_money(@report.gkpz_row['cost_nds_reg'] != 0 ? @report.gkpz_row['cost_nds_etp'] / @report.gkpz_row['cost_nds_reg'] * 100 : 0))
+
+add_text_row t(".order616")
+
+@sheet.rows[row_begin..row_begin + 2].each do |row|
+  @sheet.merge_cells row.cells[0..3]
+end

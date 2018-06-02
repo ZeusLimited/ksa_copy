@@ -1,0 +1,5 @@
+ru:
+  rebid_protocol_decorator:
+    gkpz: 'ГКПЗ %{ownership} «%{name}» на %{year}'
+    czk: 'ЦЗК %{ownership} «%{name}» от %{date} №%{num}'
+    lot: 'По лоту №%{num} - %{cost}'

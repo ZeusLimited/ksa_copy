@@ -1,0 +1,17 @@
+.covers {
+  #background-color: #A7DFF1;
+  #border: 1px solid #033C73;
+  padding-bottom: 10px;
+}
+
+.covers-even {
+  background-color: #FFFFDB;
+}
+
+td.no-wrap { white-space: nowrap; }
+
+td.active { background-color: #F5F5F5; }
+td.success { background-color: #DFF0D8; }
+td.info { background-color: #D9EDF7; }
+td.warning { background-color: #FCF8E3; }
+td.danger { background-color: #F2DEDE; }

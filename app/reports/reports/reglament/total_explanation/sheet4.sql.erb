@@ -1,0 +1,77 @@
+<% def select_dir(f)
+    field = ->(name) { f[:subj] ? "decode(subject_type_id, #{f[:subj]}, #{name}, 0)" : name }
+
+    <<-SQL
+      --#{f[:name]}
+      round(sum(decode(direction_id, #{f[:dir]}, #{field.call('gkpz_cost_nds')}, 0)) / 1000, 2) as #{f[:name]}_cost_nds,
+      round(sum(decode(direction_id, #{f[:dir]}, #{field.call('public_cost_nds')}, 0)) / 1000, 2) as #{f[:name]}_pcost_nds,
+      round(sum(decode(direction_id, #{f[:dir]}, #{field.call('average_cost_nds')}, 0)) / 1000, 2) as #{f[:name]}_avg_cost,
+      round(sum(decode(direction_id, #{f[:dir]}, #{field.call('final_cost_nds')}, 0)) / 1000, 2) as #{f[:name]}_fcost_nds,
+    SQL
+  end
+%>
+
+select
+<% fields.each do |f| %>
+  <%= select_dir(f) %>
+<% end %>
+null as xx
+
+From (
+select
+  l.id,
+  l.subject_type_id,
+  s.direction_id,
+  o.status_id,
+  nvl(gkpz_ps.qty * gkpz_ps.cost_nds, s.qty * s.cost_nds) as gkpz_cost_nds,
+  s.qty * s.cost_nds as public_cost_nds,
+  s.qty * os.final_cost_nds as final_cost_nds,
+  case when sum(decode(o.status_id, <%= Constants::OfferStatuses::REJECT %>, 0, 1)) over (partition by l.id, s.direction_id) != 0
+    then
+    sum(
+      decode(o.status_id, <%= Constants::OfferStatuses::REJECT %>, 0, s.qty * os.cost_nds))
+        over (partition by l.id, s.direction_id) / sum(decode(o.status_id, <%= Constants::OfferStatuses::REJECT %>, 0, 1))
+          over (partition by l.id, s.direction_id) else 0 end as average_cost_nds
+From tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join offer_specifications os on (os.specification_id = s.id)
+  inner join offers o on (o.id = os.offer_id and version = 0)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join plan_lots pl on (pl.id = l.plan_lot_id)
+  left join plan_specifications ps on (ps.plan_lot_id = pl.id and ps.id = s.plan_specification_id)
+  left join lateral
+  (select * from
+    (select tpl.guid, tpl.id, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+     from plan_lots tpl
+       inner join protocols tp on (tpl.protocol_id = tp.id and tp.date_confirm <= :end_date and tpl.guid = pl.guid)
+     where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+    where rn = 1
+  ) gkpz_pl on true
+  left join plan_specifications gkpz_ps on (gkpz_ps.plan_lot_id = gkpz_pl.id and ps.guid = gkpz_ps.guid)
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+Where l.gkpz_year = :gkpz_year -- gkpz_year
+  And can.guid is null -- неотмененная
+  and wp.confirm_date between :begin_date and :end_date
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And t.tender_type_id not in (10018, 10019)
+--Group By l.id, l.subject_type_id, s.direction_id, o.id, o.status_id
+) sub Where status_id = 26004

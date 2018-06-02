@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Parent:</b>
+  <%= @dictionary.ref_type %>
+</p>
+
+<p>
+  <b>Name:</b>
+  <%= @dictionary.name %>
+</p>
+
+<p>
+  <b>Fullname:</b>
+  <%= @dictionary.fullname %>
+</p>
+
+<p>
+  <b>Is actual:</b>
+  <%= @dictionary.is_actual %>
+</p>
+
+<p>
+  <b>Position:</b>
+  <%= @dictionary.position %>
+</p>
+
+<p>
+  <b>Stylename html:</b>
+  <%= @dictionary.stylename_html %>
+</p>
+
+<p>
+  <b>Stylename docx:</b>
+  <%= @dictionary.stylename_docx %>
+</p>
+
+<p>
+  <b>Stylename xlsx:</b>
+  <%= @dictionary.stylename_xlsx %>
+</p>
+
+
+<%= link_to 'Редактировать', edit_dictionary_path(@dictionary) %> |
+<%= link_to_session_or_default 'Вернуться к списку', :filter_dic_path, dictionaries_path %>

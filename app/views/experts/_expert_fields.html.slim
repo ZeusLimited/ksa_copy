@@ -1,0 +1,16 @@
+= field_set_tag nil, class: "coloring experts user-info" do
+  = f.hidden_field :_destroy
+  = f.hidden_field :user_id, class: 'user-id'
+
+  .row
+    .span6.user-info
+      = f.label :user_id
+      = f.text_field :user_fio_full, class: 'user-name input-block-level'
+      = f.hidden_field :user_id, class: 'user-id'
+    .span4
+      label = t('.offer')
+      = f.select :destination_ids, options_for_select(Dictionary.destinations.map { |t| [t.name, t.id, {'title' => t.fullname}]}, f.object.destination_ids), {}, class: 'select-title input-block-level', 'data-placeholder' => t('.choose_directions'), multiple: true
+
+    .span2
+      label &nbsp;
+      = link_to content_tag(:i, '', class: 'icon-minus') + " " + t('icon-delete'), '#', class: "remove_expert pull-right btn btn-danger input-block-level"

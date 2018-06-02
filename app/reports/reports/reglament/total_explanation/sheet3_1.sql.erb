@@ -1,0 +1,100 @@
+--sheet3_1.sql
+select case tender_type_id
+        when 10001 then 'Открытых конкурсов'
+        when 10002 then 'Закрытых конкурсов'
+        when 10007 then 'Электронных аукционов'
+        when 10013 then 'Открытых запросов цен'
+        when 10014 then 'Закрытых запросов цен'
+        when 10011 then 'Открытых запросов предложений'
+        when 10012 then 'Закрытых запросов предложений'
+        when 10009 then 'Открытых конкурентных переговоров'
+        when 10010 then 'Закрытых конкурентных переговоров'
+        when 10017 then 'Закупок путем участия в процедурах, организованных продавцами закупок'
+        when 10015 then 'Закупок у единственного источника'
+        when 10020 then 'Закупок предварительного отбора'
+        when 10016 then 'Не регламентированных закупок'
+        when 10021 then 'Упрощенных закупок'
+        else '' end as title,
+        coalesce(fact_cost_nds, 0) as fact_cost_nds, coalesce(cnt, 0) as cnt
+  from (
+    select
+      case d.ref_id
+        when 10019 then 10002
+        when 10018 then 10001
+        when 10003 then 10001
+        when 10004 then 10002
+        when 10005 then 10001
+        when 10006 then 10002
+        when 10008 then 10007
+        else d.ref_id end as tender_type_id,
+        sum(fact_cost_nds) as fact_cost_nds, sum(cnt) as cnt
+    from(
+    select
+    case t.tender_type_id
+      when 10019 then 10002
+      when 10018 then 10001
+      when 10003 then 10001
+      when 10004 then 10002
+      when 10005 then 10001
+      when 10006 then 10002
+      when 10008 then 10007
+      else t.tender_type_id end as tender_type_id,
+    sum(s.qty * os.final_cost_nds) as fact_cost_nds,
+    case when
+      row_number() over (partition by nvl(l.frame_id, l.id), l.plan_lot_id
+                         order by decode(l.main_direction_id, s.direction_id, 0, 1)) = 1
+      then decode(l.main_direction_id, s.direction_id, 1, 0) else 0 end as cnt
+    from tenders t
+      inner join lots l on (t.id = l.tender_id)
+      inner join specifications s on (l.id = s.lot_id)
+      inner join offer_specifications os on (os.specification_id = s.id)
+      inner join offers o on (o.id = os.offer_id and o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+      inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+      left join plan_lots pl on (pl.id = l.plan_lot_id)
+      left join lateral (
+        select tpl.guid, max(tp.date_confirm) as can_date
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+        inner join commissions tc on tp.commission_id = tc.id
+        where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+        group by tpl.guid
+      ) can on true
+    Where l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+      And can.guid is null -- неотмененная
+      and l.gkpz_year = :gkpz_year -- gkpz_year
+      and wp.confirm_date between :begin_date and :end_date
+      <% if current_user_root_dept_id %>
+        and s.customer_id in
+          (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+      <% end %>
+      <% if customers.present? %>
+        and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+      <% end %>
+      <% if organizers.present? %>
+        and t.department_id in
+          (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+      <% end %>
+      and (t.tender_type_id, t.etp_address_id) not in (select 10007, 12001 from dual union all select 10008, 12001 from dual)
+    Group By l.frame_id, l.id, l.plan_lot_id, l.main_direction_id, s.direction_id,
+    case t.tender_type_id
+      when 10019 then 10002
+      when 10018 then 10001
+      when 10003 then 10001
+      when 10004 then 10002
+      when 10005 then 10001
+      when 10006 then 10002
+      when 10008 then 10007
+      else t.tender_type_id end
+    ) f
+    right join dictionaries d on (d.ref_id = f.tender_type_id)
+    where d.ref_type = 'Tender_Types'
+    group by case d.ref_id
+        when 10019 then 10002
+        when 10018 then 10001
+        when 10003 then 10001
+        when 10004 then 10002
+        when 10005 then 10001
+        when 10006 then 10002
+        when 10008 then 10007
+        else d.ref_id end) sub
+    order by decode(tender_type_id,10007,1,tender_type_id)

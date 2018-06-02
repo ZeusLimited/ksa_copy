@@ -1,0 +1,157 @@
+.page-header
+  h1 Исполнение ГКПЗ
+
+.pull-right.alert.alert-warning.lead
+  strong
+    a#additional_search data={ toggle: 'collapse', target: "#tenders_additional_search" } class=('collapsed' unless @tender_filter.additional_search?)
+        = t('.additional_search')
+
+= input_block_form_for @tender_filter, url: tenders_path, method: :get, turboboost: true do |f|
+  .row
+    .span2
+      = f.input :years, collection: gkpz_years_range, include_hidden: false,
+        input_html: { 'data-placeholder' => 'Все', multiple: true }
+    .span2
+      br
+      label.checkbox
+        = f.check_box :control_lots
+        = f.label :control_lots
+
+  .row
+    .span4
+      = f.input :customers, collection: Department.customers_by_root(current_user.root_dept_id),
+        label_method: :name_with_depth_symbols, include_hidden: false,
+        label_html: { class: 'select-all-clear-roots' },
+        input_html: { class: 'customers', 'data-placeholder' => 'Все', multiple: true }
+    .span4
+      = f.input :organizers, collection: Department.organizers_by_root, label_method: :name_with_depth_symbols,
+        label_html: { class: 'select-all-clear-roots' },
+        include_hidden: false, input_html: { 'data-placeholder' => 'Все', multiple: true }
+    .span4
+      .control-group
+        = f.label :tender_types, class: 'select-all-clear'
+        = f.select :tender_types, Dictionary.tender_types.collection_for_select,
+          { include_hidden: false }, class: 'select-title input-block-level', 'data-placeholder' => 'Все', multiple: true
+
+  .row
+    .span4
+      .control-group
+        = f.label :directions, class: 'select-all-clear'
+        = f.select :directions, Direction.collection_for_select,
+          { include_hidden: false }, class: 'select-title input-block-level', 'data-placeholder' => 'Все', multiple: true
+    .span4
+      = f.input :statuses, collection: Dictionary.lot_statuses, include_hidden: false,
+        label_html: { class: 'select-all-clear' },
+        input_html: { 'data-placeholder' => 'Все', multiple: true }
+    .span4
+      = f.input :search_by_name
+
+  .row
+    .span4
+      = f.input :by_winner
+    .span4
+      = f.input :search_by_num
+    .span4
+      = f.input :search_by_gkpz_num
+
+  #tenders_additional_search.collapse class=("in" if @tender_filter.additional_search?)
+    .row
+      .span2
+        = f.input :announce_date_begin, as: :string, include_hidden: false,
+          input_html: { class: 'datepicker' }
+      .span2
+        = f.input :announce_date_end, as: :string, include_hidden: false,
+          input_html: { class: 'datepicker' }
+      .span2
+        = f.input :wp_date_begin, as: :string, include_hidden: false,
+          input_html: { class: 'datepicker' }
+      .span2
+        = f.input :wp_date_end, as: :string, include_hidden: false,
+          input_html: { class: 'datepicker' }
+      .span2
+        = f.input :contract_date_begin, as: :string, include_hidden: false,
+          input_html: { class: 'datepicker' }
+      .span2
+        = f.input :contract_date_end, as: :string, include_hidden: false,
+          input_html: { class: 'datepicker' }
+    .row
+      .span2
+        = f.input :search_by_contract_nums, input_html: { class: 'input-block-level' }
+      .span2 = f.input :etp_num, input_html: { class: 'text-right' }
+      .span2 = f.input :start_cost, input_html: { class: 'text-right' }
+      .span2 = f.input :end_cost, input_html: { class: 'text-right' }
+      .span2 = f.input :start_tender_cost, input_html: { class: 'text-right' }
+      .span2 = f.input :end_tender_cost, input_html: { class: 'text-right' }
+    .row
+      .span3
+        = f.input :regulation_items,
+          collection: RegulationItem.all,
+          label_method: :num,
+          include_hidden: false,
+          input_html: multi
+      .span3
+        = f.input :etp_addresses, collection: Dictionary.etp_addresses, include_hidden: false,
+          input_html: { class: 'input-block-level', 'data-placeholder' => 'Все', multiple: true }
+      .span3
+        = f.input :subject_types, collection: Dictionary.subject_types, include_hidden: false,
+          label_html: { class: 'select-all-clear' },
+          input_html: { class: 'input-block-level', 'data-placeholder' => 'Все', multiple: true }
+      .span3 = f.input :sme_types, collection: Dictionary.sme_types, label_html: { class: 'select-all-clear' },
+        include_hidden: false, input_html: multi
+    .row
+      .span6
+        = f.input :users do
+          = f.hidden_field :users, class: 'autocomplete-users-select input-block-level'
+      .span6
+        = f.input :wp_solutions,
+          collection: Dictionary.winner_protocol_solution_types,
+          include_hidden: false,
+          label_html: { class: 'select-all-clear' },
+          input_html: { class: 'input-block-level', 'data-placeholder' => 'Все', multiple: true }
+    .row
+      .span6
+        = f.input :consumers,
+          collection: Department.consumers_by_root,
+          label_method: :name_with_depth_symbols,
+          label_html: { class: 'select-all-clear' },
+          include_hidden: false, input_html: { 'data-placeholder' => 'Все', multiple: true }
+      .span6
+        = f.input :monitor_services,
+          collection: Department.monitor_services,
+          label_html: { class: 'select-all-clear' },
+          include_hidden: false, input_html: { 'data-placeholder' => 'Все', multiple: true }
+    .row
+      .span6
+        = f.input :okdp do
+          = f.hidden_field :okdp, data: { multiple: true }, class: 'okdp input-block-level'
+      .span6
+        = f.input :okved do
+          = f.hidden_field :okved, data: { multiple: true }, class: 'okved input-block-level'
+
+    .row
+      .span12
+        = f.input :bidders do
+          = f.hidden_field :bidders, data: { multiple: true }, class: 'plan_lot_contractor input-block-level'
+    .row
+      .span12
+        = f.input :order1352, collection: Dictionary.order1352, label_method: :fullname, include_hidden: false, input_html: multi
+
+  .row
+    .offset10.span2
+      br
+      = button_tag 'Поиск', class: 'btn btn-success input-block-level', name: nil
+
+- if @tenders
+
+  p
+    span
+      | Найдено закупок:&nbsp;
+      span.label = @tenders.total_count
+      == "&nbsp;(лотов - <span class='label'>#{@tender_filter.lots_count}</span>)"
+    span.pull-right
+      = link_to export_excel_tenders_path(tender_filter: @tender_filter_params, format: :xlsx) do
+        => image_tag File.join('file-icons', '16px', 'xlsx.png')
+        | Экспорт в Excel
+  = paginate @tenders
+  = render 'tender_partials/found', tenders: @tenders
+  = paginate @tenders

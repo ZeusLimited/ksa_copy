@@ -1,0 +1,45 @@
+select vi.*,
+main_direction.type_id as main_direction_type_id
+from plan_lots tpl
+inner join (
+  select * from (
+    select
+    ttpl.*, row_number() over (partition by ttpl.guid order by ttp.date_confirm desc) rn
+    from plan_lots ttpl
+    inner join protocols ttp on ttp.id = ttpl.protocol_id
+    inner join commissions ttc on ttc.id = ttp.commission_id
+    left join (
+      select p.gkpz_year, c.department_id, count(*) as cnt
+      from protocols p
+      inner join commissions c on c.id = p.commission_id
+      where c.commission_type_id = <%= Constants::CommissionType::SD %> and p.date_confirm between :begin_date and :end_date
+      group by p.gkpz_year, c.department_id
+    ) sd on sd.gkpz_year = ttpl.gkpz_year and sd.department_id = ttpl.root_customer_id
+    where ttp.date_confirm between :begin_date and :end_date
+      and case when sd.cnt is not null then ttc.commission_type_id else <%= Constants::CommissionType::SD %> end = <%= Constants::CommissionType::SD %>) sub
+  where rn = 1) vi on vi.guid = tpl.guid
+  inner join directions main_direction on (main_direction.id = vi.main_direction_id)
+-- Cjoinив по гуиду получам набор записей, version = 0 ограничивает набор одной строкой и далее в селект идет vi.*
+where tpl.version = 0
+and tpl.gkpz_year = :gkpz_year -- gkpz_year
+<% if current_user_root_dept_id.present? %>
+  and tpl.id in (
+    select ps.plan_lot_id
+    from plan_specifications ps
+    where ps.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+    )-- customers
+<% end %>
+<% if customers.present? %>
+  and tpl.id in (
+    select ps.plan_lot_id
+    from plan_specifications ps
+    where ps.customer_id in
+      (<%= Department.subtree_ids_for(customers).join(', ') %>)
+    )-- customers
+<% end %>
+<% if organizers.present? %>
+  and tpl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+<% end %>
+and vi.status_id not in (<%= Constants::PlanLotStatus::CANCELLED_LIST.join(', ') %>)

@@ -1,0 +1,32 @@
+h3 = t('.offer_guarantie')
+fieldset.frame
+  .row
+    .span4
+      = f.input :is_guarantie, as: :select, input_html: { class: 'input-block-level' }
+  .row
+    .span10
+      = f.input :guarantie_offer, input_html: { rows: 3, class: 'input-block-level' }
+  .row
+    .span10
+      = f.input :guarant_criterions, input_html: { rows: 3, class: 'input-block-level' }
+  .row
+    .span10
+      = f.input :guarantie_recvisits, input_html: { rows: 3, class: 'input-block-level' }
+  .row
+    .span10
+      = f.input :guarantie_making_money, input_html: { rows: 3, class: 'input-block-level' }
+  br
+  .row
+    .span10
+      table.table.table-bordered.table-hover.table-striped
+        thead
+          tr
+            th = t('.num')
+            th = t('.name')
+            th = t('.guarantie_cost')
+        tbody
+          = f.simple_fields_for :lots do |lot|
+            tr
+              td = lot.input :nums, disabled: true, label: false
+              td = lot.input :name, disabled: true, label: false
+              td = lot.input :guarantie_cost, label: false

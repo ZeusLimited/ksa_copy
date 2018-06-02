@@ -1,0 +1,117 @@
+@simple_sheet.add_row_title @report.row_title('partII_title'), style: @styles[:title], columns_count: 3
+@sheet.add_row
+
+render 'thead_ii'
+
+part2 = (@report.part2_row && @report.part2_row['cost']) || 0
+part3 = (@report.part3_row && @report.part3_row['cost']) || 0
+part4 = (@report.part4_row && @report.part4_row['cost']) || 0
+part5 = (@report.part5_row && @report.part5_row['cost']) || 0
+part6 = (@report.part6_row && @report.part6_row['cost']) || 0
+part7 = (@report.part7_row && @report.part7_row['cost']) || 0
+part8 = (@report.part8_row && @report.part8_row['cost']) || 0
+
+part2_nds = (@report.part2_row && @report.part2_row['cost_nds']) || 0
+part3_nds = (@report.part3_row && @report.part3_row['cost_nds']) || 0
+part4_nds = (@report.part4_row && @report.part4_row['cost_nds']) || 0
+part5_nds = (@report.part5_row && @report.part5_row['cost_nds']) || 0
+part6_nds = (@report.part6_row && @report.part6_row['cost_nds']) || 0
+part7_nds = (@report.part7_row && @report.part7_row['cost_nds']) || 0
+part8_nds = (@report.part8_row && @report.part8_row['cost_nds']) || 0
+
+part2_amount = (@report.part2_row && @report.part2_row['cost_amount']) || 0
+part3_amount = (@report.part3_row && @report.part3_row['cost_amount']) || 0
+part4_amount = (@report.part4_row && @report.part4_row['cost_amount']) || 0
+part5_amount = (@report.part5_row && @report.part5_row['cost_amount']) || 0
+part6_amount = (@report.part6_row && @report.part6_row['cost_amount']) || 0
+part7_amount = (@report.part7_row && @report.part7_row['cost_amount']) || 0
+part8_amount = (@report.part8_row && @report.part8_row['cost_amount']) || 0
+
+part2_amount_nds = (@report.part2_row && @report.part2_row['cost_amount_nds']) || 0
+part3_amount_nds = (@report.part3_row && @report.part3_row['cost_amount_nds']) || 0
+part4_amount_nds = (@report.part4_row && @report.part4_row['cost_amount_nds']) || 0
+part5_amount_nds = (@report.part5_row && @report.part5_row['cost_amount_nds']) || 0
+part6_amount_nds = (@report.part6_row && @report.part6_row['cost_amount_nds']) || 0
+part7_amount_nds = (@report.part7_row && @report.part7_row['cost_amount_nds']) || 0
+part8_amount_nds = (@report.part8_row && @report.part8_row['cost_amount_nds']) || 0
+
+smp_dp_nds = if part2_nds != 0
+               (part3_nds + part5_nds + part7_nds) / part2_nds
+             else
+               0
+             end
+smp_dp = if part2 != 0
+           (part3 + part5 + part7) / part2
+         else
+           0
+         end
+
+smp_dp_amount_nds = if part2_amount_nds != 0
+               (part3_amount_nds + part5_amount_nds + part7_amount_nds) / part2_amount_nds
+             else
+               0
+             end
+smp_dp_amount = if part2_amount != 0
+           (part3_amount + part5_amount + part7_amount) / part2_amount
+         else
+           0
+         end
+
+@sheet.add_row(
+  ['11', @report.row_title('row111'), smp_dp_nds, smp_dp, '', smp_dp_amount_nds, smp_dp_amount],
+  style: [@styles[:td], @styles[:td], @styles[:td_percent], @styles[:td_percent], @styles[:td], @styles[:td_percent], @styles[:td_percent]],
+  types: [:string, :string, :float, :float, :string, :float, :float]
+)
+
+smp_dp_nds = part2_nds != 0 ? part5_nds / part2_nds : 0
+smp_dp = part2 != 0 ? part5 / part2 : 0
+
+smp_dp_amount_nds = part2_amount_nds != 0 ? part5_amount_nds / part2_amount_nds : 0
+smp_dp_amount = part2_amount != 0 ? part5_amount / part2_amount : 0
+
+@sheet.add_row(
+  ['12', @report.row_title('row112'), smp_dp_nds, smp_dp, '', smp_dp_amount_nds, smp_dp_amount],
+  style: [@styles[:td], @styles[:td], @styles[:td_percent], @styles[:td_percent], @styles[:td], @styles[:td_percent], @styles[:td_percent]],
+  types: [:string, :string, :float, :float, :string, :float, :float]
+)
+
+smp_dp_nds = if part2_nds != 0
+               (part4_nds + part6_nds + part8_nds) / part2_nds
+             else
+               0
+             end
+smp_dp = if part2 != 0
+           (part4 + part6 + part8) / part2
+         else
+           0
+         end
+
+smp_dp_amount_nds = if part2_amount_nds != 0
+               (part4_amount_nds + part6_amount_nds + part8_amount_nds) / part2_amount_nds
+             else
+               0
+             end
+smp_dp_amount = if part2_amount != 0
+           (part4_amount + part6_amount + part8_amount) / part2_amount
+         else
+           0
+         end
+
+@sheet.add_row(
+  ['13', @report.row_title('row113'), smp_dp_nds, smp_dp, '', smp_dp_amount_nds, smp_dp_amount],
+  style: [@styles[:td], @styles[:td], @styles[:td_percent], @styles[:td_percent], @styles[:td], @styles[:td_percent], @styles[:td_percent]],
+  types: [:string, :string, :float, :float, :string, :float, :float]
+)
+
+
+smp_dp_nds = part2_nds != 0 ? part6_nds / part2_nds : 0
+smp_dp = part2 != 0 ? part6 / part2 : 0
+
+smp_dp_amount_nds = part2_amount_nds != 0 ? part6_amount_nds / part2_amount_nds : 0
+smp_dp_amount = part2_amount != 0 ? part6_amount / part2_amount : 0
+
+@sheet.add_row(
+  ['14', @report.row_title('row114'), smp_dp_nds, smp_dp, '', smp_dp_amount_nds, smp_dp_amount],
+  style: [@styles[:td], @styles[:td], @styles[:td_percent], @styles[:td_percent], @styles[:td], @styles[:td_percent], @styles[:td_percent]],
+  types: [:string, :string, :float, :float, :string, :float, :float]
+)

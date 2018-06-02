@@ -1,0 +1,14 @@
+--- # Статусы лотов в исполнении
+- { ref_id: 33010, position: 1,  name: "Новый" }
+- { ref_id: 33020, position: 2,  name: "Опубликован", stylename_html: "background-color: #FFA500;" }
+- { ref_id: 33030, position: 3,  name: "Вскрытие конвертов", stylename_html: "background-color: #FCA7FC;" }
+- { ref_id: 33040, position: 4,  name: "Протокол рассмотрения направлен на рассмотрение", stylename_html: "background-color: #FFFF00;" }
+- { ref_id: 33050, position: 5,  name: "Протокол рассмотрения рассмотрен", stylename_html: "background-color: #FFD700;" }
+- { ref_id: 33060, position: 6,  name: "Вскрытие конвертов (переторжка)", stylename_html: "background-color: #A7A7FC;" }
+- { ref_id: 33070, position: 7,  name: "Протокол ВП направлен на рассмотрение", stylename_html: "background-color: #BDDCFD;" }
+- { ref_id: 33080, position: 8,  name: "Протокол ВП рассмотрен", stylename_html: "background-color: #A7F8FC;" }
+- { ref_id: 33090, position: 9,  name: "Победитель определен (Протокол ВП подписан)", stylename_html: "background-color: #A7FCB8;" }
+- { ref_id: 33095, position: 10, name: "Подписан протокол о результатах", stylename_html: "background-color: #A7FCB8;" }
+- { ref_id: 33100, position: 11, name: "Договор заключен", stylename_html: "background-color: #43FA8C;" }
+- { ref_id: 33110, position: 12, name: "Признана несостоявшейся", stylename_html: "background-color: #C0C0C0;" }
+- { ref_id: 33120, position: 13, name: "Отменена", stylename_html: "background-color: #faafbe;" }

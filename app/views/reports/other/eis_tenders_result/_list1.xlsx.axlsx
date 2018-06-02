@@ -1,0 +1,20 @@
+@sheet = sheet
+
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 1)
+
+Reports::Other::EisTendersResult::FILTERS.each_with_index do |filter, index|
+
+  @sheet.add_row [t(".report_title#{index + 2}")], style: @styles[:text_center_bold]
+  @sheet.add_row [t('.period',
+                                  date_begin: @report.date_begin,
+                                  date_end: @report.date_end)],
+                                  style: @styles[:text_left]
+  total = @report.total(filter.reject{ |k, v| k == :name }) || {}
+
+  @sheet.add_row [t(".count", count: total["lot_count"] || 0)]
+
+  @sheet.add_row [t(".sum", cost: xlsx_money(total["cost_nds"] || 0))]
+  @sheet.add_row
+
+end
+@simple_sheet.change_column_widths(90)

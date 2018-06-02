@@ -1,0 +1,36 @@
+ru:
+  activerecord:
+    models:
+      offer: 'Оферта'
+    attributes:
+      offer:
+        bidder_id: 'Участник'
+        lot_id: 'Лот'
+        num: 'Номер'
+        num_text: 'Номер'
+        type_id: 'Статус'
+        type_name: 'Оферта'
+        status_id: 'Статус'
+        status: 'Статус'
+        status_name: 'Статус'
+        rank: 'Место в ранжировке'
+        version: 'Версия (0 - последняя,актуальная)'
+        is_winer: 'Победитель'
+        conditions: 'Существенные условия'
+        note: 'Примечания'
+        change_descriptions: 'Краткое описание изменений'
+        rebidded: 'Участник принимал участие в переторжке или аукционе'
+        maker: 'Участник является производителем'
+        absent_auction: 'Не явился на процедуру аукциона'
+        final_conditions: 'Существенные условия после переторжки'
+        non_contract_reason: 'Причины невыполнения 20 дневного срока на заключение договора'
+        offer_specifications: 'Спецификация оферты'
+    errors:
+      models:
+        offer:
+          attributes:
+            base:
+              one_winner: "У этого лота уже есть победитель."
+              actual_sme: "Данный контрагент не актуализирован по МСП"
+              cant_be_an_offer_for_this_lot: "Оферта %{name} не может быть принята, или признана победившей"
+              non_sme: "Участник должен быть субъектом МСП"

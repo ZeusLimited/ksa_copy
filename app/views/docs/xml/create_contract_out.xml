@@ -1,0 +1,8 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:WashOut">
+   <soap:Body>
+      <tns:create_contract_response>
+         <success xsi:type="xsd:boolean">true</success>
+         <error_msg xsi:type="xsd:string"/>
+      </tns:create_contract_response>
+   </soap:Body>
+</soap:Envelope>

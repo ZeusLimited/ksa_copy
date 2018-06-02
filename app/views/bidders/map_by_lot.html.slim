@@ -1,0 +1,33 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  ul.tender-actions
+    li = link_to 'Свод', map_pivot_tender_bidders_path(@tender), class: 'btn btn-warning span1'
+  h1 Карта предложений
+
+= render 'tenders/tender_header', tender: tender
+
+.alert.alert-info
+  | Для перехода к просмотру оферты, нажмите на её стоимость
+
+- @tender.lots.each do |lot|
+  legend
+    h4 = lot.name_with_cust
+  table.table.table-bordered
+    thead
+      tr
+        th.center-cell Участник
+        th.span2.center-cell Оферта
+        th.span2.center-cell Стоимость
+    tbody
+      - if lot.offers.count > 0
+        - Offer.map_by_lot(lot.id).each do |offer|
+          tr
+            td.no-wrap *unfair_contractor_html_attributes(offer.bidder.contractor)
+              = offer.contractor_name
+            td = offer.basic_alt
+            = td_for_offer(offer, offer.total_cost)
+      - else
+        tr
+          td.center-cell colspan="4" Предложений не получено
+  br

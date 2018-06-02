@@ -1,0 +1,11 @@
+p = t(@user.female? ? ".hello_female" : ".hello_male", io_full: @user.io_full)
+  |,
+p
+  | Информация по договору
+  =<> link_to @contract.title, offer_contract_url(@contract.offer)
+  | была обновлена.
+p
+  | Проверьте корректность полученных данных.
+p
+  | Вы получили это письмо т.к. являетесь ответственным сотрудником по закупке №
+  =<> link_to @contract.lot.tender.num, @contract.lot.tender

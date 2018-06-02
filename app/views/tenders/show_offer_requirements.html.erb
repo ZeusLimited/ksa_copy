@@ -1,0 +1,99 @@
+<%= render "/shared/submenu_tender", tender: @tender %>
+
+<div class="page-header">
+  <ul class="tender-actions">
+    <li>
+      <%= link_to('Редактировать', edit_offer_requirements_tender_path(@tender),
+        class: 'btn btn-warning') if can?(:edit_offer_requirements, @tender) %>
+    </li>
+  </ul>
+  <h1>Требования к заявкам</h1>
+</div>
+
+<%= render 'tender_header', tender: @tender %>
+
+<legend>Приём оферт</legend>
+
+<div class="row">
+  <%= view_text_field('span2', @tender, :offer_reception_start) %>
+  <%= view_text_field('span2', @tender, :offer_reception_stop) %>
+  <%= view_text_field('span6', @tender, :offer_reception_place) %>
+</div>
+
+<div class="row">
+  <%= view_text_area('span10', @tender, :prepare_offer, @tender.prepare_offer, {rows: 3}) %>
+</div>
+
+<legend>Требования к составу заявок</legend>
+
+<% @tender.tender_content_offers.each do |tco| %>
+  <div class="row">
+    <%= view_text_field('span1', tco, :num) %>
+    <%= view_text_area('span5', tco, :name, tco.name, {rows: 2}) %>
+    <%= view_text_field('span3', tco, :content_offer_type, tco.content_offer_type.try(:name)) %>
+  </div>
+<% end %>
+
+<legend>Обеспечение</legend>
+
+<div class="row">
+  <%= view_text_field('span2', @tender, :guarantie_date_begin) %>
+  <%= view_text_field('span2', @tender, :guarantie_date_end) %>
+</div>
+
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th style="width: 100%;">Наименование лота</th>
+      <th>Размер обеспечения</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @tender.lots.each do |lot| %>
+    <tr>
+      <td><h5><%= "Лот № #{lot.num}. #{lot.name}" %></h5></td>
+      <td>
+        <%= text_field_tag nil, lot.guarantie_cost_money, class: 'input-medium text-right', readonly: true, id: nil %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<div class="row">
+  <%= view_text_area('span6', @tender, :guarantie_offer, @tender.guarantie_offer, {rows: 3}) %>
+  <%= view_text_area('span6', @tender, :guarant_criterions, @tender.guarant_criterions, {rows: 3}) %>
+</div>
+
+<div class="row">
+  <%= view_text_area('span6', @tender, :guarantie_making_money, @tender.guarantie_making_money, {rows: 3}) %>
+  <%= view_text_area('span6', @tender, :guarantie_recvisits, @tender.guarantie_recvisits, {rows: 3}) %>
+</div>
+
+<legend>Оценочные критерии</legend>
+<% @tender.tender_eval_criterions.each do |tec| %>
+  <div class="row">
+    <%= view_text_field('span1', tec, :num) %>
+    <%= view_text_area('span7', tec, :name) %>
+    <%= view_text_field('span1', tec, :value) %>
+  </div>
+<% end %>
+
+<legend>Альтернативные предложения</legend>
+<div class="row">
+  <%= view_text_field('span1', @tender, :alternate_offer) %>
+  <%= view_text_area('span7', @tender, :alternate_offer_aspects, @tender.alternate_offer_aspects, {rows: 3}) %>
+</div>
+
+<legend>Авансирование</legend>
+<div class="row">
+  <%= view_text_field('span2', @tender, :prepayment_cost_money, @tender.prepayment_cost_money,
+    {class: 'text-right'}) %>
+  <%= view_text_field('span2', @tender, :prepayment_percent_money, @tender.prepayment_percent_money,
+    {class: 'text-right'}) %>
+</div>
+<div class="row">
+  <%= view_text_area('span4', @tender, :prepayment_period_begin, @tender.prepayment_period_begin, {rows: 4}) %>
+  <%= view_text_area('span4', @tender, :prepayment_period_end, @tender.prepayment_period_end, {rows: 4}) %>
+  <%= view_text_area('span4', @tender, :prepayment_aspects, @tender.prepayment_aspects, {rows: 4}) %>
+</div>

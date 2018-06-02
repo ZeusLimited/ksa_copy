@@ -1,0 +1,221 @@
+-- sql-part1
+-- tenders over 100 millions
+select sub.*, sum(l_cnt) over (partition by tender_id) as lots_cnt from (
+select
+l.tender_id, l.id as l_id, o.status_id,
+l.gkpz_year,
+row_number() over (partition by l.id order by o.status_id) as l_rn,
+row_number() over (order by
+  nvl2(gkpz_pl.id, gkpz_pl.num_tender, rk_pl.num_tender),
+  nvl2(gkpz_pl.id, gkpz_pl.num_lot, l.num),
+  t.num, t.id, l.id, decode(o.status_id, 26004, 0, 1),
+  contracts.confirm_date) as rn,
+case when gkpz_pl.id is not null
+  then gkpz_pl.num_tender || '.' || gkpz_pl.num_lot
+  else rk_pl.num_tender || '.' || t.num || '.' || l.num end as lot_num,
+t.num || '.' || l.num as tender_num,
+case when row_number() over (partition by l.id order by o.status_id desc) = 1 then 1 else 0 end as l_cnt,
+fact_cust.name as root_customer_name,
+fact_org.name as org_name,
+decode(:hundred_millions, 1, 'Да', '') as is_hundred_millions,
+case when gkpz_pl.id is not null
+  then decode(gkpz_pl.lot_name, l.name, l.name, l.name || ' (' || gkpz_pl.lot_name || ')')
+  else l.name
+end as lot_name,
+case when gkpz_pl.id is not null
+  then decode(gkpz_pl.state, 0, 'внеплан', 1, 'план')
+  else decode(rk_pl.state, 0, 'внеплан', 1, 'план') end as lot_state,
+case when gkpz_pl.id is not null
+  then gkpz_ttype.name
+  else fact_ttype.name
+end as plan_tender_type,
+case when gkpz_pl.id is not null then gkpz_ct.name else fact_ct.name end as commission_type_name,
+fact_ttype.name as fact_tender_type,
+case when gkpz_pl.id is not null
+  then decode(gkpz_pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 'Нет', null, 'Нет', 'Да')
+  else decode(t.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 'Нет', 'Да')
+end as etp,
+sum(s.qty * s.cost) as gkpz_cost,
+sum(s.qty * s.cost_nds) as gkpz_cost_nds,
+case when gkpz_pl.id is not null then gkpz_pl.announce_date else t.announce_date end as gkpz_announce_date,
+decode(t.tender_type_id, <%= Constants::TenderTypes::ONLY_SOURCE %>, nvl(contracts.confirm_date, t.announce_date), t.announce_date) fact_announce_date,
+t.bid_date as gkpz_open_date,
+op.open_date as fact_open_date,
+count(*) over (partition by l.id) as cnt_offers,
+l.registred_bidders_count as bidders_count,
+c.name || ' (' || coalesce(ow.shortname, '') || ')' as bidder_name,
+sum(s.qty * os.cost_nds) as bid_cost_nds,
+sum(s.qty * os.cost) as bid_cost,
+case
+  when o.status_id in (<%= Constants::OfferStatuses::RECEIVE %>, <%= Constants::OfferStatuses::WIN %>)
+    then 'Да'
+  else 'Нет'
+end as offer_receive,
+case
+  when l.rebid_protocol_id is not null
+    then sum(s.qty * os.final_cost_nds)
+  else 0
+end as rebid_cost_nds,
+case
+  when l.rebid_protocol_id is not null
+    then sum(s.qty * os.final_cost)
+  else 0
+end as rebid_cost,
+decode(o.status_id, <%= Constants::OfferStatuses::WIN %>, c.name || ' (' || ow.shortname || ')', '') as winner,
+responsible.surname || ' ' || responsible.name || ' ' || responsible.patronymic as responsible,
+wp.confirm_date as winner_protocol_date,
+case
+  when o.status_id = <%= Constants::OfferStatuses::WIN %>
+    then sum(s.qty*os.final_cost_nds)
+  else 0
+end as winner_cost_plan_ratio_nds,
+case
+  when o.status_id = <%= Constants::OfferStatuses::WIN %>
+    then sum(s.qty*os.final_cost)
+  else 0
+end as winner_cost_plan_ratio,
+
+'' as empty,
+pl_st.name as pl_status,
+directions.name as direction
+
+from tenders t
+left join users responsible on responsible.id = t.user_id
+inner join lots l on l.tender_id = t.id
+inner join specifications s on s.lot_id = l.id
+left join plan_lots pl on l.plan_lot_id = pl.id
+left join plan_specifications ps on s.plan_specification_id = ps.id
+
+left join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+     where rn = 1) gkpz_pl on (pl.guid = gkpz_pl.guid)
+left join
+  (select * from
+    (select
+      tpl.*,
+      row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn,
+      tp.num as protocol_num, tp.date_confirm as protocol_date, tc.name as commission_name
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      inner join commissions tc on tp.commission_id = tc.id
+      ) sub
+     where rn = 1) vz_pl on (pl.guid = vz_pl.guid)
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+  group by tpl.guid
+) can on gkpz_pl.guid = can.guid
+
+left join plan_specifications gkpz_ps on gkpz_pl.id = gkpz_ps.plan_lot_id and gkpz_ps.guid = ps.guid
+
+inner join departments fact_org on fact_org.id = t.department_id
+inner join departments fact_cust on fact_cust.id = l.root_customer_id
+
+left join commissions gkpz_c on gkpz_pl.commission_id = gkpz_c.id
+left join dictionaries gkpz_ct on gkpz_c.commission_type_id = gkpz_ct.ref_id
+
+left join commissions fact_c on t.commission_id = fact_c.id
+left join dictionaries fact_ct on fact_c.commission_type_id = fact_ct.ref_id
+
+left join dictionaries gkpz_ttype on gkpz_pl.tender_type_id = gkpz_ttype.ref_id
+inner join dictionaries fact_ttype on t.tender_type_id = fact_ttype.ref_id
+
+left join dictionaries pl_st on pl_st.ref_id = pl.status_id
+left join directions on directions.id = l.main_direction_id
+
+left join lots rk_l on l.frame_id = rk_l.id
+left join plan_lots rk_pl on rk_l.plan_lot_id = rk_pl.id
+
+left join open_protocols op on op.tender_id = t.id
+left join winner_protocols wp on wp.id = l.winner_protocol_id
+left join winner_protocol_lots wpl on (wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id)
+
+inner join offer_specifications os on os.specification_id = s.id
+inner join offers o on o.id = os.offer_id and o.version = 0
+inner join bidders b on b.id = o.bidder_id
+inner join contractors c on c.id = b.contractor_id
+left join ownerships ow on ow.id = c.ownership_id
+
+left join contracts on o.id = contracts.offer_id and contracts.type_id = <%= Constants::ContractTypes::BASIC %> and contracts.confirm_date <= :end_date
+left join contract_specifications contract_spec on
+  (contract_spec.specification_id = s.id and contracts.id = contract_spec.contract_id)
+<% if hundred_millions.present? %>
+  inner join
+  (select
+    tt.id
+    from tenders tt
+      inner join lots ll on ll.tender_id = tt.id
+      inner join specifications ss on ss.lot_id = ll.id
+    Where 1 = 1
+      <% if organizers.present? %>
+        and tt.department_id in
+          (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+      <% end %>
+
+      <% if tender_types.present? %>
+        and tt.tender_type_id in (<%= tender_types.join(', ') %>)
+      <% end %>
+    Group By tt.id
+    <% if hundred_millions == '1' %>
+      Having sum(ss.qty * ss.cost) >= 100000000
+    <% end %>
+    <% if hundred_millions == '0' %>
+      Having sum(ss.qty * ss.cost) < 100000000
+    <% end %>
+  ) hund_millions on hund_millions.id = t.id
+<% end %>
+
+where
+l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>) -- статус лота
+and wp.confirm_date between :begin_date and :end_date
+and can.guid is null -- неотмененная
+and decode(:vz, -1, -1, vz_pl.state) = :vz
+
+<% if gkpz_years.present? %>
+  and l.gkpz_year in (<%= gkpz_years.join(', ') %>) -- год ГКПЗ
+<% end %>
+
+<% if current_user_root_dept_id %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  and t.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if nomenclature.present? %>
+  And
+    (
+      lower(l.name) like  <%= nomenclature.join(' or lower(l.name) like ') %>
+    )
+<% end %>
+<% if contractors.present? %>
+  And
+    t.id in (select b.tender_id from bidders b inner join contractors c on c.id = b.contractor_id where
+    c.guid in (select guid from contractors where id in (<%= contractors %>))
+      )
+<% end %>
+group by l.id, o.status_id, gkpz_pl.id, gkpz_pl.num_tender, rk_pl.num_tender, gkpz_pl.num_lot, l.num, t.num, t.id, contracts.confirm_date,
+         l.tender_id, fact_cust.name, fact_org.name, gkpz_pl.lot_name, l.name, gkpz_pl.state, rk_pl.state, gkpz_ttype.name, fact_ttype.name, gkpz_ct.name, fact_ct.name, gkpz_pl.etp_address_id,
+         t.etp_address_id, t.tender_type_id, gkpz_pl.announce_date, t.announce_date, t.bid_date, op.open_date, l.registred_bidders_count, c.name, ow.shortname,
+         l.rebid_protocol_id, responsible.surname, responsible.name, responsible.patronymic, wp.confirm_date, pl_st.name, directions.name
+) sub
+order by tender_id, l_id, status_id desc

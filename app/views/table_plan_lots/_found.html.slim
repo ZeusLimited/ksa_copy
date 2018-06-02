@@ -1,0 +1,19 @@
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      th = check_box_tag('selected_all', '1', false, 'data-toggle' => 'tooltip', title: 'Выбрать все')
+      = render 'table_plan_lots/center_head'
+      th
+      th
+      th
+      th
+  tbody
+    - current_user_plan_lots = current_user.plan_lots.to_a
+    - plan_lots.decorate.each do |plan_lot|
+      tr data-plan-lot-id=plan_lot.id
+        td = check_box_tag "selected_ids[#{plan_lot.id}]", plan_lot.id, current_user_plan_lots.include?(plan_lot)
+        = render 'table_plan_lots/center_body', plan_lot: plan_lot
+        td = link_icon_title 'icon-edit', t('edit'), edit_plan_lot_path(plan_lot)
+        td = link_icon_title 'icon-share', 'Сделать копию', new_plan_lot_path(clone: plan_lot.id)
+        td = link_icon_title 'icon-trash', t('icon-delete'), plan_lot, method: :delete, data: { confirm: t('confirm') }
+        td = link_icon_title 'icon-search', t('icon-search-executed'), tenders_path(plan_lot.search_tenders_params)

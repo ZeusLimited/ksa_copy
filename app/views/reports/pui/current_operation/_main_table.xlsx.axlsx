@@ -1,0 +1,23 @@
+render 'thead'
+
+@report.rows.each do |row|
+  result = @report.result_row(row[:filter])
+  values = @columns.values.map do |v|
+    v[:value].call(result)
+  end
+  @sheet.add_row [row[:num], row[:name], values].flatten, style: @column_styles, types: @column_types
+end
+
+summary = []
+summary_ei = []
+%w(C D F G H I J K L M N O P Q).each do |column|
+  summary << AxlsxExt::Formula.sum_numbers_by_column(column, [6, 8])
+  summary_ei << AxlsxExt::Formula.sum_numbers_by_column(column, [7, 9])
+end
+summary.insert 2, "=D24 / C24"
+summary_ei.insert 2, "=D25 / C25"
+
+@sheet.add_row [nil, t("reports/pui/current_operation.row_titles.summary")].concat(summary), style: @column_styles
+@sheet.add_row [nil, t("reports/pui/current_operation.row_titles.ei")].concat(summary_ei), style: @column_styles
+
+render 'tfooter'

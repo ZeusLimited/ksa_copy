@@ -1,0 +1,63 @@
+- :name: Расходы на Новое строительство и расширение. Услуги
+  :filter:
+    :direction_id: <%= yaml_directions['ks'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: Расходы на Новое строительство и расширение. Материалы
+  :filter:
+    :direction_id: <%= yaml_directions['ks'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: Итого Расходы на Новое строительство и расширение
+  :filter:
+    :direction_id: <%= yaml_directions['ks'] %>
+- :name: Расходы на ТПиР. Услуги
+  :filter:
+    :direction_id: <%= yaml_directions['tpir'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: Расходы на ТПиР. Материалы
+  :filter:
+    :direction_id: <%= yaml_directions['tpir'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: Итого Расходы на ТПиР
+  :filter:
+    :direction_id: <%= yaml_directions['tpir'] %>
+- :name: Расходы в области информационных технологий (инвестиции). Услуги
+  :filter:
+    :direction_id: <%= yaml_directions['it_invest'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: Расходы в области информационных технологий (инвестиции). Материалы
+  :filter:
+    :direction_id: <%= yaml_directions['it_invest'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: Итого Расходы в области информационных технологий (инвестиции)
+  :filter:
+    :direction_id: <%= yaml_directions['it_invest'] %>
+- :name: Расходы на НИОКР и прочие консультативные услуги (нивестиции). Услуги
+  :filter:
+    :direction_id: <%= yaml_directions['niokr_invest'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: Расходы на НИОКР и прочие консультативные услуги (нивестиции). Материалы
+  :filter:
+    :direction_id: <%= yaml_directions['niokr_invest'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: Итого Расходы на НИОКР и прочие консультативные услуги (нивестиции)
+  :filter:
+    :direction_id: <%= yaml_directions['niokr_invest'] %>
+- :name: Расходы на иннвационную и высокотехнологичную продукцию (инвестиции). Услуги
+  :filter:
+    :direction_id: <%= yaml_directions['inivp_invest'] %>
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: Расходы на иннвационную и высокотехнологичную продукцию (инвестиции). Материалы
+  :filter:
+    :direction_id: <%= yaml_directions['inivp_invest'] %>
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: Итого Расходы на иннвационную и высокотехнологичную продукцию (инвестиции)
+  :filter:
+    :direction_id: <%= yaml_directions['inivp_invest'] %>
+- :name: Услуги
+  :filter:
+    :subject_type_id: <%= Constants::SubjectType::SERVICES %>
+- :name: Материалы
+  :filter:
+    :subject_type_id: <%= Constants::SubjectType::MATERIALS %>
+- :name: ИТОГО
+  :filter: {}

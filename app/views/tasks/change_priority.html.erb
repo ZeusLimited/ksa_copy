@@ -1,0 +1,15 @@
+<div class="page-header">
+  <h1>Приоритет задач в работе</h1>
+</div>
+
+<ul class="sortable-list" data-update-url="<%= sort_tasks_url %>">
+  <% @tasks.each do |task| %>
+    <%= content_tag_for :li, task do %>
+      <span class="handle">[перетащите]</span>
+      <%= link_to truncate(task.description, length: 100), task %>
+    <% end %>
+  <% end %>
+</ul>
+<br>
+<br>
+<p><%= link_to 'Назад', tasks_path, :class => 'btn' %></p>

@@ -1,0 +1,206 @@
+.page-header
+  h1 = @report.row_title('report_title', year: @report.year,
+                                         ownership: @report.customer_info.try(:ownership_shortname),
+                                         customer: @report.customer_info.try(:name))
+
+- if @report.customer_info
+  table.table.table-bordered.table-center
+    tbody
+      tr
+        th = @report.row_title('customer_name')
+        td = @report.customer_info.name
+      tr
+        th = @report.row_title('ownership')
+        td = @report.customer_info.ownership_shortname
+      tr
+        th = @report.row_title('address')
+        td = @report.address_info
+      tr
+        th = @report.row_title('inn')
+        td = @report.customer_info.inn
+      tr
+        th = @report.row_title('kpp')
+        td = @report.customer_info.kpp
+
+h3 = @report.row_title('partI_title')
+
+- head_rows = CSV.read("app/views/reports/other/purchase_from_sme/csv/main_head_#{Setting.company}.csv")
+table.table.table-bordered.table-center
+  thead
+    - head_rows.each do |row|
+      tr
+        - row.each do |cell|
+          th = cell
+  tbody
+    - @rows.each do |key, row|
+      - result = @report.part1_row(order1352_id: row[:order1352]) unless row[:order1352].nil?
+      tr
+        td = row[:num]
+        td = row[:title]
+        td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+        td.right-cell = p_money to_thousand(result["cost"]) if result
+        td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 1, key.to_s, 'cnt', row[:order1352]) if result
+        td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+        td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+        td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 1, key.to_s, 'cnt_amount', row[:order1352]) if result
+    tr
+      - result = @report.part2_row
+      td 2
+      td = @report.row_title('row102')
+      td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 2, 'row102', 'cnt') if result
+      td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 2, 'row102', 'cnt_amount') if result
+    tr
+      - result = @report.part3_row
+      td 3
+      td = @report.row_title('row103')
+      td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 3, 'row103', 'cnt') if result
+      td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 3, 'row103', 'cnt_amount') if result
+    tr
+      - result = @report.part4_row
+      td 4
+      td = @report.row_title('row104')
+      td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 4, 'row104', 'cnt') if result
+      td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 4, 'row104', 'cnt_amount') if result
+    tr
+      - result = @report.part5_row
+      td 5
+      td = @report.row_title('row105')
+      td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 5, 'row105', 'cnt') if result
+      td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 5, 'row105', 'cnt_amount') if result
+    tr
+      - result = @report.part6_row
+      td 6
+      td = @report.row_title('row106')
+      td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 6, 'row106', 'cnt') if result
+      td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 6, 'row106', 'cnt_amount') if result
+    tr
+      - result = @report.part7_row
+      td 7
+      td = @report.row_title('row107')
+      td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 7, 'row107', 'cnt') if result
+      td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 7, 'row107', 'cnt_amount') if result
+    tr
+      - result = @report.part8_row
+      td 8
+      td = @report.row_title('row108')
+      td.right-cell = p_money to_thousand(result["cost_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt"], 8, 'row108', 'cnt') if result
+      td.right-cell = p_money to_thousand(result["cost_amount_nds"]) if result
+      td.right-cell = p_money to_thousand(result["cost_amount"]) if result
+      td.right-cell = purchase_from_sme_detail(@sme_params, result["cnt_amount"], 8, 'row108', 'cnt_amount') if result
+
+h3 = @report.row_title('partII_title')
+- part2 = (@report.part2_row && @report.part2_row['cost']) || 0
+- part3 = (@report.part3_row && @report.part3_row['cost']) || 0
+- part4 = (@report.part4_row && @report.part4_row['cost']) || 0
+- part5 = (@report.part5_row && @report.part5_row['cost']) || 0
+- part6 = (@report.part6_row && @report.part6_row['cost']) || 0
+- part7 = (@report.part7_row && @report.part7_row['cost']) || 0
+- part8 = (@report.part8_row && @report.part8_row['cost']) || 0
+
+- part2_nds = (@report.part2_row && @report.part2_row['cost_nds']) || 0
+- part3_nds = (@report.part3_row && @report.part3_row['cost_nds']) || 0
+- part4_nds = (@report.part4_row && @report.part4_row['cost_nds']) || 0
+- part5_nds = (@report.part5_row && @report.part5_row['cost_nds']) || 0
+- part6_nds = (@report.part6_row && @report.part6_row['cost_nds']) || 0
+- part7_nds = (@report.part7_row && @report.part7_row['cost_nds']) || 0
+- part8_nds = (@report.part8_row && @report.part8_row['cost_nds']) || 0
+
+- part2_amount = (@report.part2_row && @report.part2_row['cost_amount']) || 0
+- part3_amount = (@report.part3_row && @report.part3_row['cost_amount']) || 0
+- part4_amount = (@report.part4_row && @report.part4_row['cost_amount']) || 0
+- part5_amount = (@report.part5_row && @report.part5_row['cost_amount']) || 0
+- part6_amount = (@report.part6_row && @report.part6_row['cost_amount']) || 0
+- part7_amount = (@report.part7_row && @report.part7_row['cost_amount']) || 0
+- part8_amount = (@report.part8_row && @report.part8_row['cost_amount']) || 0
+
+- part2_amount_nds = (@report.part2_row && @report.part2_row['cost_amount_nds']) || 0
+- part3_amount_nds = (@report.part3_row && @report.part3_row['cost_amount_nds']) || 0
+- part4_amount_nds = (@report.part4_row && @report.part4_row['cost_amount_nds']) || 0
+- part5_amount_nds = (@report.part5_row && @report.part5_row['cost_amount_nds']) || 0
+- part6_amount_nds = (@report.part6_row && @report.part6_row['cost_amount_nds']) || 0
+- part7_amount_nds = (@report.part7_row && @report.part7_row['cost_amount_nds']) || 0
+- part8_amount_nds = (@report.part8_row && @report.part8_row['cost_amount_nds']) || 0
+
+- head_rows = CSV.read("app/views/reports/other/purchase_from_sme/csv/main_head_ii_#{Setting.company}.csv")
+- smp_dp_nds = part2_nds != 0 ? (part3_nds + part5_nds + part7_nds) / part2_nds : 0
+- smp_dp = part2 != 0 ? (part3 + part5 + part7) / part2 : 0
+- smp_dp_amount_nds = part2_amount_nds != 0 ? (part3_amount_nds + part5_amount_nds + part7_amount_nds) / part2_amount_nds : 0
+- smp_dp_amount = part2 != 0 ? (part3_amount + part5_amount + part7_amount) / part2_amount : 0
+
+table.table.table-bordered.table-center
+  thead
+    - head_rows.each do |row|
+      tr
+        - row.each do |cell|
+          th = cell
+  tbody
+    tr
+      td 11
+      td = @report.row_title('row111')
+      td.right-cell = smp_dp_nds
+      td.right-cell = smp_dp
+      td.right-cell
+      td.right-cell = smp_dp_amount_nds
+      td.right-cell = smp_dp_amount
+    - smp_dp_nds = part2_nds != 0 ? part5_nds / part2_nds : 0
+    - smp_dp = part2 != 0 ? part5 / part2 : 0
+    - smp_dp_amount_nds = part2_amount_nds != 0 ? part5_amount_nds / part2_amount_nds : 0
+    - smp_dp_amount = part2_amount != 0 ? part5_amount / part2_amount : 0
+    tr
+      td 12
+      td = @report.row_title('row112')
+      td.right-cell = smp_dp_nds
+      td.right-cell = smp_dp
+      td.right-cell
+      td.right-cell = smp_dp_amount_nds
+      td.right-cell = smp_dp_amount
+      - smp_dp_nds = part2_nds != 0 ? (part4_nds + part6_nds + part8_nds) / part2_nds : 0
+      - smp_dp = part2 != 0 ? (part4 + part6 + part8) / part2 : 0
+      - smp_dp_amount_nds = part2_amount_nds != 0 ? (part4_amount_nds + part6_amount_nds + part8_amount_nds) / part2_amount_nds : 0
+      - smp_dp_amount = part2 != 0 ? (part4_amount + part6_amount + part8_amount) / part2_amount : 0
+    tr
+      td 13
+      td = @report.row_title('row113')
+      td.right-cell = smp_dp_nds
+      td.right-cell = smp_dp
+      td.right-cell
+      td.right-cell = smp_dp_amount_nds
+      td.right-cell = smp_dp_amount
+    - smp_dp_nds = part2_nds != 0 ? part6_nds / part2_nds : 0
+    - smp_dp = part2 != 0 ? part6 / part2 : 0
+    - smp_dp_amount_nds = part2_amount_nds != 0 ? part6_amount_nds / part2_amount_nds : 0
+    - smp_dp_amount = part2_amount != 0 ? part6_amount / part2_amount : 0
+    tr
+      td 14
+      td = @report.row_title('row112')
+      td.right-cell = smp_dp_nds
+      td.right-cell = smp_dp
+      td.right-cell
+      td.right-cell = smp_dp_amount_nds
+      td.right-cell = smp_dp_amount

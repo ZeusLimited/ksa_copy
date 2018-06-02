@@ -1,0 +1,33 @@
+<h1>Listing content_offers</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Num</th>
+      <th>Position</th>
+      <th>Content offer type</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @content_offers.each do |content_offer| %>
+      <tr>
+        <td><%= content_offer.name %></td>
+        <td><%= content_offer.num %></td>
+        <td><%= content_offer.position %></td>
+        <td><%= content_offer.content_offer_type_id %></td>
+        <td><%= link_to 'Show', content_offer %></td>
+        <td><%= link_to 'Edit', edit_content_offer_path(content_offer) %></td>
+        <td><%= link_to 'Destroy', content_offer, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Content offer', new_content_offer_path %>

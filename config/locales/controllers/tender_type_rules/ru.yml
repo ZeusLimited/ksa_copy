@@ -1,0 +1,4 @@
+ru:
+  tender_type_rules:
+    update_all:
+      notice: 'Правила успешно изменены!'

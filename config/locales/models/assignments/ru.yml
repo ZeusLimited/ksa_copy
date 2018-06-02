@@ -1,0 +1,8 @@
+ru:
+  activerecord:
+    models:
+      assignment: 'Права доступа'
+    attributes:
+      assignment:
+        department_id: 'Предприятие'
+        role_id: 'Роль'

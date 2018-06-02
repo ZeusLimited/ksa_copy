@@ -1,0 +1,34 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li= link_to_session_or_default t('return_to_list'), :protocol_filter_path, protocols_path
+      li= link_to t('edit'), edit_protocol_path(@protocol)
+
+.page-header
+  h1 = t('.header', num: @protocol.num)
+
+p
+  b #{Protocol.human_attribute_name(:date_confirm)}:
+  =< @protocol.date_confirm
+
+p
+  b #{Protocol.human_attribute_name(:location)}:
+  =< @protocol.location
+
+p
+  b #{Protocol.human_attribute_name(:format)}:
+  =< @protocol.format.try(:name)
+p
+  b #{Protocol.human_attribute_name(:commission)}:
+  =< @protocol.commission.try(:name)
+
+- unless @protocol.protocol_files.empty?
+  = field_set_tag t('.files')
+    = render 'shared/table_files', files: @protocol.protocol_files, type: false
+
+= field_set_tag t('.lots')
+  p
+    => t('lot_count')
+    span.label= @protocol.plan_lots.size
+
+  = render 'table_plan_lots/simple', plan_lots: @protocol.plan_lots

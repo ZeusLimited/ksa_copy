@@ -1,0 +1,27 @@
+= render 'shared/submenu_tender', tender: @tender
+
+.page-header
+  h1 Журнал регистрации
+
+= render 'tenders/tender_header', tender: @tender
+
+= render 'form', tender: @tender, doc_taker: @doc_taker
+
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      th.span4 Наименование
+      th.span2 Дата регистрации
+      th.span5 Основание (письмо от ... исх. № ...)
+      th.span1 &nbsp;
+  tbody
+    - @doc_takers.each do |doc_taker|
+      tr
+        td = doc_taker.contractor_name_inn
+        td = doc_taker.register_date.strftime('%d.%m.%Y') if doc_taker.register_date
+        td = doc_taker.reason
+        td
+          = link_to_if can?(:destroy, doc_taker), content_tag(:i ,'', class: 'icon-trash' ),
+            tender_doc_taker_path(doc_taker.tender_id, doc_taker.id),
+            method: :delete,
+            data: { confirm: 'Вы уверены?' }

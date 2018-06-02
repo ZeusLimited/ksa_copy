@@ -1,0 +1,39 @@
+= input_block_form_for @options, url: reports_other_start_form_show_path,
+  method: :get, html: { target: '_blank' } do |f|
+
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+      .span2= f.input :gkpz_year, collection: gkpz_years_range, include_hidden: false, input_html: multi
+    .row
+      .span6
+        = f.input :customers, collection: Department.roots_customers(current_user.root_dept).order(:position),
+          input_html: multi, include_hidden: false, label_method: :name_with_depth_symbols,
+          label_html: { class: 'select-all-clear-roots' }
+    .row
+      .span6
+        = f.input :organizers,
+            collection: Department.organizers_by_root,
+            selected: Constants::Departments::RAO,
+            label_method: :name_with_depth_symbols,
+            include_hidden: false,
+            input_html: multi
+    .row
+      .span3
+        = f.input :directions,
+            collection: Direction.collection_for_select,
+            include_hidden: false,
+            label_html: { class: 'select-all-clear' },
+            input_html: multi
+      .span3
+        = f.input :tender_types,
+            collection: Dictionary.tender_types,
+            include_hidden: false,
+            label_html: { class: 'select-all-clear' },
+            input_html: multi
+    .row
+      .span2= f.input :format, collection: { 'Excel' => 'xlsx' }, include_blank: false
+
+    .form-actions
+      = f.button :button, class: 'btn btn-primary', name: nil

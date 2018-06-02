@@ -1,0 +1,44 @@
+def sum_all(col_letter, start_index, end_index)
+  AxlsxExt::Formula.sum_by_column(col_letter, start_index, end_index)
+end
+
+def sum_held(col_letter, start_index, end_index)
+  all_sum = AxlsxExt::Formula.sum_by_column(col_letter, start_index, end_index)
+  not_held_sum = AxlsxExt::Formula.sum_by_column_if('E', col_letter, '""', start_index, end_index)
+  "=#{AxlsxExt::Formula.del_eq(all_sum)}-#{AxlsxExt::Formula.del_eq(not_held_sum)}"
+end
+
+def sum_by_type(sum_type, col_letter, start_index, end_index)
+  if sum_type == :all
+    sum_all(col_letter, start_index, end_index)
+  else
+    sum_held(col_letter, start_index, end_index)
+  end
+end
+
+def sum_values(sum_type, sum_name, group)
+  values = @columns.map do |col_key, col_val|
+    if col_key == :c1
+      sum_type == :all ? sum_name : sum_name + " (состоявшиеся закупки)"
+    else
+      if col_val[:sum]
+        col_letter = col_val[:col]
+        fs = group[:filter_sum]
+        cs = group[:children_sum]
+        row_index = sum_type == :all ? 0 : 1
+        if col_val[:sum_formula]
+          col_val[:formula].call(@sheet.rows.size + 1)
+        elsif group.key?('filter')
+          fs ? sum_by_type(sum_type, col_letter, fs[:start_index], fs[:end_index]) : nil
+        else
+          AxlsxExt::Formula.sum_numbers_by_column(col_letter, cs.map { |i| i + row_index })
+        end
+      else
+        nil
+      end
+    end
+  end
+end
+
+@sheet.add_row sum_values(:all, sum_name, group), style: @sum_styles
+@sheet.add_row sum_values(:held, sum_name, group), style: @alt_sum_styles

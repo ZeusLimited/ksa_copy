@@ -1,0 +1,17 @@
+fieldset.nested-fields
+  .row
+    .span6
+      = f.input :department_id,
+        collection: Department.customers_by_root,
+        label_method: :name_with_depth_symbols,
+        include_blank: true,
+        input_html: { class: 'input-block-level' }
+    .span3
+      = f.input :role_id,
+        collection: Role.without_admin.order(:id),
+        label_method: :fullname,
+        include_blank: false,
+        input_html: { class: 'input-block-level' }
+    .span3
+      label &nbsp;
+      = link_to_remove_association t('icon-delete'), f, class: minus_default_classes

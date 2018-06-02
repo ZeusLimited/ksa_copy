@@ -1,0 +1,124 @@
+ru:
+  activerecord:
+    models:
+      tender: 'Тендер'
+    attributes:
+      tender:
+        num: 'Номер закупки'
+        name: 'Наименование закупки'
+        tender_type_id: 'Способ закупки'
+        tender_type_name: 'Способ закупки'
+        tender_type_explanations: 'Обоснование выбора способа'
+        etp_address_id: 'Адрес ЭТП'
+        etp_address_name: 'Адрес ЭТП'
+        commission_id: 'Закупочная комиссия'
+        commission: 'Закупочная комиссия'
+        commission_name: 'Закупочная комиссия'
+        department_id: 'Организатор'
+        department: 'Организатор'
+        department_name: 'Организатор'
+        announce_date: 'Дата публикации'
+        announce_place: 'Место публикации'
+        bid_date: 'Дата вскрытия конвертов'
+        bid_place: 'Место вскрытия конвертов'
+        user_id: 'Ответственный пользователь'
+        oos_num: 'Номер закупки на ЕИС'
+        oos_id: 'Идентификатор закупки на ЕИС'
+        etp_num: 'Номер закупки на ЭТП'
+        order_num: '№ поручения'
+        order_date: 'Дата поступления поручения'
+        contact_id: 'Контактные данные организатора'
+        confirm_place: 'Место утверждения документации'
+        explanation_period: 'Срок предоставления запросов на разъяснение (дней до вскрытия)'
+        paper_copies: 'Количество копий заявок/предложений на бумажном носителе'
+        digit_copies: 'Количество копий заявок/предложений в электронном виде'
+        life_offer: 'Срок действия, дней'
+        offer_reception_start: 'Начало приёма'
+        offer_reception_stop: 'Окончание приёма'
+        review_place: 'Место рассмотрения заявок/предложений'
+        review_date: 'Дата рассмотрения заявок/предложений'
+        summary_place: 'Место подведения итогов'
+        summary_date: 'Дата подведения итогов'
+        is_sertification: 'Учитывается/не учитывается добровольная сертификация'
+        is_guarantie: 'Требуется / не требуется обеспечение заявок'
+        guarantie_offer: 'Форма обеспечения заявок'
+        guarantie_date_begin: 'Дата начала'
+        guarantie_date_end: 'Дата окончания'
+        guarantie_making_money: 'Порядок внесения денежных средств'
+        guarantie_recvisits: 'Реквизиты для перечисления'
+        guarant_criterions: 'Требования к гаранту'
+        is_multipart: 'Допускаются / не допускаются коллективные участники'
+        alternate_offer: 'Кол-во'
+        alternate_offer_aspects: 'Аспекты по которым может быть подана альтернативная оферта'
+        maturity: 'Срок оплаты'
+        is_prepayment: 'Допускается / не допускается авансирование'
+        prepayment_cost: 'Размер аванса руб'
+        prepayment_percent: 'Размер аванса %'
+        prepayment_cost_money: 'Размер аванса руб'
+        prepayment_percent_money: 'Размер аванса %'
+        prepayment_aspects: 'Условия аванса'
+        prepayment_period_begin: 'Срок оплаты аванса'
+        prepayment_period_end: 'Срок оплаты оставшейся части'
+        project_type_id: 'Вид проекта договора'
+        project_text: 'Текст проекта договора'
+        provide_td: 'Порядок предоставления документации'
+        preferences: 'Преференции'
+        other_terms: 'Иные существенные условия'
+        contract_period: 'Срок заключения договора (дней)'
+        prepare_offer: 'Порядок подготовки оферт'
+        provide_offer: 'Порядок предоставления оферт'
+        is_gencontractor: 'Право участвовать генеральным подрядчикам'
+        contract_guarantie: 'Обеспечение исполнения обязательств по договору'
+        is_simple_production: 'Простая продукция'
+        reason_for_replace: 'Причины внесения изменений'
+        is_rebid: 'Переторжка предусмотрена/не предусмотрена'
+        failure_period: 'Срок отказа от проведения конкурса'
+        offer_reception_place: 'Место предоставления заявки'
+        local_time_zone: 'Время'
+        local_time_zone_name: 'Время'
+        user_fio_full: 'Ответственный пользователь'
+        local_time_zone_id: 'Время'
+        is_profitable: 'Закупка в счёт доходных договоров'
+        contract_period_type: 'Тип дней (в сроке для заключения договора)'
+        agency_contract_date: 'Дата агентского договора'
+        agency_contract_num: 'Номер агентского договора'
+        hidden_offer: 'Закрытая подача предложений'
+        official_site_num: 'Номер закупки на оф. сайте общества'
+        price_begin_limited: 'Ограничивать предложения указанной в извещении стоимостью'
+      tender/lots/specifications:
+        financing_id: "Источник финансирования"
+        cost_money: "Цена без НДС"
+        cost_nds_money: "Цена с НДС"
+        qty: "Количество"
+    errors:
+      models:
+        tender:
+          attributes:
+            base:
+              empty_lots: "Отсутствуют лоты"
+              repeated_numbers: "Номера лотов повторяются: %{nums}"
+              bidders_zero: 'Закупка без участников'
+              bidder_offers_zero: "Участник без оферт"
+              sublot_number_0: "Номера подлотов должны начинаться с 1"
+              one_sublot: "У лота №%{lot_num} не может быть только один подлот"
+              winner_for_each_lot: "У лота № %{lot_num} должен быть один победитель"
+              uniq_expert: "Сотрудник не может быть добавлен более 1 раза"
+              b2b_classifiers_must_be_low_level: 'Код b2b-классификатора должен быть нижнего уровня'
+            announce_date:
+              less_than_order_date: "не может быть раньше даты распорядительного документа"
+              greater_than_offer_reception_start: "не может быть позже даты начала приема предложений"
+            offer_reception_start:
+              greater_than_offer_reception_stop: "не может быть позже даты окончания приема предложений"
+            offer_reception_stop:
+              greater_than_bid_date: "не может быть позже даты вскрытия конвертов %{bid_date}"
+            bid_date:
+              reception_period: >
+                не может быть раньше, чем через %{days_count} дней после публикации процедуры
+                (дни публикации и вскрытия не учитываются)
+              greater_than_review_date: "не может быть позже даты рассмотрения предложений"
+            review_date:
+              greater_than_summary_date: "не может быть позже даты подведения итогов"
+            guarantie_date_begin:
+              greater_than_guarantie_date_end: "не может быть позже срока оплаты оставшейся части"
+            etp_address_id:
+              not_etp: "должен быть вне ЭТП"

@@ -1,0 +1,5 @@
+<%= fields_for :order do |fo| %>
+  <%= fo.fields_for :order_files_attributes, tender_file.order_files.build, index: gen_index do |builder| %>
+    $('#tender_files').append("<%= j render 'orders/order_file_fields', f: builder %>");
+  <% end %>
+<% end %>

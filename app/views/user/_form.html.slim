@@ -1,0 +1,43 @@
+= simple_form_for(user) do |f|
+  = error_messages_for user
+
+  .row: .span3 = f.input :email, input_html: { class: 'input-block-level' }
+  .row: .span3 = f.input :login, input_html: { class: 'input-block-level' }
+
+  .row
+    .span3 = f.input :surname, input_html: { class: 'input-block-level' }
+    .span3 = f.input :name, input_html: { class: 'input-block-level' }
+    .span3 = f.input :patronymic, input_html: { class: 'input-block-level' }
+    .span3 = f.input :gender, collection: t_enums('user_gender'), include_blank: true, input_html: { class: 'input-block-level', data: { placeholder: 'Нет' } }
+
+  .row: .span12 = f.input :user_job, input_html: { class: 'input-block-level' }
+
+  .row
+    .span3
+      = f.input :phone_public, input_html: { class: 'input-block-level' }
+    .span3
+      = f.input :phone_cell, input_html: {class: 'input-block-level'}
+    .span3
+      = f.input :phone_office, input_html: {class: 'input-block-level'}
+    .span3
+      = f.input :fax, input_html: {class: 'input-block-level'}
+
+  .row
+    .span6
+      = f.association :department,
+      collection: Department.rank_array,
+      label_method: :name_with_depth_symbols,
+      input_html: { class: 'input-block-level' },
+      include_blank: false
+    .span3
+      = f.input :approved, inline_label: t('.activate')
+
+  = field_set_tag t('.ability')
+    .row
+      .span12
+        = f.simple_fields_for :assignments do |builder|
+          == render 'assignment_fields', f: builder
+    .links
+      = link_to_add_association text_plus(t('add')), f, :assignments, class: plus_default_classes
+
+  .row: .span12 = f.submit t('save'), :class => 'btn btn-primary'

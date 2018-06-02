@@ -1,0 +1,10 @@
+ru:
+  activerecord:
+    models:
+      effeciency_indicator: 'Контрольные показатели для расчета КПЭ'
+    attributes:
+      effeciency_indicator:
+        gkpz_year: 'Год ГКПЗ'
+        work_name: 'Наименование показателя эффективности'
+        name: 'Наименование показателя эффективности'
+        value: 'Значение показателя эффективности'

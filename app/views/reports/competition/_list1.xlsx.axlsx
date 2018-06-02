@@ -1,0 +1,104 @@
+sheet.add_row [
+  'Год ГКПЗ', @report.params.gkpz_year,
+  'Дата начала периода', @report.params.date_begin,
+  'Дата окончания периода', @report.params.date_end
+  ], style: @item_style
+
+sheet.add_row
+
+@dirs = @report.params.direction
+
+# head
+root_customers = Department.customers.roots
+root_customer_names = root_customers.pluck(:name)
+
+cells = [nil] + (['Итого'] + root_customer_names).map {|d| [d, nil]}.flatten
+logger.debug cells
+row = sheet.add_row cells, style: @style_th
+
+# logger.debug 'xxx'
+(root_customers.count + 1).times do |i|
+  sheet.merge_cells row.cells[(i * 2 + 1)..(i * 2 + 2)]
+end
+
+cells = [nil] + (['количество', 'сумма, руб. с НДС'] * (root_customers.count + 1))
+row = sheet.add_row cells, style: @style_th
+
+title_row1 = 'Состоявшиеся закупки с подведёнными итогами'
+title_row2 = 'Закупки с неподведенными итогами'
+title_row3 = 'Необъявленные по плану Закупки , в т.ч.:'
+title_row4 = 'необъявленные "организатор РАО"'
+title_row5 = 'необъявленные "отменённые "'
+title_row6 = 'всего  на период'
+title_row7 = 'исполнение  запусков'
+title_row8 = 'КПЭ "Обеспечение стартов конкурентных процедур " (только по ЗАО)'
+
+
+# row 1
+sql = ERB.new(File.new("#{@folder}/row1.sql.erb").read).result(binding)
+cells = [title_row1] + [nil, nil]
+
+root_customers.pluck(:id).each do |cust_id|
+  line = @report.select_rows(sql, cust_id).first
+  cells = cells + [line['count_lots'], line['cost_lots']]
+end
+
+row = sheet.add_row cells, style: @style_td
+
+# row 2
+sql = ERB.new(File.new("#{@folder}/row2.sql.erb").read).result(binding)
+cells = [title_row2] + [nil, nil]
+
+root_customers.pluck(:id).each do |cust_id|
+  line = @report.select_rows(sql, cust_id).first
+  cells = cells + [line['count_lots'], line['cost_lots']]
+end
+
+row = sheet.add_row cells, style: @style_td
+
+# row 3
+sql = ERB.new(File.new("#{@folder}/row3.sql.erb").read).result(binding)
+cells = [title_row3] + [nil, nil]
+
+root_customers.pluck(:id).each do |cust_id|
+  line = @report.select_rows(sql, cust_id).first
+  cells = cells + [line['count_lots'], line['cost_lots']]
+end
+
+row = sheet.add_row cells, style: @style_td
+
+# row 4
+@org_rao = true
+sql = ERB.new(File.new("#{@folder}/row3.sql.erb").read).result(binding)
+cells = [title_row4] + [nil, nil]
+
+root_customers.pluck(:id).each do |cust_id|
+  line = @report.select_rows(sql, cust_id).first
+  cells = cells + [line['count_lots'], line['cost_lots']]
+end
+
+row = sheet.add_row cells, style: @style_td
+@org_rao = false
+
+# row 5
+@canceled = true
+sql = ERB.new(File.new("#{@folder}/row3.sql.erb").read).result(binding)
+cells = [title_row5] + [nil, nil]
+
+root_customers.pluck(:id).each do |cust_id|
+  line = @report.select_rows(sql, cust_id).first
+  cells = cells + [line['count_lots'], line['cost_lots']]
+end
+
+row = sheet.add_row cells, style: @style_td
+@canceled = false
+
+# row 6
+# cells = [title_row6] + [nil, nil]
+# root_customers.pluck(:id).each do |cust_id|
+#   cells = cells + ["=R[-5]C + R[-3]C", "=R[-5]C + R[-3]C"]
+# end
+#
+# row = sheet.add_row cells, style: @style_td
+
+# sheet.column_widths 50, 30, 5, 30

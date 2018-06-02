@@ -1,0 +1,10 @@
+@report.success_sql_rows.each do |result_row|
+  values = @columns.values.map do |val|
+    if val[:value]
+      val[:value].call(result_row)
+    else
+      ""
+    end
+  end
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end

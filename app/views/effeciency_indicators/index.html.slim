@@ -1,0 +1,22 @@
+.page-header
+  h1 = t('.head')
+
+p.text-left
+  = link_to t('.add_effeciency_indicator'), new_effeciency_indicator_path, class: "btn btn-primary"
+
+table.table.table-bordered
+  thead
+    tr
+      th = t('.gkpz_year')
+      th = t('.name')
+      th = t('.value')
+      th
+      th
+    tbody
+    - @effeciency_indicators.each do |effeciency_indicator|
+      tr
+        td = effeciency_indicator.gkpz_year
+        td = effeciency_indicator.name
+        td = effeciency_indicator.value
+        td = link_icon_title 'icon-edit', t('.edit'), edit_effeciency_indicator_path(effeciency_indicator)
+        td = link_icon_title 'icon-trash', t('.destroy'), effeciency_indicator, method: :delete, data: { confirm: 'Вы уверены?' }

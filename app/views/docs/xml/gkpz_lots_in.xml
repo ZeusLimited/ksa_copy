@@ -1,0 +1,11 @@
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:WashOut">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:gkpz_lots soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+         <gkpz_year xsi:type="xsd:int">2016</gkpz_year>
+         <customer_id xsi:type="xsd:int">2</customer_id>
+         <num xsi:type="xsd:string">125.1</num>
+         <num xsi:type="xsd:string">129.1</num>
+      </urn:gkpz_lots>
+   </soapenv:Body>
+</soapenv:Envelope>

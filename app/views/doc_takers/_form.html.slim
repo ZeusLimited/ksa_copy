@@ -1,0 +1,16 @@
+= simple_form_for [tender, doc_taker] do |f|
+  = error_messages_for doc_taker
+
+  .row
+    .span4
+      = f.input :contractor_id do
+        = f.text_field :contractor_name_inn, class: 'autocomplete_contractor_name input-block-level'
+        = f.hidden_field :contractor_id, class: 'autocomplete_contractor_id'
+    .span2
+      = f.input :register_date, as: :string,
+        input_html: { value: f.object.register_date, class: 'datepicker input-block-level' }
+    .span4= f.input :reason, input_html: { class: 'input-block-level' }
+    .span2
+      label &nbsp;
+      = f.submit "Сохранить", data: { confirm: "Вы уверены, что хотите сохранить сведения в журнале?" },
+        class: 'span2 btn btn-primary'

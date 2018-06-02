@@ -1,0 +1,34 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:WashOut">
+   <soap:Body>
+      <tns:contractors_response>
+         <contractors xsi:type="tns:contractors">
+            <id xsi:type="xsd:int">50840</id>
+            <name xsi:type="xsd:string">Туймаада-Нефть</name>
+            <fullname xsi:type="xsd:string">Открытое акционерное общество "Нефтяная компания "Туймаада-Нефть"</fullname>
+            <inn xsi:type="xsd:string">1435149745</inn>
+            <kpp xsi:type="xsd:string">143501001</kpp>
+            <ogrn xsi:type="xsd:string">1041402041724</ogrn>
+            <okpo xsi:type="xsd:string">49065169</okpo>
+            <ownership xsi:type="xsd:string">ОАО</ownership>
+            <oktmo xsi:type="xsd:string">98701000</oktmo>
+            <legal_addr xsi:type="xsd:string">677000, Республика Саха (Якутия), г. Якутск, ул. Курашова, д. 46</legal_addr>
+            <form xsi:type="xsd:string">company</form>
+            <status xsi:type="xsd:string">active</status>
+         </contractors>
+         <contractors xsi:type="tns:contractors">
+            <id xsi:type="xsd:int">50847</id>
+            <name xsi:type="xsd:string">Альянс</name>
+            <fullname xsi:type="xsd:string">Общество с ограниченной ответственностью "Альянс"</fullname>
+            <inn xsi:type="xsd:string">1435194836</inn>
+            <kpp xsi:type="xsd:string">143501001</kpp>
+            <ogrn xsi:type="xsd:string">1071435020700</ogrn>
+            <okpo xsi:type="xsd:string">81735692</okpo>
+            <ownership xsi:type="xsd:string">ООО</ownership>
+            <oktmo xsi:type="xsd:string">98701000</oktmo>
+            <legal_addr xsi:type="xsd:string">677000, Республика Саха (Якутия), г. Якутск, ул. Курашова, д. 1/1, оф. 17</legal_addr>
+            <form xsi:type="xsd:string">company</form>
+            <status xsi:type="xsd:string">active</status>
+         </contractors>
+      </tns:contractors_response>
+   </soap:Body>
+</soap:Envelope>

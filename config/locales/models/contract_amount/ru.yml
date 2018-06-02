@@ -1,0 +1,12 @@
+ru:
+  activerecord:
+    models:
+      contract_amount: 'Обязательства по договору'
+    attributes:
+      contract_amount:
+        year: 'Год'
+        amount_finance: 'Финансирование без НДС'
+        amount_finance_money: 'Финансирование без НДС'
+        amount_finance_nds: 'Финансирование с НДС'
+        amount_finance_nds_money: 'Финансирование с НДС'
+        contract_specification_id: 'Спецификация договора'

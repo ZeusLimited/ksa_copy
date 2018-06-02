@@ -1,0 +1,45 @@
+select
+sum(kv_1) as kv1_cost, sum(kv_2) as kv2_cost, sum(kv_3) as kv3_cost, sum(kv_4) as kv4_cost, direction_id, tender_type_id
+From
+(
+  select
+  pl.id, pl.tender_type_id, pl.subject_type_id, pl.gkpz_year, pl.department_id as organizer, pl.status_id,
+  ps.direction_id, ps.financing_id, ps.customer_id,
+  case when pl.announce_date <= to_date('31.03.' || to_char(pl.gkpz_year),'dd.mm.yyyy') then ps.qty * ps.cost end as kv_1,
+  case when to_char(pl.announce_date,'Q.YYYY') = '2.' || pl.gkpz_year then ps.qty * ps.cost end as kv_2,
+  case when to_char(pl.announce_date,'Q.YYYY') = '3.' || pl.gkpz_year then ps.qty * ps.cost end as kv_3,
+  case when to_char(pl.announce_date,'Q.YYYY') = '4.' || pl.gkpz_year then ps.qty * ps.cost end as kv_4
+
+  From plan_lots pl
+  inner join plan_specifications ps on (ps.plan_lot_id = pl.id)
+  INNER JOIN protocols p on (pl.protocol_id = p.id)
+  inner join commissions c on (c.id = p.commission_id)
+  inner join
+  (select ss.guid, max(date_confirm) as date_confirm
+                from plan_lots ll
+                inner join plan_specifications ss on (ll.id = ss.plan_lot_id)
+                inner join protocols pp on (ll.protocol_id = pp.id)
+                inner join commissions cc on (pp.commission_id = cc.id)
+                Where pp.date_confirm <= :end_date
+                And cc.commission_type_id = <%= Constants::CommissionType::SD %>
+                Group by ss.guid
+              ) vi on (vi.guid = ps.guid and vi.date_confirm = p.date_confirm)
+  where pl.gkpz_year = :gkpz_year and pl.status_id in (<%= Constants::PlanLotStatus::CONFIRM_SD %>)
+) vi
+
+Where vi.gkpz_year = :gkpz_year
+
+<% if customer.present? %>
+  and vi.customer_id in (<%= Department.subtree_ids_for(customer).join(', ') %>)
+<% end %>
+
+<% if organizers.present? %>
+  and vi.organizer in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if directions.present? %>
+  and vi.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+Group By direction_id, tender_type_id

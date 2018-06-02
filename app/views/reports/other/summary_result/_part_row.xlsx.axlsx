@@ -1,0 +1,35 @@
+@simple_sheet.add_row_title name, style: @styles[:group_row_h1]
+row_begin = @sheet.rows.size
+
+sum_row_numbers = []
+Dictionary.tender_types.each do |tender_type|
+  [-1, Constants::EtpAddress::B2B_ENERGO].each do |etp|
+    sum_row_numbers << (@sheet.rows.size + 1) if etp == -1
+    next if etp != -1 && (Constants::TenderTypes::EI + [Constants::TenderTypes::UNREGULATED]).include?(tender_type.id)
+    name = etp != -1 ? "в т.ч. #{tender_type.fullname} на ЭТП" : tender_type.fullname
+    result = @report.result_row(name, tender_type.id, begin_date, end_date, etp)
+    values = @columns.values.map { |value| value[:value].call(result) }
+    @sheet.add_row values, style: @column_styles, types: @column_types
+  end
+end
+row_end = @sheet.rows.size
+@sheet.add_row [  "Итого",
+                  AxlsxExt::Formula.sum_numbers_by_column("B", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("C", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("D", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("E", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("F", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("G", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("H", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("I", sum_row_numbers),
+                  AxlsxExt::Formula.sum_numbers_by_column("J", sum_row_numbers),
+                  "=H#{row_end + 1}/B#{row_end + 1}",
+                  "=J#{row_end + 1}/C#{row_end + 1}",
+                  "=H#{row_end + 1}/D#{row_end + 1}",
+                  "=J#{row_end + 1}/E#{row_end + 1}",
+                  "=I#{row_end + 1}-J#{row_end + 1}",
+                  "=O#{row_end + 1}/I#{row_end + 1}"
+               ],
+               style: @sum_styles
+
+@outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }

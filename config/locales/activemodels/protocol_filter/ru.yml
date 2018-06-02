@@ -1,0 +1,13 @@
+ru:
+  helpers:
+    submit:
+      protocol_filter:
+        create: "Поиск"
+  activemodel:
+    models:
+      protocol_filter: 'Фильтр протоколов'
+    attributes:
+      protocol_filter:
+        year: 'Год'
+        department: 'Подразделение'
+        commission_type: 'Тип комиссии'

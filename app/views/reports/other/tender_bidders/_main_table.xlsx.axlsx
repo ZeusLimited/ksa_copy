@@ -1,0 +1,15 @@
+render 'thead'
+
+results = @report.bidders_sql_rows
+
+results.each do |result_row|
+  next if results.last == result_row
+  if result_row['break_point'] == 1
+    @simple_sheet.add_row_title result_row['contractor_name'], style: @styles[:group_row_h1]
+  else
+    values = @columns.values.map do |val|
+      val[:value].call(result_row)
+    end
+    @sheet.add_row values, style: @column_styles, types: @column_types
+  end
+end

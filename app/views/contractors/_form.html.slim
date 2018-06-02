@@ -1,0 +1,97 @@
+== render 'contractors/dadata_search'
+
+= simple_form_for(contractor, form_options.merge(html: { id: "form_contractor" }, defaults: { input_html: { class: 'input-block-level' } })) do |f|
+  = error_messages_for contractor
+  = f.hidden_field :guid_hex
+  .row
+    .span12.text-error
+        span.text-error == t('.reestr_msp')
+  br
+  .row
+    .span4
+      = link_to t('.correct_contractor'), image_path("/images/correct_new_contractor.png"), target: "_blank"
+  br
+
+  .row
+    = view_text_field('span2', contractor, :status, t("contractor_status.#{contractor.status}"))
+    .span2 = f.input :form, collection: t_enums('contractor_form'), include_blank: false
+    - if contractor.unfair?
+      == view_text_field('span2', contractor, :unfair?, tbool(contractor.unfair?))
+    .span2
+      span#span_focus_kontur
+    .span2.offset6
+      label &nbsp;
+      = link_to t('.e_documents'), '#assign_files', class: "btn btn-warning pull-right", "data-toggle" => "modal"
+  .row
+    .span2
+      = f.input :inn, input_html: { class: "input-block-level text-right", readonly: !contractor.new_record? }
+
+    .span2 = f.input :kpp, input_html: { class: "input-block-level text-right",
+                      readonly: (f.object.view_for_main? && current_user.cannot?(:contractor_boss, Contractor)) }
+    .span2
+      = f.input :ogrn, input_html: { class: "input-block-level text-right",
+                 readonly: (f.object.view_for_main? && current_user.cannot?(:contractor_boss, Contractor)) }
+    .span2 = f.input :okpo, input_html: { class: "input-block-level text-right" }
+    .span2 = f.input :oktmo, input_html: { class: "input-block-level text-right" }
+    .span2 = f.input :reg_date, as: :string, input_html: { value: f.object.reg_date, class: 'datepicker input-block-level' }
+  .row
+    .span6 = f.input :name, input_html: { class: 'from-fns input-block-level'}, label: t('.description_name')
+    .span6 = f.input :fullname, input_html: { class: 'from-fns input-block-level' }
+  .row
+    .span12 = f.input :legal_addr, as: :string, input_html: { class: 'fias-address input-block-level from-fns' }, hint: t('.description_address')
+  .row
+    - if f.object.view_for_all?
+      .span8
+        = f.input :parent_id do
+          = f.hidden_field :parent_id,
+            class: 'select-parent-contractor input-block-level',
+            data: { url: search_parents_contractors_path, url_info: info_contractors_path }
+    .span2
+      = f.input :ownership_id, collection: Ownership.order(:shortname),
+        label_method: :shortname,
+        input_html: { class: 'input-block-level', data: { placeholder: 'Нет' } }
+    .span2
+      = f.input :jsc_form_id, collection: Dictionary.jsc_forms,
+        input_html: { class: 'input-block-level', data: { placeholder: 'Нет' } }
+    .span2 = f.input :is_sme, as: :select,
+      input_html: { data: { placeholder: 'Не выбрано' } },
+      readonly: !f.object.reestr_file?,
+      hint: link_to(t('.site_msp'), 'https://rmsp.nalog.ru/', target: :_blank) if current_user.can?(:contractor_boss, Contractor)
+    .span2
+      - if current_user.can?(:contractor_boss, Contractor)
+        = f.input :sme_type_id do
+          = f.select :sme_type_id,
+            options_for_select(Dictionary.contractor_sme_types.map { |t| [t.name, t.id, { 'title' => t.fullname }] }, f.object.sme_type_id),
+            { include_blank: true },
+            class: 'select-title input-block-level', 'data-placeholder' => 'Не выбрано',
+            readonly: !f.object.reestr_file?
+    .span2 = f.input :is_dzo, as: :select, include_blank: false if current_user.can?(:boss, Contractor)
+    .span2 = f.input :is_resident, as: :select, include_blank: false if current_user.can?(:boss, Contractor)
+
+  .form-actions
+    => link_to t('.cancel'), url_from_session_or_default(:filter_contractors, contractors_path), class: 'btn btn-warning'
+    = f.submit t('.submit'), class: 'btn btn-primary'
+
+  = image_tag "load.gif", id: "loadImg"
+
+  #assign_files.bootstrap-modal.modal.hide.fade
+    .modal-header
+      button.close data-dismiss="modal" &times;
+      h3 = t('.e_documents')
+    .modal-body
+      = render "tender_files/field", area_id: Constants::TenderFileArea::CONTRACTOR, year: Time.now.year
+      table.table.table-hover.table-striped
+        thead
+          tr
+            th
+            th = t('modal_files.file')
+            th = t('modal_files.size')
+            th = t('modal_files.type')
+            th = t('modal_files.note')
+            th = t('modal_files.load')
+            th = t('modal_files.owner')
+        tbody#contractor_files
+          = f.simple_fields_for :files do |builder|
+            = render 'tender_files/file_fields', f: builder, file_types: Dictionary.contractor_file_types
+    .modal-footer
+     button.btn data-dismiss="modal" = t('.close')

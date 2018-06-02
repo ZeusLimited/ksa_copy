@@ -1,0 +1,9 @@
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:WashOut">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:contractors soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+         <begin_date xsi:type="xsd:date">2015-12-18 01:55</begin_date>
+         <end_date xsi:type="xsd:date">2016-02-01</end_date>
+      </urn:contractors>
+   </soapenv:Body>
+</soapenv:Envelope>

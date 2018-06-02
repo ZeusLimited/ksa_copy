@@ -1,0 +1,9 @@
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:WashOut">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:find_dictionary soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+         <ref_id xsi:type="xsd:int">15001</ref_id>
+         <ref_id xsi:type="xsd:int">15003</ref_id>
+      </urn:find_dictionary>
+   </soapenv:Body>
+</soapenv:Envelope>

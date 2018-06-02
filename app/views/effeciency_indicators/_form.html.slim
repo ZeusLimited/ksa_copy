@@ -1,0 +1,18 @@
+= simple_form_for @effeciency_indicator do |f|
+  = error_messages_for @effeciency_indicator
+
+  .row
+    .span6
+      = f.input :work_name,
+          collection: EffeciencyIndicatorType.types_list,
+          input_html: { value: f.object.work_name, class: 'input-block-level', data: { placeholder: t('.select_name') } }
+    .span3
+      = f.input :gkpz_year, collection: gkpz_years_range, include_hidden: false,
+                input_html: { value: f.object.gkpz_year, class: 'input-block-level', data: { placeholder: t('.select_gkpz_year') } }
+    .span3
+      = f.input :value, as: :float,
+                input_html: { value: f.object.value, class: 'input-block-level' }
+
+  .form-actions.text-right
+    => f.submit t('.save'), class: 'btn btn-primary'
+    = link_to t('.cancel'), url_from_session_or_default(:effeciency_indicators, effeciency_indicators_path), class: 'btn input-small btn-warning'

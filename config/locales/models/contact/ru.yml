@@ -1,0 +1,23 @@
+ru:
+  activerecord:
+    models:
+      contact: 'Контакт'
+    attributes:
+      contact:
+        legal_fias_name: 'Адрес'
+        postal_fias_name: 'Адрес'
+        web: 'Интернет адрес'
+        email: 'E-mail'
+        phone: 'Номер телефона'
+        fax: 'Факс'
+        version: 'Версия'
+        department_id: 'Предприятие/подразделение'
+        contact_person: 'Контактное лицо'
+    errors:
+      models:
+        contact:
+          attributes:
+            postal_fias_name:
+              not_exist: 'не найден или не заполнен'
+            postal_fias_name:
+              not_exist: 'не найден или не заполнен'

@@ -1,0 +1,128 @@
+@sheet = sheet
+
+@col_count = 6
+
+def print_group(name, options = {})
+  values = Array.new(@col_count)
+  values[0] = name
+  group_row = @sheet.add_row values, options
+  @sheet.merge_cells group_row.cells[0..(@col_count - 1)]
+  group_row
+end
+
+def thead
+  rows = []
+  @head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+  rows[0].height = 60
+  rows[1].height = 15
+end
+
+def tbody(rows)
+  rows.each_with_index do |row, index|
+    @sheet.add_row [
+      index + 1,
+      row['lot_num'],
+      row['lot_name'],
+      row['reason_create_quot'],
+      row['tender_type_name'],
+      row['fact_cost']
+    ], style: [@styles[:td], @styles[:td], @styles[:td], @styles[:td], @styles[:td], @styles[:td_money]]
+  end
+end
+
+@head_rows = CSV.read('app/views/reports/reglament/total_explanation/csv/head_2_2.csv', col_sep: ';')
+
+months = "#{@report.months} #{t(:month, count: @report.months)}"
+
+fc = @report.sheet2_fact_row["final_cost_nds"]
+
+inv_cost = @report.sheet2_2_invest_rows.sum { |n| n['fact_cost'] }
+inv_cnt = @report.sheet2_2_invest_rows.sum { |n| n['rn'] }
+inv_ps = fc.present? ? (inv_cost / fc * 100).round(2) : 0
+
+tek_cost = @report.sheet2_2_tek_rows.sum { |n| n['fact_cost'] }
+tek_cnt = @report.sheet2_2_tek_rows.sum { |n| n['rn'] }
+tek_ps = fc.present? ? (tek_cost / fc * 100).round(2) : 0
+
+
+pcnt = @report.sheet2_plan_row['all_count'] || 0
+pcost_nds = @report.sheet2_plan_row['all_cost_nds_sum'] || 0
+
+offplan_ps = pcnt == 0 ? 0 : ((inv_cnt + tek_cnt) / pcnt.to_f * 100).round(2)
+offplan_cost_ps = pcost_nds == 0 ? 0 : ((inv_cost + tek_cost) / pcost_nds * 100).round(2)
+
+print_group t('.text1'), style: @styles[:text_left_bold]
+print_group(
+  t('.text2',
+    months: months,
+    year: @report.gkpz_year), style: @styles[:text_left])
+
+sheet.add_row
+
+print_group(
+  t('.text3',
+    count: "#{tek_cnt} #{t(:tender, count: tek_cnt)}",
+    cost: to_money_str(tek_cost),
+    percent: number_to_percentage(tek_ps, precision: 2)), style: @styles[:text_left], height: 30)
+
+sheet.add_row
+
+thead
+tbody @report.sheet2_2_tek_rows
+
+sheet.add_row
+
+print_group(
+  t('.text4',
+    count: "#{inv_cnt} #{t(:tender, count: inv_cnt)}",
+    cost: to_money_str(inv_cost),
+    percent: number_to_percentage(inv_ps, precision: 2)), style: @styles[:text_left], height: 30)
+
+sheet.add_row
+
+thead
+tbody @report.sheet2_2_invest_rows
+
+sheet.add_row
+
+vneplan_cnt = tek_cnt + inv_cnt
+vneplan_cost = tek_cost + inv_cost
+
+print_group(
+  t('.text5',
+    count: "#{vneplan_cnt} #{t(:thing, count: vneplan_cnt)}",
+    cost: to_money_str(vneplan_cost),
+    percent_cnt: number_to_percentage(offplan_ps, precision: 2),
+    percent_cost: number_to_percentage(offplan_cost_ps, precision: 2)), style: @styles[:text_left], height: 30)
+
+kon_rows = @report.sheet2_2_rows.select { |r| r['tender_type_id'] != Constants::TenderTypes::ONLY_SOURCE }
+ei_rows = @report.sheet2_2_rows.select { |r| r['tender_type_id'] == Constants::TenderTypes::ONLY_SOURCE }
+
+cnt_kon = kon_rows.sum { |n| n['rn'] }
+sum_kon = kon_rows.sum { |n| n['fact_cost'] }
+cnt_ei = ei_rows.sum { |n| n['rn'] }
+sum_ei = ei_rows.sum { |n| n['fact_cost'] }
+
+total_cnt = cnt_kon + cnt_ei
+total_sum = sum_kon + sum_ei
+
+cnt_kon_ps = begin cnt_kon.to_f / total_cnt * 100 rescue 0 end
+sum_kon_ps = begin sum_kon.to_f / total_sum * 100 rescue 0 end
+
+cnt_ei_ps = begin cnt_ei.to_f / total_cnt * 100 rescue 0 end
+sum_ei_ps = begin sum_ei.to_f / total_sum * 100 rescue 0 end
+
+print_group(
+  t('.text6',
+    count: "#{cnt_kon} #{t(:thing, count: cnt_kon)}",
+    cost: to_money_str(sum_kon),
+    percent_cnt: number_to_percentage(cnt_kon_ps, precision: 2),
+    percent_cost: number_to_percentage(sum_kon_ps, precision: 2)), style: @styles[:text_left], height: 30)
+print_group(
+  t('.text7',
+    count: "#{cnt_ei} #{t(:thing, count: cnt_ei)}",
+    cost: to_money_str(sum_ei),
+    percent_cnt: number_to_percentage(cnt_ei_ps, precision: 2),
+    percent_cost: number_to_percentage(sum_ei_ps, precision: 2)), style: @styles[:text_left], height: 30)
+
+sheet.column_widths 5, 10, 50, 12, 12, 20

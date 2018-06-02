@@ -1,0 +1,88 @@
+doctype html
+html
+  head
+    meta charset="utf-8"
+    meta name="turbolinks-cache-control" content="no-cache"
+    title = content_for?(:title) ? yield(:title) : general_title
+    = csrf_meta_tags
+
+    / javascript_include_tag "//www.google.com/jsapi", "chartkick"
+
+    / Le HTML5 shim, for IE6-8 support of HTML elements
+    /[if lt IE 9]
+      = javascript_include_tag "http://html5shim.googlecode.com/svn/trunk/html5.js"
+
+    = javascript_include_tag 'application', 'data-turbolinks-track': 'reload'
+
+    = stylesheet_link_tag('application', media: 'all', 'data-turbolinks-track': 'reload')
+    = javascript_pack_tag('vendor-bundle', 'data-turbolinks-track': 'reload')
+    = javascript_pack_tag('app-bundle', 'data-turbolinks-track': 'reload')
+
+    / Dadata Service
+    / = stylesheet_link_tag "https://cdn.jsdelivr.net/jquery.suggestions/17.2/css/suggestions.css"
+    / = javascript_include_tag "https://cdn.jsdelivr.net/jquery.suggestions/17.2/js/jquery.suggestions.min.js"
+
+    / For all other devices
+    / Size should be 32 x 32 pixels
+    = favicon_link_tag 'favicon4.ico', rel: 'shortcut icon'
+  body
+    = include_gon(:init => true)
+    = nav_bar fixed: :top, brand: image_tag(Setting.company + ".png", alt: Setting.app_name, title: Setting.app_name), responsive: true do
+      = menu_group do
+        = menu_divider
+        = menu_item_nested "Планирование закупок", plan_lots_path
+        = menu_item_nested "Исполнение ГКПЗ", tenders_path
+        = menu_item "Отчёты", reports_path
+        = menu_divider
+        = drop_down "Справочники" do
+          = menu_item "Системные справочники", dictionaries_path if can? :read, Dictionary
+          = menu_item "Направления деятельности", directions_path
+          = menu_item "Инвестиционные проекты", invest_projects_path
+          = menu_item "Предприятия и подразделения", departments_path if can? :manage, Department
+          = menu_item "Курирующие подразделения", monitor_services_path if can? :manage, Department
+          = menu_item "Закупочные комиссии", commissions_path
+          = menu_item "Пользователи", user_index_path
+          = menu_item "Часовые пояса", local_time_zones_path if can? :manage, LocalTimeZone
+          = menu_item "Контрагенты", contractors_path
+          = menu_item "Правила смены способов закупок", tender_type_rules_path
+          = menu_item "Пункты положения о закупках", regulation_items_path
+          = menu_item "Недобросовестные контрагенты", unfair_contractors_path
+          = menu_item "Формы собственности", ownerships_path
+          = menu_item "Контрольные показатели для расчета КПЭ", effeciency_indicators_path
+          = menu_item "Специальный перечень ОКДП", okdp_sme_etps_path
+          = menu_item "Количество дней между публикацией и вскрытием", tender_dates_for_types_path
+        = menu_item "Контакты", main_contacts_path
+      = menu_group pull: :right do
+        = menu_item "Wiki", pages_path
+        = menu_divider
+        - if current_user
+          li
+            = link_to cart_lots_path, class: 'cart-lots' do
+              = image_tag("32bag.png", title: 'Папка исполняемых лотов')
+              = content_tag(:span, current_user.lots.count, class: 'badge badge-success')
+            / = link_to cart_lots_path, class: 'cart-lots' do
+            /   - png_src = (current_user.lots.count > 0) ? "32cart_select.png" : "32cart.png"
+            /   = image_tag(png_src, alt: "Корзина исполняемых лотов", title: 'Корзина исполняемых лотов')
+            /   = content_tag(:span, current_user.lots.count, class: 'badge badge-success')
+          = menu_divider
+          = menu_item current_user.fio_short, account_profile_path
+          = menu_item "Выйти", destroy_user_session_path, method: :delete
+        - else
+          = menu_item "Регистрация", new_user_registration_path
+          = menu_item "Войти", new_user_session_path
+
+    #main.container.plain
+      .row
+        .span12
+          = yield(:subnav)
+          = bootstrap_flash
+          = yield
+      #history.bootstrap-modal.modal.hide.fade
+
+      footer.footer
+        p
+          | &copy; ООО &laquo;АРИНК ГРУПП&raquo; 2013-#{Date.current.year}
+
+    = yield :javascript_includes
+
+    = redux_store_hydration_data

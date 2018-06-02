@@ -1,0 +1,27 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 Список протоколов рассмотрения
+
+= render 'tenders/tender_header', tender: tender
+
+p.text-right
+  = link_to 'Создать протокол', new_tender_review_protocol_path(tender), class: "btn btn-primary"
+
+table.table.table-bordered.table-striped.table-nonfluid
+  thead
+    tr
+      th Номер
+      th Дата вступления в силу
+      th
+      th
+      th
+  tbody
+  - tender.review_protocols.each do |review_protocol|
+    tr
+      td = review_protocol.num
+      td = review_protocol.confirm_date
+      td = link_icon_title 'icon-info-sign', t('icon-show'), [tender, review_protocol]
+      td = link_icon_title 'icon-edit', t('edit'), edit_tender_review_protocol_path(tender, review_protocol)
+      td = link_icon_title 'icon-trash', t('icon-delete'), [tender, review_protocol], method: :delete,
+        data: { confirm: t('confirm') }

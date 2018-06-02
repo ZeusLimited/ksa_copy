@@ -1,0 +1,68 @@
+--fact
+select ttype1, ttype2, sum(cnt) as sum_cnt, round(sum(sum_cost_nds) / 1000) as sum_cost_nds from (
+select
+tt.name as ttype1,
+CASE
+  WHEN
+    t.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+    and (<%= filter_pp.html_safe %>)
+  THEN '<%= Reports::Reglament::ConsolidatedAnalysis::EI_PP %>'
+  ELSE tt.fullname
+END as ttype2,
+case when s.direction_id = l.main_direction_id then 1 else 0 end as cnt,
+sum(os.cost_nds * s.qty) as sum_cost_nds
+
+from tenders t
+inner join lots l on l.tender_id = t.id
+inner join specifications s on s.lot_id = l.id
+inner join winner_protocols wp on l.winner_protocol_id = wp.id
+inner join dictionaries tt on tt.ref_id = t.tender_type_id
+inner join offers o on o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>
+inner join offer_specifications os on os.offer_id = o.id and os.specification_id = s.id
+left join plan_lots pl on pl.id = l.plan_lot_id
+LEFT JOIN regulation_items ri on ri.id = pl.regulation_item_id
+
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+  group by tpl.guid
+) can on pl.guid = can.guid
+
+where
+l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+and can_date is null
+and wp.confirm_date between :begin_date and :end_date
+
+<% if gkpz_years.present? %>
+  and l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id.present? %>
+  and l.root_customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+
+<% if customers.present? %>
+  and l.root_customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+group by
+tt.name,
+CASE
+  WHEN
+    t.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+    and (<%= filter_pp.html_safe %>)
+  THEN '<%= Reports::Reglament::ConsolidatedAnalysis::EI_PP %>'
+  ELSE tt.fullname
+END,
+nvl(l.frame_id, l.id), l.plan_lot_id, s.direction_id, l.main_direction_id
+) sub
+group by ttype1, ttype2

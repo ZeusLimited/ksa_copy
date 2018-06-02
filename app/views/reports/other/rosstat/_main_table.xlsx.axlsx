@@ -1,0 +1,30 @@
+head_rows = CSV.read('app/views/reports/other/rosstat/csv/part1_head.csv', col_sep: ';')
+
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, height: 30, style: @styles[:th]) }
+rows[2].height = 45
+rows[3].height = 15
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+@rows.each do |row|
+  @simple_sheet.add_row_title row['name'], style: @styles[:td_title]
+
+  row['lines'].each do |key, value|
+    is_money = (301..308).include?(key)
+    columns = is_money ? @money_columns : @columns
+    column_styles = is_money ? @money_column_styles : @column_styles
+    column_types = is_money ? @money_column_types : @column_types
+
+    @report.sql_result(key).each do |result|
+      values = columns.map do |k, v|
+        case k
+          when :c1 then value
+          when :c2 then key
+          else
+            v[:value].call(result)
+        end
+      end
+      @sheet.add_row values, style: column_styles, types: column_types
+    end
+  end
+end

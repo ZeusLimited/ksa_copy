@@ -1,0 +1,21 @@
+ru:
+  activerecord:
+    models:
+      department: "Предприятия/подразделения"
+    attributes:
+      department:
+        inn: 'ИНН'
+        kpp: 'КПП'
+        ownership: 'Форма собственности'
+        full_ownership: 'Полное наименование формы собственности'
+        name: 'Наименование'
+        fullname: 'Полное наименование (указывается с кавычками)'
+        parent_dept_id: 'Головное подразделение'
+        position: 'Порядковый номер'
+        is_customer: 'Заказчик?'
+        is_organizer: 'Организатор?'
+        tender_cost_limit: 'Лимит на проведение закупок'
+        tender_cost_limit_money: 'Доступный лимит, руб. без НДС'
+        ownership_id: 'Форма собственности'
+        shortname: 'Сокращенное наименование'
+        eis223_limit_money: 'Доступный лимит п.15 ст.4 223-ФЗ, руб. с НДС'

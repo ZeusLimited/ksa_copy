@@ -1,0 +1,17 @@
+ru:
+  departments:
+    index:
+      new_department: 'Новое предприятие'
+      new_child: 'Новое подразделение'
+    new:
+      header: Новое предприятие
+    new_child:
+      header: Новое подразделение
+    child_form:
+      move_to_root: Сделать предприятием
+    form:
+      move_to_child: 'Сделать подразделением'
+    edit:
+      header: Редактирование предприятия
+    edit_child:
+      header: Редактирование подразделения

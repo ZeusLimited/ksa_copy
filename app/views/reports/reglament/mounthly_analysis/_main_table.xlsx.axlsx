@@ -1,0 +1,27 @@
+render 'thead'
+
+@report.structure.each do |row|
+  result = @report.send(row['sql'] + "_row", row['filters'])
+  values = @columns.map do |key, value|
+    if key == :c1
+      row['num']
+    elsif key == :c2
+      row['name']
+    else
+      value[:value].call(result)
+    end
+  end
+  styles = row['styles'] ? row['styles'].map{ |s| @styles[s.to_sym] } : @column_styles
+  types = row['types'] ? row['types'].map(&:to_sym) : @column_types
+  @sheet.add_row values, style: styles, types: types
+end
+
+@sheet.add_row
+@sheet.add_row ["*с учетом опережающих и первоочередных закупок под ГКПЗ #{@report.gkpz_year}г."]
+
+result = @report.unplan_row(direction_id: Direction.pluck(:id), is_zzc: 1)
+@sheet.add_row ["**в объем внеплановых закупок включена #{result['cnt_all']} ЗЗЦ на сумму #{xlsx_money to_thousand(result['cost_nds_all'])} тыс. руб. с НДС, которые проведены на основании рамочного решения ЦЗК о серии однотипных закупок, проводимых по результатам предварительного отбора. Порешению ЦЗК данные закупки считаются плановыми"]
+
+result = @report.over_public_tenders_sql_rows.first
+@sheet.add_row ["***за #{@report.month} #{@report.gkpz_year}г. объявлено/проведено #{result['cnt_all']} лотов с плановой датой объявления в следующем периоде на сумму #{xlsx_money to_thousand(result['cost_nds_all'])} тыс. руб. с НДС. Поэтому показатели по графам 3,4 в строках 1+2 и 3+12 не равны"]
+@sheet.add_row ["****В Положении о закупке продукции для нужд Общества не предусмотрен пункт, исключающий закупки в счет доходных договоров. Информация о таких закупках указана в строках 3-7"]

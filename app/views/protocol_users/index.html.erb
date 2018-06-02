@@ -1,0 +1,29 @@
+<h1>Listing protocol_users</h1>
+
+<table>
+  <tr>
+    <th>Commission</th>
+    <th>User</th>
+    <th>Status</th>
+    <th>Is veto</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @protocol_users.each do |protocol_user| %>
+  <tr>
+    <td><%= protocol_user.commission_id %></td>
+    <td><%= protocol_user.user_id %></td>
+    <td><%= protocol_user.status %></td>
+    <td><%= protocol_user.is_veto %></td>
+    <td><%= link_to 'Show', protocol_user %></td>
+    <td><%= link_to 'Edit', edit_protocol_user_path(protocol_user) %></td>
+    <td><%= link_to 'Destroy', protocol_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Protocol user', new_protocol_user_path %>

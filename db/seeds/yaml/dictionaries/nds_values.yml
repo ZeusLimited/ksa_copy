@@ -1,0 +1,5 @@
+--- # Значения НДС
+- { ref_id: 18001, position: 01, name: "18", fullname: "18%" }
+- { ref_id: 18002, position: 02, name: "10", fullname: "10%" }
+- { ref_id: 18003, position: 03, name: "0", fullname: "Без НДС" }
+- { ref_id: 18004, position: 04, name: "20", fullname: "20%" }

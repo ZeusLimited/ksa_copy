@@ -1,0 +1,16 @@
+@simple_sheet.add_row_title(t('.title'), style: @styles[:title], column_count: 4)
+
+
+render 'thead', name: 'summary_head'
+
+columns = Reports::Gkpz::GkpzExplanation::SUMMARY_COLUMNS
+column_styles = columns.values.map { |c| @styles[c[:style]] }
+column_types = columns.values.map { |c| c[:type] }
+widths = columns.values.map { |c| c[:width] }
+
+@report.summary_rows.each do |row|
+  values = columns.values.map { |v| v[:value].call(row) }
+  @sheet.add_row values, style: column_styles, types: column_types
+end
+
+@simple_sheet.change_column_widths widths

@@ -1,0 +1,151 @@
+select stage, lot_num, lot_name, tender_type, credit, all_cost, all_nds_cost, final_winner_cost,
+       announce_date, gkpz_year, organizer_id, plan_lot_id, lot_status, offers_cnt,
+       <%= ActiveRecord::Base.concatinate("cast(offer_cost as varchar2(4000))", "';'") %> as offers_arr
+from
+  (select
+      case
+          when t2.lot_num is null
+            then 'plan_stage'
+          when t2.status not in (<%= Constants::LotStatus::FATAL.join(', ') %>)
+            then 'exec_stage'
+          when t2.open_protocol_num is null and t2.status in (<%= Constants::LotStatus::CANCEL %>) and wp_solution in (<%= Constants::WinnerProtocolSolutionTypes::CANCEL %>)
+            then 'cancel_before_open'
+          when t2.result_protocol_num is null and t2.open_protocol_num is not null and t2.status in (<%= Constants::LotStatus::CANCEL %>) and wp_solution in (<%= Constants::WinnerProtocolSolutionTypes::CANCEL %>)
+            then 'cancel_before_result'
+          when t2.status in (<%= Constants::LotStatus::FAIL %>) and wp_solution in (<%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>, <%= Constants::WinnerProtocolSolutionTypes::FAIL %>)
+            then 'fail'
+      end as stage,
+      t1.lot_name,
+      t1.plan_lot_id,
+      coalesce(t2.lot_num, t1.lot_num) as lot_num,
+      t1.tender_type as tender_type,
+      coalesce(t2.credit, t1.credit) as credit,
+      coalesce(t2.all_cost, t1.all_cost) as all_cost,
+      coalesce(t2.all_nds_cost, t1.all_nds_cost) as all_nds_cost,
+      coalesce(t2.final_winner_cost, 0) as final_winner_cost,
+      coalesce(t2.wp_confirm_date, t2.announce_date, t1.announce_date) as announce_date,
+      coalesce(t2.gkpz_year, t1.gkpz_year) as gkpz_year,
+      coalesce(t2.organizer_id, t1.organizer_id) as organizer_id,
+      coalesce(t2.lot_status, t1.lot_status) as lot_status,
+      coalesce(t2.offers_cnt, 0) as offers_cnt,
+      coalesce(t2.offer_cost, 0) as offer_cost
+    from
+    (
+          select
+              pl.lot_name,
+              pl.guid as plan_lot_guid,
+              pl.id as plan_lot_id,
+              pl.num_tender || '.' || pl.num_lot as lot_num,
+              d.name as tender_type,
+              (case when lower(pl.lot_name) like '%кредит%' then 'Да' else 'Нет' end) as credit,
+              ps.all_cost as all_cost,
+              ps.all_cost_nds as all_nds_cost,
+              pl.announce_date as announce_date,
+              pl.gkpz_year as gkpz_year,
+              pl.status_id as lot_status,
+              organizer.id as organizer_id
+          from
+          plan_lots pl
+          inner join departments organizer on organizer.id = pl.department_id
+          inner join departments cust on cust.id = pl.root_customer_id
+          left join dictionaries d on d.ref_type = 'Tender_Types' and d.ref_id = pl.tender_type_id
+          inner join
+          (
+              select plan_lot_id, sum(qty*cost) as all_cost, sum(qty*cost_nds) as all_cost_nds
+              from plan_specifications
+              <% if customers.present? %>
+                where customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+              <% end %>
+              group by plan_lot_id
+          ) ps on ps.plan_lot_id = pl.id
+          where pl.version = 0
+    )t1
+    full outer  join
+    (
+        select
+              l.plan_lot_guid,
+              l.plan_lot_id as plan_lot_id,
+              pl.num_tender || '.' || pl.num_lot as lot_num,
+              d.name as tender_type,
+              (case when lower(l.name) like '% кредит%' then 'Да' else 'Нет' end) as credit,
+              s.all_cost as all_cost,
+              s.all_cost_nds as all_nds_cost,
+              os.final_cost as final_winner_cost,
+              l.status_id as status,
+              op.num as open_protocol_num,
+              rp.num as result_protocol_num,
+              t.announce_date as announce_date,
+              l.gkpz_year as gkpz_year,
+              organizer.id as organizer_id,
+              l.status_id as lot_status,
+              wp.confirm_date as wp_confirm_date,
+              wpl.solution_type_id as wp_solution,
+              oa.offers_cnt as offers_cnt,
+              osa.offer_cost as offer_cost
+        from tenders t
+        inner join
+        ( select * from
+          (
+            select tl.*, row_number() over(partition by tpl.guid order by tt.announce_date desc) as rn from lots tl
+            inner join plan_lots tpl on tl.plan_lot_guid = tpl.guid
+            inner join tenders tt on tl.tender_id = tt.id
+          ) sub
+          where rn = 1
+        ) l on l.tender_id = t.id
+        inner join plan_lots pl on l.plan_lot_id = pl.id
+        left join offers o on o.lot_id = l.id and o.status_id = <%= Constants::OfferStatuses::WIN %> and o.version = 0
+        left join
+        (
+          select lot_id, version, count(id) as offers_cnt
+          from offers
+          group by lot_id, version
+        ) oa on oa.lot_id = l.id and oa.version = 0
+        left join
+        (
+          select offer_id, sum(final_cost) as final_cost
+          from offer_specifications
+          group by offer_id
+        ) os on os.offer_id = o.id
+        left join offers oaa on oaa.lot_id = l.id and oaa.version = 0 and oaa.status_id in (<%= Constants::OfferStatuses::WIN %>, <%= Constants::OfferStatuses::RECEIVE %>)
+        left join
+        (
+          select offer_id, sum(os.cost * s.qty) as offer_cost
+          from offer_specifications os
+          inner join specifications s on s.id = os.specification_id
+          group by offer_id
+        ) osa on osa.offer_id = oaa.id
+        inner join departments organizer on organizer.id = pl.department_id
+        left join open_protocols op on op.tender_id = t.id
+        left join result_protocols rp on rp.tender_id = t.id
+        left join winner_protocols wp on wp.id = l.winner_protocol_id and wp.tender_id = t.id
+        left join winner_protocol_lots wpl on wp.id = wpl.winner_protocol_id and wpl.lot_id = l.id
+        left join dictionaries d on d.ref_type = 'Tender_Types' and d.ref_id = t.tender_type_id
+        inner join
+        (
+              select lot_id, sum(qty*cost) as all_cost, sum(qty*cost_nds) as all_cost_nds
+              from specifications
+              <% if customers.present? %>
+                where customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+              <% end %>
+              group by lot_id
+        ) s on s.lot_id = l.id
+    )t2 on t1.plan_lot_guid = t2.plan_lot_guid
+  ) sub
+  where announce_date between :begin_date and :end_date
+  <% if gkpz_years.present? %>
+    and gkpz_year in (<%= gkpz_years.join(',') %>)
+  <% end %>
+  <% if organizers.present? %>
+    and organizer_id in (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+  <% end %>
+  <% if lot_num.present? %>
+    and plan_lot_id in (<%= lot_num %>)
+  <% end %>
+  <% if lot_statuses.present? %>
+    and lot_status in (<%= lot_statuses.join(',') %>)
+  <% elsif plan_lot_statuses.present? %>
+    and lot_status in (<%= plan_lot_statuses.join(',') %>)
+  <% end %>
+
+group by (stage, lot_num, lot_name, tender_type, credit, all_cost, all_nds_cost, final_winner_cost,
+                  announce_date, gkpz_year, organizer_id, plan_lot_id, lot_status, offers_cnt)

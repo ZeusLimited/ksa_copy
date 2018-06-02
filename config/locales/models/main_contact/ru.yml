@@ -1,0 +1,9 @@
+ru:
+  activerecord:
+    models:
+      main_contact: 'Контакт'
+    attributes:
+      main_contact:
+        role: 'Роль пользователя'
+        order: 'Порядок в списке'
+        user_id: 'Пользователь'

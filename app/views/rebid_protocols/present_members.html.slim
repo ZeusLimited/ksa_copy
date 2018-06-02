@@ -1,0 +1,3 @@
+= fields_for @rebid_protocol do |f|
+  = f.fields_for :rebid_protocol_present_members, @rebid_protocol.initialized_present_members do |builder|
+    = render "rebid_protocol_present_member_fields", builder: builder

@@ -1,0 +1,30 @@
+.page-header
+  h1 = t('.header')
+
+p.text-right
+  = link_to t('.new'), new_direction_path, class: 'btn btn-primary'
+
+table.table.table-bordered
+  thead
+    tr
+      th.column-icon
+      th == t('.table.name')
+      th == t('.table.fullname')
+      th == t('.table.type')
+      th == t('.table.longterm')
+      th.column-icon
+      th.column-icon
+      th.column-icon
+
+  tbody.sortable-list data-update-url=sort_directions_path
+    - @directions.each do |direction|
+      = content_tag_for :tr, direction do
+        td
+          i.icon-random.handle
+        td = direction.name
+        td = direction.fullname
+        td = t("direction_type.#{direction.type_id}")
+        td = tbool(direction.is_longterm)
+        td = link_show direction
+        td = link_edit edit_direction_path(direction)
+        td = link_delete direction

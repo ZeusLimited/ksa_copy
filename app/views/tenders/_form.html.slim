@@ -1,0 +1,135 @@
+= simple_form_for tender, url: url, html: { class: 'tender-form' } do |f|
+  = error_messages_for tender
+
+  - f.object.what_valid = 'form'
+  = f.hidden_field :what_valid
+  = f.hidden_field :public?
+  = f.hidden_field :plan_sme_types
+
+  #dialog-confirm title="Проверочная информация"
+
+  .row
+    .span2
+      = f.input :tender_type_id, collection: types, value_method: 'ref_id', include_blank: false,
+        input_html: { class: 'input-block-level' }
+    .span2
+      = f.input :etp_address_id, collection: etp_addresses, value_method: 'ref_id', include_blank: false,
+        input_html: { class: 'input-block-level' }
+    .span3
+      = f.association :local_time_zone, collection: LocalTimeZone.all, include_blank: false,
+        input_html: { class: 'input-block-level' }
+    - if f.object.show_official_num?
+      .span3
+        = f.input :official_site_num, input_html: { class: 'input-block-level' }
+
+
+  .row
+    .span2 = f.input :num, input_html: { class: 'input-block-level' }
+    .span2 = f.input :oos_num, input_html: { class: 'input-block-level' }
+    .span3 = f.input :etp_num, input_html: { class: 'input-block-level' }
+  .row
+    .span10
+      = f.input :name, as: :text,
+        input_html: { rows: 2, class: 'input-block-level', placeholder: t('.tender_name_placeholder') }
+  .row
+    .span4
+      = f.association :department,
+        collection: Department.organizers_by_root(f.object.department.root_id),
+        label_method: :name_with_depth_symbols,
+        input_html: { class: 'input-block-level' }, include_blank: false
+    .span6
+      = f.association :commission,
+        collection: Commission.actuals.execute_group.where(department_id: tender.department_id).includes(:commission_type),
+        label_method: :commission_type_name,
+        input_html: { class: 'input-block-level', data: { placeholder: 'Выберите комиссию' } }
+  .row
+    .span4.user-info
+      = f.label :user_id
+      = f.text_field :user_fio_full, class: 'user-name input-block-level'
+      = f.hidden_field :user_id, class: 'user-id'
+    .span3= f.input :order_num, input_html: disable_edit_field(class: 'input-block-level')
+    .span3= f.input :order_date, as: :string,
+      input_html: disable_edit_field(value: f.object.order_date, class: 'datepicker input-block-level')
+
+  hr
+
+  = link_to t('.e_documents'), '#modal_files', class: "btn btn-warning pull-right", data: { toggle: "modal" }
+
+  table.table.table-nonfluid
+    thead
+      tr
+        th
+        th = t('.date')
+        th = t('.place')
+    tbody
+      tr
+        th = t('.public')
+        td = f.text_field :announce_date, value: f.object.announce_date, class: "datepicker input-small"
+        td = f.text_field :announce_place, class: "input-xxlarge"
+      tr
+        th = t('.open')
+        td.no-wrap
+          = f.fields_for :compound_bid_date do |fields|
+            => fields.text_field :date, class: "datepicker input-small"
+            = timepicker_div { fields.text_field :time, class: "timepicker input-mini" }
+        td = f.text_field :bid_place, class: "input-xxlarge address_name"
+      tr
+        th = t('.review')
+        td.no-wrap
+          = f.fields_for :compound_review_date do |fields|
+            => fields.text_field :date, class: "datepicker input-small"
+            = timepicker_div { fields.text_field :time, class: "timepicker input-mini" }
+        td=  f.text_field :review_place, class: "input-xxlarge address_name"
+      tr
+        th = t('.summary')
+        td.no-wrap
+          = f.fields_for :compound_summary_date do |fields|
+            => fields.text_field :date, class: "datepicker input-small"
+            = timepicker_div { fields.text_field :time, class: "timepicker input-mini" }
+        td = f.text_field :summary_place, class: "input-xxlarge address_name"
+      tr
+        th = t('.contract_period')
+        td.no-wrap
+          = f.text_field :contract_period, value: f.object.contract_period, class: "input-small text-right"
+        td
+          = f.input :contract_period_type,
+            collection: [[true, t('.working_days')], [false, t('.calendar_days')]],
+            value_method: :first,
+            label_method: :last,
+            as: :radio_buttons,
+            item_wrapper_class: 'inline',
+            label: false
+      / tr
+      /   th = t('.profitable')
+      /   td.no-wrap
+      /     = f.input :is_profitable, label: false, input_html: { class: "input-small text-right" }
+      /   td
+
+  = f.simple_fields_for :lots, @tender.lots.sort_by(&:nums) do |builder|
+    = render 'tender_partials/lots', f: builder
+
+  .form-actions
+    => link_to_back_or_default t('.cancel'), tenders_path, class: 'btn btn-warning'
+    = f.submit t('.submit'), class: 'btn btn-primary'
+
+  #modal_files.bootstrap-modal.modal.hide.fade
+    .modal-header
+      button.close data-dismiss="modal" &times;
+      h3 = t('.e_documents')
+    .modal-body
+      = render "tender_files/field", area_id: Constants::TenderFileArea::TENDER, year: Time.now.year
+      table.table.table-hover.table-striped
+        thead
+          tr
+            th
+            th = t('.table_files.file')
+            th = t('.table_files.size')
+            th = t('.table_files.view')
+            th = t('.table_files.note')
+            th = t('.table_files.loaded')
+            th = t('.table_files.owner')
+        tbody#tender_files
+          = f.simple_fields_for :link_tender_files do |builder|
+            = render 'link_tender_file', f: builder
+    .modal-footer
+      button.btn.btn-info data-dismiss="modal" = t('.close')

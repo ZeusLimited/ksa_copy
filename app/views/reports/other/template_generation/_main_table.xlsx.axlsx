@@ -1,0 +1,13 @@
+render 'thead'
+
+@report.rows.each do |row|
+  result = @report.result_row(row[:filter], row[:fuel])
+  values = @columns.map do |c|
+    if c[1][:formula]
+      c[1][:formula].call(@sheet.rows.size + 1)
+    else
+      c[1][:value].call(result)
+    end
+  end
+  @sheet.add_row [row[:num], row[:name]] + values, style: @column_styles, types: @column_types
+end

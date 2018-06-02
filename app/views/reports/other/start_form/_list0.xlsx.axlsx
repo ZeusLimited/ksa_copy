@@ -1,0 +1,22 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 25)
+@outlines = []
+
+@columns = Reports::Other::StartForm::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+
+@sum_styles = @columns.values.map { |c| @styles[c[:sum_style]] }
+
+@sheet.add_row
+@simple_sheet.add_row_title(Reports::Other::StartForm.model_name.human,
+                            style: @styles[:title], columns_count: 25)
+@sheet.add_row ["Период - с #{@report.date_begin} по #{@report.date_end}"], style: @styles[:note]
+gkpz = @report.gkpz_year ? @report.gkpz_year.join(', ') : 'все'
+@sheet.add_row ["Годы ГКПЗ - #{gkpz}"], style: @styles[:note]
+
+render 'main_table'
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

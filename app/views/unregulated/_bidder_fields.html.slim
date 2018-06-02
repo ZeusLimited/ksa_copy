@@ -1,0 +1,15 @@
+- f.object.build_offers_from_tender if f.object.offers.empty?
+= field_set_tag nil, class: "frame coloring bidders nested-fields" do
+
+  .row
+    .span11
+      = f.input :contractor_id, label: 'Наименование контрагента' do
+        = f.text_field :contractor_name_long,
+          data: { tender_type_id: f.object.tender.tender_type_id },
+          class: 'ac-contractor-name input-block-level'
+        = f.hidden_field :contractor_id, class: 'ac-contractor-id'
+
+  = f.simple_fields_for :offers do |f_offer|
+    = render 'offer_fields', f: f_offer
+
+  = link_to_remove_association text_minus('Удалить участника'), f, class: minus_default_classes

@@ -1,0 +1,115 @@
+select cnt, cost_nds, cnt_inv, cost_nds_inv, cnt-cnt_inv as cnt_tek, cost_nds-cost_nds_inv as cost_nds_tek,
+cost_nds_reg, cost_nds_etp, cnt_etp, cost_nds_ei, cost_nds_sme, cost_nds_sme_all, cost_nds_reg_sme_all
+From (
+  select sum(cnt) as cnt,
+  coalesce(round(sum(cost_nds) / 1000, 2), 0) as cost_nds,
+  coalesce(sum(cnt_inv), 0) as cnt_inv,
+  coalesce(round(sum(cost_nds_inv) / 1000, 2), 0) as cost_nds_inv,
+  coalesce(sum(decode(etp_address_id, 12001, 0, cnt)), 0) as cnt_etp,
+  coalesce(round(sum(decode(etp_address_id, 12001, 0, cost_nds)) / 1000, 2), 0) as cost_nds_etp,
+  coalesce(round(sum(decode(tender_type_id, 10016, 0, cost_nds)) / 1000, 2), 0) as cost_nds_reg,
+  coalesce(
+    round(
+      sum(
+        case when tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+                  and (regulation_item_num = '5.11.1.5' or
+                    (regulation_item_num is null and (point_clause like '%5.9.1.4%' or point_clause like '%5.11.1.5%')))
+             then cost_nds
+        end
+      ) / 1000, 2
+    ), 0
+  ) as cost_nds_ei,
+  coalesce(round(sum(
+    case when sme_type_id = <%= Constants::SmeTypes::SME %> and order1352_id = <%= Constants::Order1352::SELECT %> then cost_nds else 0 end
+    ) / 1000, 2), 0) as cost_nds_sme,
+  coalesce(round(sum(
+    case when sme_type_id is not null and order1352_id = <%= Constants::Order1352::SELECT %> then cost_nds else 0 end
+    ) / 1000, 2), 0) as cost_nds_sme_all,
+  coalesce(round(sum(
+    case when tender_type_id != <%= Constants::TenderTypes::UNREGULATED %> and order1352_id = <%= Constants::Order1352::SELECT %> then cost_nds else 0 end
+    ) / 1000, 2), 0) as cost_nds_reg_sme_all
+  From (
+    select
+      pl.etp_address_id,
+      pl.tender_type_id,
+      pl.sme_type_id,
+      pl.point_clause,
+      pl.order1352_id,
+      ri.num as regulation_item_num,
+      qty*cost as cost_nds,
+      -- инвестиции
+      case when dir.type_id = 1 Then
+        qty*cost
+      End as cost_nds_inv,
+      case when row_number() over (partition by pl.id order by decode(pl.main_direction_id, ps.direction_id, 0, 1), ps.qty * ps.cost desc) = 1 then 1 else 0 end as cnt,
+      case when dir.type_id = 1 Then
+        case when row_number() over (partition by pl.id order by decode(pl.main_direction_id, ps.direction_id, 0, 1), ps.qty * ps.cost desc) = 1 then 1 else 0 end
+      End as cnt_inv
+    From plan_lots pl
+      INNER JOIN plan_specifications ps on (pl.id = ps.plan_lot_id)
+      INNER JOIN directions dir on (dir.id = ps.direction_id)
+      LEFT JOIN regulation_items ri on (ri.id = pl.regulation_item_id)
+      <% unless gkpz_type == 'current' %>
+        inner join protocols p on (pl.protocol_id = p.id)
+        inner join commissions c on (p.commission_id = c.id)
+        inner join (
+          select l.guid, max(p1.date_confirm) as date_confirm from plan_lots l
+          inner join protocols p1 on (p1.id = l.protocol_id)
+          inner join commissions c1 on (p1.commission_id = c1.id)
+          where p1.date_confirm <= :date_gkpz_on_state
+          <% if gkpz_type == 'gkpz' %>
+            and c1.commission_type_id = <%= Constants::CommissionType::SD %>
+          <% end %>
+          Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+      <% end %>
+
+    Where pl.announce_date between :begin_date and :end_date
+    <% if gkpz_type == 'unplanned' %>
+      And not exists (select 'x' from plan_lots l where l.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %> and l.guid = pl.guid)
+    <% elsif gkpz_type == 'current' %>
+      And pl.version = 0
+    <% end %>
+
+    <% if customers.present? %>
+      And ps.customer_id in
+        (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+    <% end %>
+
+    <% if current_user_root_dept_id %>
+      And ps.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+    <% end %>
+
+    <% if gkpz_years.present? %>
+      And pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+    <% end %>
+
+    <% if organizers.present? %>
+      And pl.department_id in
+        (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+    <% end %>
+
+    <% if tender_types.present? %>
+      And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+    <% end %>
+
+    <% if etp_addresses.present? %>
+      And pl.etp_address_id in (<%= etp_addresses.join(', ') %>)
+    <% end %>
+
+    <% if directions.present? %>
+      And ps.direction_id in (<%= directions.join(', ') %>)
+    <% end %>
+
+    <% if subject_types.present? %>
+      And pl.subject_type_id = <%= subject_types.join(', ') %>
+    <% end %>
+
+    <% if statuses.present? %>
+      And pl.status_id in (<%= statuses.join(', ') %>)
+    <% end %>
+
+    <% if gkpz_state.present? %>
+      And pl.state = <%= PlanLot.states[gkpz_state] %>
+    <% end %>
+  ) sub_sub
+) sub

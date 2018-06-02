@@ -1,0 +1,28 @@
+- content_for :sidebar do
+  .sidebar-module
+    h4 Общее
+    ol.list-unstyled
+      li = link_to "Адреса WSDL", '#wsdl'
+
+  .sidebar-module
+    h4 Методы
+    ol.list-unstyled
+      - @soap_method_names.each do |smn|
+        li
+          = link_to smn, "##{smn}"
+
+h1.bd-title Общее
+
+.blog-post
+  h2#wsdl.blog-post-title Адреса WSDL
+
+  br
+
+  dl
+    dt Production
+    dd
+      = link_to nil, web_service_wsdl_url
+
+h1.bd-title Методы
+
+= render partial: 'soap_method', collection: @soap_methods

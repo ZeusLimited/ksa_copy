@@ -1,0 +1,22 @@
+ru:
+  activerecord:
+    models:
+      invest_project: 'Инвестиционный проект'
+    attributes:
+      invest_project:
+        num: 'Номер'
+        name: 'Наименование'
+        object_name: 'Наименование объекта'
+        date_install: 'Дата ввода'
+        power_name: 'Мощность'
+        power_elec_gen: 'Мощность электр. генерации'
+        power_elec_net: 'Мощность электр. сетей'
+        power_thermal_gen: 'Мощность тепл. генерации'
+        power_thermal_net: 'Мощность тепл. сетей'
+        power_substation: 'Подстанция'
+        amount_financing: 'Планируемый объём'
+        amount_financing_money: 'Планируемый объём'
+        department: 'Потребитель'
+        gkpz_year: 'Год ГКПЗ'
+        project_type: 'Тип проекта'
+        invest_project_name_id: 'Наименование проекта в системе АКВА'

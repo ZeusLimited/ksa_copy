@@ -1,0 +1,42 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li= link_to_session_or_default t('return_to_list'), :order_filter_path, orders_path
+      li= link_to t('edit'), edit_order_path(@order)
+
+.page-header
+  h1 = t('.header', num: @order.num)
+
+p
+  b #{Order.human_attribute_name(:num)}:
+  =< @order.num
+
+p
+  b #{Order.human_attribute_name(:receiving_date)}:
+  =< @order.receiving_date
+
+p
+  b #{Order.human_attribute_name(:received_from)}:
+  =< @order.received_from_fio_full
+
+- if @order.confirmed?
+  br
+  p.alert.fade.in.alert-success #{Order.human_attribute_name(:approval)}
+  p
+    b #{Order.human_attribute_name(:agreement_date)}:
+    =< @order.agreement_date
+
+  p
+    b #{Order.human_attribute_name(:agreed_by)}:
+    =< @order.agreed_by_fio_full
+
+- unless @order.order_files.empty?
+  = field_set_tag t('.files')
+    = render 'shared/table_files', files: @order.order_files, type: false
+
+= field_set_tag t('.lots')
+  p
+    => t('lot_count')
+    span.label= @order.plan_lots.size
+
+  = render 'table_plan_lots/simple', plan_lots: @order.plan_lots

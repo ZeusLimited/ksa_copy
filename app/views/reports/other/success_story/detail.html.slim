@@ -1,0 +1,19 @@
+.page-header
+  h1 = t('.detail_head')
+
+- results = @report.details_sql_rows
+- head_rows = CSV.read('app/views/reports/other/success_story/csv/head_detail.csv')
+table.table.table-bordered.table-center
+  thead
+    - head_rows.each do |row|
+      tr
+        - row.each do |cell|
+          th = cell
+  tbody
+    - results.each do |result|
+      tr
+        - Reports::Other::SuccessStory::COLUMNS_DETAILED.values.each do |col|
+          -if col[:money]
+            td = p_money col[:value].call(result)
+          -else
+            td = col[:value].call(result)

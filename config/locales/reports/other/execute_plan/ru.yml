@@ -1,0 +1,22 @@
+ru:
+  helpers:
+    submit:
+      reports_other_execute_plan:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/execute_plan: 'Исполнение плана закупок ПАО "Квадра"'
+    attributes:
+      reports/other/execute_plan:
+        customers: 'Заказчики'
+        organizers: 'Организаторы'
+        date_begin: 'Дата начала'
+        date_end: 'Дата окончания'
+        cumulative_start_date: 'Дата начала накопительного периода'
+        gkpz_year: 'Год ГКПЗ'
+        directions: 'Направление'
+        state: 'Состояние в ПЗ'
+        format: 'Формат'
+  reports/other/execute_plan:
+    row_titles:
+      report_title1: 'Исполнение ПЗ'

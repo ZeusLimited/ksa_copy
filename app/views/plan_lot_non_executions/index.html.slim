@@ -1,0 +1,20 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top= "20"
+    ul.nav.nav-pills
+      li= link_to 'Вернуться к просмотру текущей версии', @plan_lot_current_version if @plan_lot_current_version
+      li= link_to_session_or_default 'Вернуться к списку', :filter_path, plan_lots_path
+
+.page-header
+  h1 Причины отсутствия старта закупки
+
+- @plan_lot_current_version.non_executions.each do |plan_lot_non_execution|
+  table.table.table-bordered
+    thead
+      tr
+        th= [plan_lot_non_execution.created_at, plan_lot_non_execution.user_fio_full].join(' ')
+    tbody
+        tr
+          td = plan_lot_non_execution.reason
+
+== render 'form', plan_lot_non_execution: @plan_lot_current_version.non_executions.build(user: current_user),
+                  url: create_plan_lot_non_execution_path(guid: params[:guid])

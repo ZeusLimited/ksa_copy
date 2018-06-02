@@ -1,0 +1,17 @@
+legend = t('.lots')
+table.table.table-bordered.table-striped
+  thead
+    tr
+      th = t('.table.name')
+      th = t('.table.cost')
+      th = t('.table.solution')
+      th = t('.table.status')
+      th.column-icon
+  tbody
+    - @winner_protocol.winner_protocol_lots.includes(:lot).order('lots.num, lots.sublot_num').decorate.each do |wpl|
+      tr
+        td *control_attributes(wpl.plan_lot_control_user_fio_short, wpl.plan_lot_control_created_at) = wpl.lot_name_with_cust
+        td.right-cell = p_money wpl.lot_specs_cost
+        td == wpl.solution
+        td style=wpl.lot_status_stylename_html = wpl.lot_status_name
+        td = link_to_history_icon(wpl)

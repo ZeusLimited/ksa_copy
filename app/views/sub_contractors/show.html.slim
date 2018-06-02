@@ -1,0 +1,39 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li= link_to 'Вернуться к договору', offer_contract_path(@offer)
+      li= link_to 'Субподрядчики', contract_sub_contractors_path(@contract)
+      li= link_to 'Редактировать', edit_contract_sub_contractor_path(@contract, @sub_contractor)
+
+.page-header
+  h1 Просмотр субподрядчика
+
+h4
+  = @sub_contractor.contractor_name_long
+  =< link_to_history_icon(@sub_contractor)
+
+= render 'shared/contract_info', lot: @lot, offer: @offer
+
+.row
+  = view_text_field('span2', @sub_contractor, :num)
+  = view_text_field('span2', @sub_contractor, :confirm_date)
+  = view_text_field('span2', @sub_contractor, :begin_date)
+  = view_text_field('span2', @sub_contractor, :end_date)
+
+= field_set_tag "Спецификации" do
+  table.table.table-bordered
+    thead
+      tr
+        th.center-cell rowspan="2" Наименование
+        th.center-cell colspan="2" Стоимость договора субподряда
+        th.column-icon rowspan="2"
+      tr
+        th.span2.center-cell руб. без НДС
+        th.span2.center-cell руб. с НДС
+    tbody
+      - @sub_contractor.sub_contractor_specs.each do |sub_contractor_spec|
+        tr
+          td = sub_contractor_spec.specification_fullname
+          td.right-cell = sub_contractor_spec.cost_money
+          td.right-cell = sub_contractor_spec.cost_nds_money
+          td = link_to_history_icon(sub_contractor_spec)

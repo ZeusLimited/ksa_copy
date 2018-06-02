@@ -1,0 +1,41 @@
+<%= simple_form_for(dictionary) do |f| %>
+  <%= error_messages_for dictionary %>
+
+  <div class="row">
+    <div class="span3">
+      <%= f.input :name, input_html: {class: 'input-block-level'} %>
+    </div>
+
+    <div class="span7">
+      <%= f.input :fullname, input_html: {class: 'input-block-level'} %>
+    </div>
+
+    <div class="span2">
+      <%= f.input :position, input_html: {class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span10">
+      <%= f.input :stylename_html, input_html: { class: 'input-block-level'} %>
+    </div>
+
+
+  </div>
+
+  <div class="row">
+    <div class="span2">
+      <%= f.input :color, as: :minicolors, input_html: { data: {
+          minicolors: {theme: :bootstrap, swatchPosition: :right} }, class: 'color' } %>
+    </div>
+  </div>
+
+  <%= f.hidden_field :ref_type %>
+
+
+  <div class="form-actions">
+    <%= f.submit 'Сохранить', :class => 'btn btn-primary' %>
+    <%= link_to_session_or_default 'Отмена', :filter_dic_path, dictionaries_url, class: 'btn' %>
+  </div>
+
+<% end %>

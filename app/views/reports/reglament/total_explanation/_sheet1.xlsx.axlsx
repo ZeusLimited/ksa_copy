@@ -1,0 +1,89 @@
+sheet.add_row [t('.text_right1')], style: @styles[:text_right]
+sheet.add_row [t('.text_right2')], style: @styles[:text_right]
+sheet.add_row [t('.text_right3')], style: @styles[:text_right]
+sheet.add_row [t('.text_right4')], style: @styles[:text_right]
+sheet.add_row
+sheet.add_row [t('.text_center1')], style: @styles[:text_center_bold]
+sheet.add_row [t('.text_center2', holding: @holding_name)], style: @styles[:text_center_bold]
+months = "#{@report.months} #{t(:month, count: @report.months)}"
+sheet.add_row [t('.text_center3', months: months, year: @report.gkpz_year)], style: @styles[:text_center_bold]
+sheet.add_row
+sheet.add_row [t('.par1', year: @report.gkpz_year)], style: @styles[:text_left_bold]
+sheet.add_row [t('.par1_1', holding: @holding_name)], style: @styles[:text_left]
+sheet.add_row [
+  t('.par1_2',
+    year: @report.gkpz_year,
+    all_count: "#{@report.sheet1_row['all_count']} #{t(:tender_procedure, count: @report.sheet1_row['all_count'])}",
+    all_cost_nds_sum: to_money_str(to_thousand(@report.sheet1_row['all_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.par1_2_a',
+    current_count: "#{@report.sheet1_row['current_count']} #{t(:tender, count: @report.sheet1_row['current_count'])}",
+    current_cost_nds_sum: to_money_str(to_thousand(@report.sheet1_row['current_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.par1_2_b',
+    invest_count: "#{@report.sheet1_row['invest_count']} #{t(:tender, count: @report.sheet1_row['invest_count'])}",
+    invest_cost_nds_sum: to_money_str(to_thousand(@report.sheet1_row['invest_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.par1_3',
+    year: @report.gkpz_year,
+    ipivp_count: @report.sheet1_row['ipivp_count'],
+    ipivp_cost_nds_sum: to_money_str(to_thousand(@report.sheet1_row['ipivp_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [t('.par1_4', year: @report.gkpz_year)], style: @styles[:text_left]
+sheet.add_row [
+  t('.ea',
+    count: "#{@report.sheet1_row['ea_count']} #{t(:thing, count: @report.sheet1_row['ea_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['ea_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.ok',
+    count: "#{@report.sheet1_row['ok_count']} #{t(:thing, count: @report.sheet1_row['ok_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['ok_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.zk',
+    count: "#{@report.sheet1_row['zk_count']} #{t(:thing, count: @report.sheet1_row['zk_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['zk_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.ozc',
+    count: "#{@report.sheet1_row['ozc_count']} #{t(:thing, count: @report.sheet1_row['ozc_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['ozc_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.zzc',
+    count: "#{@report.sheet1_row['zzc_count']} #{t(:thing, count: @report.sheet1_row['zzc_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['zzc_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.ozp',
+    count: "#{@report.sheet1_row['ozp_count']} #{t(:thing, count: @report.sheet1_row['ozp_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['ozp_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.zzp',
+    count: "#{@report.sheet1_row['zzp_count']} #{t(:thing, count: @report.sheet1_row['zzp_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['zzp_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.okp',
+    count: "#{@report.sheet1_row['okp_count']} #{t(:thing, count: @report.sheet1_row['okp_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['okp_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.zkp',
+    count: "#{@report.sheet1_row['zkp_count']} #{t(:thing, count: @report.sheet1_row['zkp_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['zkp_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.zpp',
+    count: "#{@report.sheet1_row['zpp_count']} #{t(:thing, count: @report.sheet1_row['zpp_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['zpp_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.po',
+    count: "#{@report.sheet1_row['po_count']} #{t(:thing, count: @report.sheet1_row['po_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['po_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.ei',
+    count: "#{@report.sheet1_row['ei_count']} #{t(:thing, count: @report.sheet1_row['ei_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['ei_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.nz',
+    count: "#{@report.sheet1_row['nz_count']} #{t(:thing, count: @report.sheet1_row['nz_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['nz_cost_nds_sum'])))], style: @styles[:text_left]
+sheet.add_row [
+  t('.uz',
+    count: "#{@report.sheet1_row['uz_count']} #{t(:thing, count: @report.sheet1_row['uz_count'])}",
+    sum: to_money_str(to_thousand(@report.sheet1_row['uz_cost_nds_sum'])))], style: @styles[:text_left]
+
+sheet.column_widths 90

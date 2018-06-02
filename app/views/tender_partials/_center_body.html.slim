@@ -1,0 +1,16 @@
+td style=lot.status_stylename_html title=lot.status_fullname
+  = link_to_if tender.frame?, lot.num, frame_info_tender_lot_path(tender, lot),
+    title: t('.frame_tenders')
+td = lot.name
+td.right-cell = p_money(to_thousand(lot.specs_cost))
+td.right-cell = p_money(to_thousand(lot.winner_cost))
+- winners = lot.winners.split(',')
+td.no-wrap = winners.map { |winner| short_text(winner, 25) }.join('<br>').html_safe
+td == lot.customers.join('<br>')
+- not_note = lot.boss_note.nil? || lot.boss_note.length == 0
+td colspan="3" *{ class: not_note ? '' : 'text-error' }
+  - if lot.winner_single_source?
+    = t('.single_source')
+    br
+  = not_note ? t('.not_note') : short_text(lot.boss_note)
+td = link_icon_title 'icon-info-sign', t('.info'), tender_path(tender.id, anchor: dom_id(lot))

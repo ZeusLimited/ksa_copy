@@ -1,0 +1,23 @@
+<h1>Listing unit_subtitles</h1>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @unit_subtitles.each do |unit_subtitle| %>
+  <tr>
+    <td><%= unit_subtitle.name %></td>
+    <td><%= link_to 'Show', unit_subtitle %></td>
+    <td><%= link_to 'Edit', edit_unit_subtitle_path(unit_subtitle) %></td>
+    <td><%= link_to 'Destroy', unit_subtitle, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Unit subtitle', new_unit_subtitle_path %>

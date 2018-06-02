@@ -1,0 +1,23 @@
+ru:
+  activerecord:
+    models:
+      plan_annual_limit: 'Годовой лимит'
+    attributes:
+      plan_annual_limit: &pal
+        year: 'Год'
+        cost: 'без НДС'
+        cost_nds: 'с НДС'
+        cost_money: 'Лимит без НДС'
+        cost_nds_money: 'Лимит с НДС'
+      plan_annual_limits:
+        base: 'Лимит'
+        <<: *pal
+    errors:
+      models:
+        plan_annual_limit:
+          attributes:
+            cost_money:
+              eq_0: "не может быть 0"
+            cost_nds_money:
+              eq_0: "не может быть 0"
+              not_less_cost: "не может быть меньше лимита без НДС"

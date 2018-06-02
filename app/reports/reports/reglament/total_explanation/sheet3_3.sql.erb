@@ -1,0 +1,48 @@
+select
+sum(cnt) cnt,
+sum(fact_cost_etp) as fact_cost_etp,
+sum(fact_cost) as fact_cost
+from
+(
+select
+ case when t.etp_address_id != <%= Constants::EtpAddress::NOT_ETP %>
+  and row_number() over (partition by nvl(l.frame_id,l.id), l.plan_lot_id
+                       order by case when t.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %> then 1 else 0 end,
+                                case when l.main_direction_id = s.direction_id then 0 else 1 end
+                      ) = 1
+    and l.main_direction_id = s.direction_id then 1 else 0 end as cnt,
+ case when t.etp_address_id != <%= Constants::EtpAddress::NOT_ETP %> then sum(s.qty * os.final_cost_nds) end as fact_cost_etp,
+ sum(s.qty * os.final_cost_nds) as fact_cost
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join offer_specifications os on (os.specification_id = s.id)
+  inner join offers o on (o.id = os.offer_id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (fr.id = l.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+Where l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And can.guid is null -- неотмененная
+  and l.gkpz_year = :gkpz_year -- gkpz_year
+  and wp.confirm_date between :begin_date and :end_date
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>
+Group By l.id, l.frame_id, l.plan_lot_id, l.main_direction_id,s.direction_id,t.etp_address_id, t.tender_type_id
+) sub

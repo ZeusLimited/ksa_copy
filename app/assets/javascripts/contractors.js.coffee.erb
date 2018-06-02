@@ -1,0 +1,128 @@
+disable_main_recvisits = (ogrn = true, kpp = true) ->
+  <% if Setting.contractor_form == 'main' %>
+    $('#contractor_kpp').prop('disabled', kpp)
+    $('#contractor_ogrn').prop('disabled', ogrn)
+  <% end %>
+
+disable_numbers = ->
+  switch $('#contractor_form').val()
+    when 'foreign'
+      $('#contractor_inn').prop('disabled', true)
+      $('#contractor_fns').prop('disabled', true)
+      $('#contractor_okpo').prop('disabled', true)
+      disable_main_recvisits()
+    when 'businessman'
+      $('#contractor_inn').prop('disabled', false)
+      $('#contractor_fns').prop('disabled', false)
+      $('#contractor_okpo').prop('disabled', false)
+      disable_main_recvisits(false)
+    when 'person'
+      $('#contractor_inn').prop('disabled', false)
+      $('#contractor_fns').prop('disabled', false)
+      $('#contractor_okpo').prop('disabled', true)
+      disable_main_recvisits()
+    when 'company'
+      $('#contractor_inn').prop('disabled', false)
+      $('#contractor_fns').prop('disabled', false)
+      $('#contractor_okpo').prop('disabled', false)
+      disable_main_recvisits(false, false)
+
+disable_sme_type = ->
+  $('#contractor_sme_type_id').prop('disabled', $('#contractor_is_sme').val() != 'true')
+
+typeDescription = (type) ->
+  TYPES = {
+    'INDIVIDUAL': 'businessman',
+    'LEGAL': 'company'
+  }
+  TYPES[type]
+
+showSuggestion = (suggestions) ->
+  data = suggestions.data
+  $('#contractor_inn').val(data.inn)
+  $('#contractor_kpp').val(data.kpp)
+  $('#contractor_ogrn').val(data.ogrn)
+  $('#contractor_okpo').val(data.okpo)
+  $('#contractor_name').val(data.name.short)
+  $('#contractor_fullname').val(data.name.full_with_opf)
+  $('#contractor_reg_date').val((new Date(data.state.registration_date)).toLocaleDateString() if data.state.registration_date?)
+  $("#contractor_form option[value='#{typeDescription(data.type)}']").prop('selected', true)
+  if data.opf?
+    $("#contractor_ownership_id option").filter ->
+      $(this).text() == data.opf.short
+    .prop('selected', true)
+  address = data.address.unrestricted_value
+  if data.address.data?
+    $('#contractor_oktmo').val(data.address.data.oktmo)
+    address = data.address.data.postal_code + ', ' + address
+  else
+    $('#contractor_oktmo').val()
+  $('#contractor_legal_addr').val(address)
+  $('#contractor_ogrn').change()
+  $("#contractor_form").trigger('change')
+  $('#contractor_ownership_id').trigger('change')
+
+@removeBranches = (suggestions) ->
+  if '<%= Setting.contractor_form %>' == 'main'
+    suggestions.filter (suggestion) ->
+      suggestion.data.branch_type == 'MAIN' || !suggestion.data.branch_type?
+
+change_sme_fields = ->
+  files_type = document.getElementsByClassName('file-types')
+  editable_state = Array.prototype.some.call(files_type,
+    (elem) -> elem.value == '<%= Constants::FileType::REESTR_MSP %>')
+  set_sme_fields_editable(editable_state)
+
+set_sme_fields_editable = (editable_state) ->
+  $('#contractor_is_sme').select2('readonly', !editable_state)
+  $('#contractor_sme_type_id').select2('readonly', !editable_state)
+
+$(document).on 'change', 'form .file-types', (event) ->
+  change_sme_fields()
+
+$(document).on 'change', '#contractor_ogrn', (event) ->
+  $('span#span_focus_kontur').html('<label>&nbsp;</label><a href="https://focus.kontur.ru/entity?query=' + $(this).val() + '" target="_blank">Проверить в Контур Фокус</a>')
+
+document.addEventListener "turbolinks:load", ->
+  change_sme_fields()
+
+  if gon.cannot_edit_all
+    disable_numbers()
+    disable_sme_type()
+    $('#contractor_form').change disable_numbers
+    $('#contractor_is_sme').change disable_sme_type
+
+  $('#contractor_name').keypress (e) ->
+    !e.key.match(/'|"|<|>/)
+
+  $("#egrul_search").suggestions
+    serviceUrl: "https://suggestions.dadata.ru/suggestions/api/4_1/rs"
+    token: "4e6da031d9aa2ef9f8347bac270ff2e38eddee33"
+    type: "PARTY"
+    count: 10
+    params:
+      type: null
+    onSuggestionsFetch: removeBranches
+    onSelect: showSuggestion
+
+  $('.select-parent-contractor').select2
+    placeholder: "Выберите головную организацию"
+    minimumInputLength: 1
+    allowClear: true
+    ajax:
+      url: $('.select-parent-contractor').data('url')
+      dataType: 'json'
+      data: (term, page) ->
+        term: term
+        inn: $('#contractor_inn').val()
+      results: (data, page) -> { results: data }
+    initSelection: (element, callback) ->
+      id = $(element).val()
+      if id isnt ""
+        $.ajax
+          url: $(element).data('url-info')
+          data: { id: id }
+          dataType: 'json'
+        .done (data) -> callback(data)
+    formatResult: (c) -> c.label
+    formatSelection: (c) -> c.label

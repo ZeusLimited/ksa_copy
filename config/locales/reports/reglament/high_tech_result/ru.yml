@@ -1,0 +1,21 @@
+ru:
+  helpers:
+    submit:
+      reports_reglament_high_tech_result:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/high_tech_result: 'Отчет об исполнении ГКПЗ инновационной и высокотехнологичной продукции'
+    attributes:
+      reports/reglament/high_tech_result:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        show_root: 'Показывать заказчика ДЗО'
+        format: 'Формат'

@@ -1,0 +1,178 @@
+<% ork = Constants::TenderTypes::ORK %>
+<% zrk = Constants::TenderTypes::ZRK %>
+<% not_etp = Constants::EtpAddress::NOT_ETP %>
+<% single_source = Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>
+<% agreement_list = Constants::PlanLotStatus::AGREEMENT_LIST %>
+<% basic = Constants::ContractTypes::BASIC %>
+<% win = Constants::OfferStatuses::WIN %>
+<% lot_new = Constants::LotStatus::NEW %>
+
+select
+
+t.id as tender_id,
+l.id as lot_id,
+s.id as spec_id,
+gkpz_pl.id as gkpz_pl_id,
+s.direction_id,
+l.subject_type_id,
+
+row_number() over (order by coalesce(gkpz_pl.num_tender, rk_pl.num_tender), coalesce(t.num, '0'), coalesce(gkpz_pl.num_lot, l.num)) as sort_order,
+
+-- col 1
+case when gkpz_pl.id is not null
+  then to_char(gkpz_pl.num_tender)
+  else rk_pl.num_tender || '.' || t.num end as tender_num,
+
+-- col 2
+(case when gkpz_pl.id is not null then gkpz_pl.num_lot else l.num end) as lot_num,
+
+-- col 3
+(case when gkpz_pl.id is not null
+  then decode(gkpz_pl.lot_name, l.name, l.name, l.name || ' (' || gkpz_pl.lot_name || ')')
+  else l.name end) as lot_name,
+
+-- col 4
+round(
+  case when gkpz_pl.id is not null
+    then decode(t.tender_type_id, <%= ork %>, 0, <%= zrk %>, 0, gkpz_ps.qty * gkpz_ps.cost)
+    else s.qty * s.cost
+    end / 1000, 2) as gkpz_cost,
+
+-- col 5
+round(case when wp.confirm_date is not null then s.qty * os.final_cost end / 1000, 2) as winner_cost,
+
+-- col 6 calculated
+-- col 7 calculated
+
+-- col 8
+round(s.qty * contract_spec.cost / 1000, 2) as contract_cost,
+
+-- col 9
+wp.confirm_date as wp_confirm_date,
+
+-- col 10
+case
+  when contracts.id is not null then 'Договор заключен'
+  when wp.id is not null then lot_status.name
+  when rebid_p.id is not null then 'Вскрытие конвертов (переторжка)'
+  when review_p.id is not null then 'Протокол рассмотрения рассмотрен'
+  when op.id is not null then 'Вскрытие конвертов'
+  else 'Опубликован'
+end as lot_status,
+
+-- col 11
+contracts.num as contract_num,
+
+-- col 12
+contracts.confirm_date as contract_date,
+
+-- col 13
+(case when wp.id is not null
+  then case when c.id is not null then c.name || ' (' || ow.shortname || '), ИНН ' || c.inn || ', КПП ' || c.kpp end
+end) as winner,
+
+-- col 14
+(case when gkpz_pl.id is not null
+  then gkpz_ttype.name || decode(gkpz_pl.etp_address_id, <%= not_etp %>, '', ' ЭТП')
+  else fact_ttype.name || decode(t.etp_address_id, <%= not_etp %>, '', ' ЭТП') end) as gkpz_type,
+
+-- col 15
+CASE
+  WHEN wp.id is not null and wpl.solution_type_id = <%= single_source %> THEN 'ЕИ'
+  ELSE fact_ttype.name || decode(t.etp_address_id, <%= not_etp %>, '', ' ЭТП')
+END as fact_type,
+
+-- col 16
+null as tender_note
+
+from tenders t
+
+inner join lots l on l.tender_id = t.id
+inner join specifications s on s.lot_id = l.id
+
+left join dictionaries lot_status on lot_status.ref_id = l.status_id
+
+left join plan_lots pl on pl.id = l.plan_lot_id
+left join plan_specifications ps on ps.id = s.plan_specification_id
+
+left join lots rk_l on l.frame_id = rk_l.id
+left join plan_lots rk_pl on rk_l.plan_lot_id = rk_pl.id
+
+left join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm < :end_date
+      where tpl.status_id in (<%= agreement_list.join(', ') %>)) sub
+     where rn = 1) gkpz_pl on (pl.guid = gkpz_pl.guid)
+left join plan_specifications gkpz_ps on gkpz_pl.id = gkpz_ps.plan_lot_id and gkpz_ps.guid = ps.guid
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+  group by tpl.guid
+) can on gkpz_pl.guid = can.guid
+
+left join dictionaries gkpz_ttype on gkpz_ttype.ref_id = gkpz_pl.tender_type_id
+left join dictionaries fact_ttype on fact_ttype.ref_id = t.tender_type_id
+
+left join winner_protocols wp on
+  wp.tender_id = t.id and wp.id = l.winner_protocol_id and wp.confirm_date <= :end_date
+left join winner_protocol_lots wpl on
+  wpl.lot_id = l.id and wpl.winner_protocol_id = wp.id
+left join rebid_protocols rebid_p on
+  rebid_p.tender_id = t.id and rebid_p.id = l.rebid_protocol_id and rebid_p.confirm_date <= :end_date
+left join review_protocols review_p on
+  review_p.tender_id = t.id and review_p.id = l.review_protocol_id and review_p.confirm_date <= :end_date
+left join open_protocols op on
+  op.tender_id = t.id and op.open_date <= :end_date
+
+left join offers o on o.lot_id = l.id and o.version = 0 and o.status_id = <%= win %>
+left join offer_specifications os on o.id = os.offer_id and os.specification_id = s.id
+
+left join contracts on
+  o.id = contracts.offer_id and contracts.type_id = <%= basic %> and contracts.confirm_date <= :end_date
+left join contract_specifications contract_spec on
+  (contract_spec.specification_id = s.id and contracts.id = contract_spec.contract_id)
+
+left join bidders b on b.id = o.bidder_id
+left join contractors c on c.id = b.contractor_id
+left join ownerships ow on ow.id = c.ownership_id
+
+inner join
+  (select pl1.guid, l1.guid as fact_guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+    from tenders t1
+    inner join lots l1 on (t1.id = l1.tender_id)
+    left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+    where t1.announce_date between :begin_date and :end_date
+    group by pl1.guid, l1.frame_id, l1.guid
+  ) vi on
+    (vi.guid = pl.guid or (l.guid = vi.fact_guid and l.frame_id = vi.frame_id))
+      and vi.max_announce_date = t.announce_date
+
+where t.announce_date between :begin_date and :end_date
+And can.guid is null -- неотмененная
+and l.status_id != <%= lot_new %>
+and t.tender_type_id not in (<%= ork %>, <%= zrk %>, <%= Constants::TenderTypes::PO %>)
+and l.gkpz_year = :gkpz_year
+
+<% if current_user_root_dept_id %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if directions.present? %>
+  and s.direction_id in (<%= directions.join(', ') %>) -- направление
+<% end %>

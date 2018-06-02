@@ -1,0 +1,37 @@
+= f.input :direction_id
+  = f.select :direction_id,
+    options_for_select(Direction.longterms.collection_for_select, f.object.direction_id),
+    {},
+    class: 'select-title input-block-level'
+
+= f.input :financing_id
+  = f.select :financing_id,
+    options_for_select(Dictionary.financing_sources.map { |t| [t.name, t.id, { 'title' => t.fullname }] },
+      f.object.financing_id),
+    {},
+    class: 'select-title input-block-level'
+
+= f.input :customer_id,
+  collection: Department.customers_by_root(current_user.root_dept_id),
+  label_method: :name_with_depth_symbols,
+  include_blank: false,
+  input_html: { class: 'customers input-block-level',
+                'data-next-free-number-path' => next_free_number_plan_lots_path }
+= f.input :consumer_id do
+  = f.hidden_field :consumer_id, data: { url: nodes_for_parent_departments_path }, class: 'consumer input-block-level'
+
+= f.input :monitor_service_id,
+  collection: Department.monitor_services,
+  include_blank: false,
+  input_html: { class: 'input-block-level' }
+
+= f.input :curator, input_html: { class: 'input-block-level' }
+= f.input :tech_curator, input_html: { class: 'input-block-level' }
+
+= f.input :requirements, as: :text, input_html: { class: 'input-block-level' }
+
+= f.input :okdp_id do
+  = f.hidden_field :okdp_id, class: 'okdp input-block-level'
+
+= f.input :okved_id do
+  = f.hidden_field :okved_id, class: 'okved input-block-level'

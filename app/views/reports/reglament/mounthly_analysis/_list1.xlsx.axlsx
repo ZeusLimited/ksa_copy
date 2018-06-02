@@ -1,0 +1,18 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 8)
+
+@columns = Reports::Reglament::MounthlyAnalysis::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+
+@sheet.add_row
+@simple_sheet.add_row_title(I18n.t("reports/reglament/mounthly_analysis.header_#{Setting.company}", customer: @report.customer_name),
+                            style: @styles[:title], columns_count: 8)
+values = Array.new(7)
+@sheet.add_row values + ["по состоянию на #{@report.state_mounth.strftime('%d.%m.%Y')}"], style: values + [@styles[:text_right]]
+@sheet.add_row
+
+render 'main_table'
+
+@simple_sheet.change_column_widths(@widths)

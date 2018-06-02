@@ -1,0 +1,62 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to t('.list'), tender_review_protocols_path(tender)
+      li = link_to t('edit'), edit_tender_review_protocol_path(tender, review_protocol.id)
+      li = link_to t('.map_bids'), map_by_lot_tender_bidders_path(tender)
+      - if can?(:update_confirm_date, @review_protocol)
+        li = link_to t('.change_confirm_date'), "#change_confirm_date", "data-toggle" => "modal"
+
+.page-header
+  .btn-group.pull-right.span2
+    button.btn.btn-primary.input-block-level.dropdown-toggle data-toggle='dropdown'
+      = t('actions')
+      span.caret
+    ul.dropdown-menu
+      - if can?(:pre_confirm, @review_protocol)
+        li
+          = link_to t('.pre_confirm'),
+            pre_confirm_tender_review_protocol_path(tender, review_protocol), method: :patch
+      - if can?(:confirm, @review_protocol)
+        li
+          = link_to t('.confirm'),
+            confirm_tender_review_protocol_path(tender, review_protocol), method: :patch
+      - if can?(:cancel_confirm, @review_protocol)
+        li
+          = link_to t('.cancel_confirm'),
+            cancel_confirm_tender_review_protocol_path(tender, review_protocol), method: :patch
+      - if can?(:revoke_confirm, @review_protocol)
+        li
+          = link_to t('.revoke_confirm'),
+            revoke_confirm_tender_review_protocol_path(tender, review_protocol), method: :patch
+  h1 = t('.header')
+
+= render 'tenders/tender_header', tender: tender
+
+h4
+  span.protocol-title = review_protocol.title
+  =< link_to_history_icon(review_protocol)
+
+legend = t('.lots')
+table.table.table-bordered.table-striped
+  thead
+    tr
+      th = t('.table.name')
+      th = t('.table.cost')
+      th = t('.table.date')
+      th = t('.table.place')
+      th = t('.table.status')
+      th.column-icon
+  tbody
+  - @review_protocol.review_lots.sort_by(&:lot_nums).each do |lot|
+    tr
+      td *control_attributes(lot.plan_lot_control_user_fio_short, lot.plan_lot_control_created_at) = lot.lot_name_with_cust
+      td.right-cell = p_money lot.lot_specs_cost
+      td.no-wrap = lot.rebid_date
+      td = lot.rebid_place
+      td style=lot.lot_status_stylename_html = lot.lot_status_name
+      td = link_to_history_icon(lot)
+
+= render 'tender_partials/edit_protocol_confirm_date',
+  value: review_protocol.confirm_date,
+  url: update_confirm_date_tender_review_protocol_path(tender, review_protocol)

@@ -1,0 +1,57 @@
+contractorFormatResult = (c) ->
+  # "<h4 class=\"text-success\">#{c.label}</h4>"
+  "#{c.name_long}"
+
+contractorFormatSelection = (c) ->
+  "#{c.name_long}"
+
+contractor_search_path = "/contractors/search_potential_bidders.json"
+contractor_info_path = "/contractors/info.json"
+
+@contractor_for_plan_lot = ->
+  object = $('.plan_lot_contractor')
+  object.select2
+    placeholder: "Выберите потенциального участника"
+    multiple: object.data('multiple')
+    minimumInputLength: 1
+    allowClear: true
+    ajax:
+      url: contractor_search_path
+      dataType: 'json'
+      data: (term, page) ->
+        term: term
+      results: (data, page) -> { results: data }
+    initSelection: (element, callback) ->
+      id = $(element).val()
+      if id isnt ""
+        $.ajax
+          url: contractor_info_path
+          data: { id: id }
+          dataType: 'json'
+        .done (data) -> callback(if element.data('multiple') then data else data[0])
+
+    formatResult: contractorFormatResult
+    formatSelection: contractorFormatSelection
+
+minimum_contractors = ->
+  array = ["<%= Constants::TenderTypes::ONLY_SOURCE %>", "<%= Constants::TenderTypes::ZPP %>"]
+  if $('#plan_lot_preselection_guid_hex').val() == ''
+    if $.inArray($('#plan_lot_tender_type_id').val(), array) == -1 then 3 else 1
+  else
+    0
+
+$(document).on 'click', 'form .remove_plan_lot_contractor', (event) ->
+  fieldset_pc = $(this).closest('fieldset.potential_contractors')
+  if fieldset_pc.find('fieldset.plan_lot_contractor_fields:visible').length > minimum_contractors()
+    $(this).closest('fieldset').children('input:hidden').first().val('1')
+    $(this).closest('fieldset').hide 'blind'
+  else
+    message = if minimum_contractors() == 1
+    then "<%= I18n.t("activerecord.errors.models.plan_lot.attributes.base.less_then_minimum_contractors_ei") %>"
+    else "<%= I18n.t("activerecord.errors.models.plan_lot.attributes.base.less_then_minimum_contractors") %>"
+    alert message
+  event.preventDefault()
+
+document.addEventListener "turbolinks:load", ->
+
+  contractor_for_plan_lot()

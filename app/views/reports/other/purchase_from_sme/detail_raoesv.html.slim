@@ -1,0 +1,38 @@
+.page-header
+  h1 Детализация показателя:
+  h3 = @report.row_title(@report.row)
+
+- results = @report.detail_rows(order1352_id: @report.order.try(:map, &:to_i)) || []
+
+- if @report.filter_rows == 'cnt'
+  - t = results.reject { |v|  v['is_current'] == 0 }
+- if @report.filter_rows == 'cnt_amount'
+  - t = results.reject { |v|  v['is_ca'] == 0  }
+
+table.table.table-bordered.table-center
+  thead
+    tr
+      th Номер закупки
+      th Наименование
+      th Способ
+      th Победитель
+      th Номер договора
+      th Дата договора
+      th Стоимость договора, тыс. руб с НДС
+      th Финансирование, тыс. руб с НДС
+  tbody
+    - t.each do |result|
+      tr
+        td = result["tender_num"]
+        td = result["name"]
+        td = result["tender_type_name"]
+        td.no-wrap == result["contractors"].split('\n').uniq.map { |contractor| short_text(contractor, 50) }.join('<br>') if result["contractors"]
+        td = result["num"]
+        td = result["confirm_date"]
+        td.right-cell = p_money to_thousand(result["cost_nds"])
+        td.right-cell = p_money to_thousand(result["cost_amount_nds"])
+  tfooter
+    tr
+      th.left-cell colspan="6" = "ИТОГО #{t.size} шт."
+      th = p_money to_thousand(results.sum { |s| s["cost_nds"] })
+      th = p_money to_thousand(results.sum { |s| s["cost_amount_nds"] })

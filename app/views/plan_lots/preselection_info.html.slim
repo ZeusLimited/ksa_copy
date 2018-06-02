@@ -1,0 +1,76 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to_session_or_default t('return_to_list'), :filter_path, plan_lots_path
+
+.page-header
+  h1 = t('.header')
+
+h3
+  = link_to plan_lot.full_num, plan_lot_path(plan_lot)
+
+h4 = plan_lot.lot_name
+
+p
+  strong = t('customer')
+  span =< plan_lot.root_customer_name
+
+br
+
+ul.nav.nav-tabs
+  - plan_lot.plan_annual_limits.each do |limit|
+    li class= (limit.year == Date.current.year ? "active" : nil)
+      = link_to limit.year, "#pastselection_#{limit.year}", data: { toggle: "tab" }
+
+.tab-content
+  - plan_lot.plan_annual_limits.each do |limit|
+    .tab-pane class= (limit.year == Date.current.year ? "active" : nil) id= "#pastselection_#{limit.year}"
+
+      - pastselections = PlanLot.last_protocol \
+                                .by_status(Constants::PlanLotStatus::AGREEMENT_LIST) \
+                                .guid_eq("plan_lots.preselection_guid", plan_lot.guid_hex) \
+                                .where(gkpz_year: limit.year) \
+                                .order(:announce_date).reverse_order
+      - limit_cost = 0
+
+      table.table.table-bordered.table-striped
+        thead
+          tr
+            th = t('.table.num')
+            th = t('.table.date')
+            th = abbr t("cost_short_#{Setting.company}", default: t('.table.cost_short')),
+              t("cost_#{Setting.company}", default: t('.table.cost'))
+            th = abbr t('.table.winner_cost_short'), t('.table.winner_cost')
+            th = t('.table.econ')
+            th = t('.table.winner')
+            th = t('.table.status')
+        tbody
+          - pastselections.decorate.each do |pastselection|
+            - lot = PlanLot.last_public_lot(pastselection.guid_hex).try(:decorate)
+            - limit_cost += lot && lot.held? ? pastselection.plan_cost : 0
+            tr
+              td = link_to pastselection.full_num, plan_lot_path(pastselection)
+              td = pastselection.announce_date
+              td.right-cell = p_money pastselection.plan_cost
+              td.right-cell = p_money lot.try(:limit_cost)
+              td.right-cell = p_money (pastselection.plan_cost - (lot.try(:limit_cost) || 0)) if lot
+              td = lot.try(:winners)
+              td style=lot.try(:status_stylename_html) title=lot.try(:status_fullname)
+                = lot.try(:status_name)
+                br
+                = lot.try(:contract_termination_info)
+
+      p
+        strong = t('.start_cost')
+        span.text-success =<> p_money limit.cost
+        = t('.currency')
+
+      p
+        strong = t('.public_cost')
+        span.text-error =<> p_money limit_cost
+        = t('.currency')
+
+      p
+        strong = t('.available_limit')
+        span.text-success =<> p_money (limit.cost || 0) - limit_cost
+        = t('.currency')

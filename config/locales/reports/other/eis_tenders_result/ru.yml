@@ -1,0 +1,30 @@
+ru:
+  helpers:
+    submit:
+      reports_other_eis_tenders_result:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/eis_tenders_result: 'Отчет для ЕИС по п.19 ст.4 223-ФЗ'
+    attributes:
+      reports/other/eis_tenders_result:
+        customers: 'Заказчики'
+        tender_types: 'Все способы закупок, исключая:'
+        date_begin: 'Дата начала'
+        date_end: 'Дата окончания'
+        format: 'Формат'
+  reports:
+    other:
+      eis_tenders_result:
+        default: &def
+          report_title2: 'Договоры заключенные по результатам закупок'
+          report_title3: 'Договоры заключенные заказчиком по результатам закупок у единственного поставщика (подрядчика, исполнителя)'
+          report_title4: 'Договоры заключенные заказчиком по результатам закупки, сведения о которой составляют государственную тайну или в отношении которой приняты решения Правительства Российской Федерации'
+          report_title5: 'Договоры заключенные заказчиком по результатам закупки, у субъектов малого и среднего предпринимательства'
+          period: 'Период: %{date_begin} - %{date_end}'
+        list1:
+          count: 'Количество договоров: %{count} шт.'
+          sum: 'Сумма договоров: %{cost}, руб. с НДС'
+          <<: *def
+        list2:
+          <<: *def

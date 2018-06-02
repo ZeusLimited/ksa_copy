@@ -1,0 +1,16 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 17)
+@outlines = []
+
+@columns = Reports::Other::TemplateGeneration::COLUMNS
+@column_styles = [@styles[:td], @styles[:td]].concat @columns.values.map { |c| @styles[c[:style]] }
+@column_types = [:string, :string].concat @columns.values.map { |c| c[:type] }
+@widths = [5, 26].concat @columns.values.map { |c| c[:width] || 13 }
+
+@simple_sheet.add_row_title(Reports::Other::TemplateGeneration.model_name.human,
+                            style: @styles[:title], columns_count: 17)
+@sheet.add_row
+
+render 'main_table'
+
+@simple_sheet.change_column_widths(@widths)

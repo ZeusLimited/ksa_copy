@@ -1,0 +1,58 @@
+ru:
+  reports/gkpz/checklist:
+    header_main_org:
+      title: 'Контрольная таблица к ГКПЗ на %{year} год Структурного подразделения %{holding} ______________________'
+      application: 'Приложение №5'
+      note: 'к Регламенту формирования годовой комплексной программы закупок и отчетности для нужд %{holding}'
+      gkpz: 'Годовая комплексная программа закупок'
+    header:
+      title: 'Контрольная таблица к ГКПЗ на %{year} год ДЗО %{holding} - %{dzo}'
+      application: 'Приложение №2'
+      note: 'к Регламенту формирования годовой комплексной программы закупок и отчетности для нужд ДЗО/ВЗО %{holding}'
+      gkpz: 'Годовая комплексная программа закупок'
+    footer_main_org:
+      fb_curator: 'Ответственный за функциональный бюджет %{holding}'
+      approval: 'СОГЛАСОВАНО'
+      tender_boss: 'Начальлник департамента закупок'
+      invest_boss: 'Начальник Департамента инвестиций'
+      economic_boss: 'Начальник Департамента экономики'
+      sign: '______________________ (Фамилия И.О.)'
+      sign_date: '___ ______________ 201__ г.'
+      curator: 'исп.'
+      phone_number: 'телефон'
+    footer:
+      boss_main_org: 'Заместитель Генерального директора %{holding}'
+      approval: 'СОГЛАСОВАНО'
+      boss: 'Руководитель ДЗО'
+      tender_boss: 'Начальлник отдела закупок ДЗО'
+      invest_boss_main_org: 'Департамент инвестиций %{holding}'
+      tender_boss_main_org: 'Начальник департамента закупок %{holding}'
+      economic_boss_main_org: 'Департамент экономики %{holding}'
+      economic_boss: 'Руководитель финансово-экономического подразделения ДЗО (лицо, ответственное за ведение бизнес-плана ДЗО)'
+      sign: '______________________ (Фамилия И.О.)'
+      sign_date: '___ ______________ 201__ г.'
+      curator: 'исп.'
+      phone_number: 'телефон'
+  helpers:
+    submit:
+      reports_gkpz_checklist:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/gkpz/checklist: 'Контрольная таблица к ГКПЗ'
+    attributes:
+      reports/gkpz/checklist:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        date_gkpz_on_state: 'Состояние ГКПЗ на'
+        gkpz_year: 'Год ГКПЗ'
+        gkpz_type: 'ГКПЗ / Внеплановые закупки'
+        customer: 'Заказчик'
+        organizers: 'Организаторы'
+        etp_addresses: 'Адреса ЭТП'
+        tender_types: 'Способы закупок'
+        directions: 'Направления закупки'
+        subject_type: 'Предмет закупки'
+        financing_sources: 'Источники финансирования'
+        statuses: 'Статусы закупки'
+        gkpz_state: 'Состояние в ГКПЗ'

@@ -1,0 +1,13 @@
+@simple_sheet.add_row_title(p_name, style: @styles[:title_left], columns_count: 10)
+render 'thead'
+
+result_rows.each do |result_row|
+  values = @columns_part_3.values.map do |val|
+    if val[:value]
+      val[:value].call(result_row)
+    else
+      val[:formula].call(@sheet.rows.size + 1)
+    end
+  end
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end

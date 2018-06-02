@@ -1,0 +1,43 @@
+.page-header
+  h1 = t('.header')
+
+= form_tag regulation_items_path, method: 'get' do
+
+  .row
+    .span6
+      = label_tag 'department', 'Подразделение'
+      = select_tag 'department',
+        options_from_collection_for_select(Department.roots_customers(current_user.root_dept).order(:position),
+          'id', 'name_with_depth_symbols', params[:department]),
+          class: 'input-block-level'
+
+    .span2
+      label &nbsp;
+      = button_tag 'Поиск', class: 'btn btn-success input-block-level', name: nil
+
+    .text-right
+      label &nbsp;
+      = link_to t('.new'), new_regulation_item_path, class: 'btn btn-primary'
+
+table.table.table-bordered.table-striped.table-hover
+  thead
+    tr
+      th.span2 = t('.table.num')
+      th = t('.table.name')
+      th = t('.table.tender_types')
+      th.column-icon
+      th.column-icon
+
+  tbody
+    - @regulation_items.decorate.each do |regulation_item|
+      tr class=regulation_item.row_class
+        td = regulation_item.num
+        td = regulation_item.name
+        td = regulation_item.tender_type_names.join(', ')
+        td = link_edit edit_regulation_item_path(regulation_item)
+        td = link_delete regulation_item
+
+br
+
+p.text-right
+  = link_to t('.new'), new_regulation_item_path, class: 'btn btn-primary'

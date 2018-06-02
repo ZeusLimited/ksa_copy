@@ -1,0 +1,21 @@
+ru:
+  activemodel:
+    attributes:
+      tender:
+        num: 'Номер'
+        oos_id: 'Идентификатор на ЕИС'
+        oos_num: 'Номер на ЕИС'
+        announce_date: 'Дата публикации'
+        official_site_num: 'Номер на оф. сайте'
+        name: 'Предмет договора'
+        department_id: 'Организатор'
+        user_id: 'Ответственный пользователь'
+        contract_period_type: 'Тип дней (в сроке для заключения договора)'
+        contract_period: 'Срок заключения договора (дней)'
+      lots:
+        non_public_reason: 'Причина невыполнения сроков публикации'
+        num: 'Номер лота'
+      tender/lots/specifications:
+        qty: 'Кол-во'
+        cost_money: 'Цена без НДС'
+        cost_nds_money: 'Цена без НДС'

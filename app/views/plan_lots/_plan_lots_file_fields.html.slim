@@ -1,0 +1,15 @@
+tr data={ 'tender-file-id' => "#{f.object.tender_file.id}" }
+  = f.hidden_field :_destroy
+  = f.hidden_field :tender_file_id
+  td= icon_for_tender_file(f.object.tender_file, '32px')
+  td= link_to truncate(f.object.tender_file.read_attribute(:document)), f.object.tender_file.document.valid_url
+  td= number_to_human_size f.object.tender_file.file_size
+  td
+    = f.select :file_type_id,
+      options_for_select(Dictionary.plan_lot_filetypes.map { |t| [t.name, t.id] }, f.object.file_type_id),
+      {},
+      class: 'input-large'
+  td= f.text_area :note, rows: 2
+  td= abbr(l(f.object.tender_file.created_at), l(f.object.tender_file.created_at, format: :long))
+  td= abbr(f.object.tender_file.user.fio_short, f.object.tender_file.user.fio_full)
+  td= link_delete_tf_file(f.object.tender_file)

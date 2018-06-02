@@ -1,0 +1,76 @@
+name: 'create_contract'
+desc: 'функция создает новый договор в системе'
+request_params:
+  -
+    name: 'plan_lot_guid'
+    data_type: 'Guid'
+    desc: 'Гуид лота в планировании'
+    required: true
+    example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+  -
+    name: 'offer_id'
+    data_type: 'Integer'
+    desc: 'ИД победившей оферты'
+    required: false
+    example: '128902'
+  -
+    name: 'num'
+    data_type: 'String(255)'
+    desc: 'Номер договора'
+    required: true
+    example: '20-18'
+  -
+    name: 'reg_number'
+    data_type: 'String(255)'
+    desc: 'Регистрационный номер'
+    required: false
+    example: '15'
+  -
+    name: 'confirm_date'
+    data_type: 'Date'
+    desc: 'Дата подписания договора'
+    required: true
+    example: '28.08.2015'
+  -
+    name: 'begin_date'
+    data_type: 'Date'
+    desc: 'Дата начала поставки'
+    required: true
+    example: '01.09.2015'
+  -
+    name: 'end_date'
+    data_type: 'Date'
+    desc: 'Дата окончания поставки'
+    required: true
+    example: '20.09.2015'
+  -
+    name: 'cost'
+    data_type: 'Decimal(18,2)'
+    desc: 'Цена договора (без НДС)'
+    required: true
+    example: '13245678,99'
+  -
+    name: 'cost_nds'
+    data_type: 'Decimal(18,2)'
+    desc: 'Цена договора (с НДС)'
+    required: true
+    example: '13245678,99'
+  -
+    name: 'additional_plan_lot_guid'
+    data_type: 'Guid'
+    desc: 'Гуид лота в планировании для доп. соглашения'
+    required: false
+    example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+response_params:
+  -
+    name: 'success'
+    data_type: 'Boolean'
+    desc: 'Признак, информация успешно сохранена?'
+    required: true
+    example: 'true'
+  -
+    name: 'error_msg'
+    data_type: 'String'
+    desc: 'Причина ошибки в случае её возникновения'
+    required: false
+    example: 'Закупка в системе не найдена.'

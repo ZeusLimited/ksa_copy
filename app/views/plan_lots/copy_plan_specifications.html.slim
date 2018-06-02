@@ -1,0 +1,39 @@
+.page-header
+  h1 = t('.header')
+
+= form_tag edit_plan_specifications_plan_lots_path, method: :get do
+  h3 = t('.select_specification')
+  table.table.table-bordered.tenders_list
+    thead
+      tr
+        th
+        th #
+        th = t('.name')
+        th = t('.price')
+        th = t('.customer')
+        th = t('.consumer')
+    tbody
+      - @plan_lots.each do |plan_lot|
+        tr.info
+          td
+          td colspan='5'
+            strong
+              = plan_lot.full_num + ' ' + plan_lot.lot_name
+        - plan_lot.plan_specifications.each do |plan_spec|
+          tr
+            td = check_box_tag 'ps_ids[]', plan_spec.id
+            td = plan_spec.num_spec
+            td = plan_spec.name
+            td = p_money(plan_spec.cost)
+            td = plan_spec.customer_name
+            td = plan_spec.consumer_name
+
+  br
+
+  h3 = t('.select_lot')
+  .span6
+    = hidden_field_tag :id, nil, { id: :preselection_id, class: 'input-block-level'}
+  br
+  .form-actions
+    = submit_tag t('.next'), class: 'btn btn-success', onclick: "return validateCopyPlanSpecForm()"
+  = link_to t('return_to_list'), url_from_session_or_default(:filter_path, plan_lots_url)

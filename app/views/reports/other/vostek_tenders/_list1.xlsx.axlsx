@@ -1,0 +1,37 @@
+@sheet = sheet
+
+@report.tenders_sql_rows.each do |result|
+  next if result['is_print'] == 0
+
+  sheet.add_row [t(".row_1", customers: result["customers"])], style: @styles[:plain_bold]
+  sheet.add_row [t(".row_2", organizers: result["organizer"])], style: @styles[:plain_bold]
+  sheet.add_row [t(".row_3", nums: result["nums"])], style: @styles[:plain_bold]
+  sheet.add_row [t(".row_4", lots: result["lots"])], style: @styles[:plain_bold]
+  sheet.add_row
+
+  render 'thead'
+
+  parent_index = 0
+  child_index = 0
+
+  @rows.each do |key, value|
+    suffix = if key == :row_2_5
+      Constants::TenderTypes::CLOSED.include?(result['tender_type_id']) ? 'closed' : 'opened'
+    end
+    name = ["name", suffix].compact.join('_')
+
+    if result[key.to_s] > 0
+      if value[:parent].present?
+        parent_index += 1
+        child_index = 0
+      end
+      sheet.add_row [[parent_index, child_index].join('.'), @report.l(key, name), result[key.to_s]], style: @styles[:td]
+      child_index += 1
+    end
+  end
+
+  sheet.add_row
+  sheet.add_row
+end
+
+sheet.column_widths 10, 100

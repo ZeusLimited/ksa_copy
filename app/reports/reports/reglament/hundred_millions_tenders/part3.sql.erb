@@ -1,0 +1,112 @@
+-- sql_part3
+-- tenders over 100 millions
+select
+row_number() over (order by pl.num_tender, pl.num_lot) as rn,
+pl.gkpz_year,
+pl.num_tender || '.' || pl.num_lot as lot_num,
+count(pl.id) over (partition by pl.root_customer_id, pl.num_tender) as lots_cnt,
+cust.name as root_customer_name,
+org.name as org_name,
+decode(:hundred_millions, 1, 'Да', '') as is_hundred_millions,
+pl.lot_name as lot_name,
+decode(pl.state, 0, 'внеплан', 1, 'план') as lot_state,
+ttype.name as plan_tender_type,
+ct.name as commission_type_name,
+decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 'Нет', 'Да') as etp,
+sum(ps.qty * ps.cost) as gkpz_cost,
+sum(ps.qty * ps.cost_nds) as gkpz_cost_nds,
+pl.announce_date as gkpz_announce_date,
+'' as empty,
+pl_st.name as pl_status,
+directions.name as direction
+
+from plan_lots pl
+inner join plan_specifications ps on pl.id = ps.plan_lot_id
+
+inner join departments org on org.id = pl.department_id
+inner join departments cust on cust.id = ps.customer_id
+
+left join commissions c on pl.commission_id = c.id
+left join dictionaries ct on c.commission_type_id = ct.ref_id
+
+inner join dictionaries ttype on pl.tender_type_id = ttype.ref_id
+
+<% if hundred_millions.present? %>
+  inner join
+  (select
+    pll.num_tender, pll.root_customer_id, pll.gkpz_year
+    from plan_lots pll
+      inner join plan_specifications pss on pss.plan_lot_id = pll.id
+    Where pll.version = 0
+      and pll.status_id not in (<%= Constants::PlanLotStatus::CANCELLED_LIST.join(', ') %>)
+      <% if gkpz_years.present? %>
+        and pll.gkpz_year in (<%= gkpz_years.join(', ') %>) -- год ГКПЗ
+      <% end %>
+    Group By pll.gkpz_year, pll.root_customer_id, pll.num_tender
+    <% if hundred_millions == '1' %>
+      Having sum(pss.qty * pss.cost) >= 100000000
+    <% end %>
+    <% if hundred_millions == '0' %>
+      Having sum(pss.qty * pss.cost) < 100000000
+    <% end %>
+  ) hund_millions on hund_millions.num_tender = pl.num_tender and
+                     hund_millions.root_customer_id = pl.root_customer_id and
+                     hund_millions.gkpz_year = pl.gkpz_year
+<% end %>
+
+left join lots l on l.plan_lot_guid = pl.guid
+left join tenders t on l.tender_id = t.id
+
+left join dictionaries pl_st on pl_st.ref_id = pl.status_id
+left join directions on directions.id = pl.main_direction_id
+
+left join
+  (select pl1.guid, max(t1.announce_date) as max_announce_date
+    from tenders t1
+    inner join lots l1 on (t1.id = l1.tender_id)
+    left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+    where t1.announce_date between :begin_date and :end_date
+    and l1.status_id != <%= Constants::LotStatus::NEW %>
+    group by pl1.guid
+  ) last_public on (last_public.guid = pl.guid) and last_public.max_announce_date = t.announce_date
+
+
+where
+pl.announce_date between :begin_date and :end_date
+and (l.status_id not in (<%= Constants::LotStatus::NOT_NEW.join(', ') %>) or l.status_id is null)
+and decode(:vz, -1, -1, pl.state) = :vz
+and pl.version = 0
+
+
+<% if gkpz_years.present? %>
+  and pl.gkpz_year in (<%= gkpz_years.join(', ') %>) -- год ГКПЗ
+<% end %>
+
+<% if current_user_root_dept_id %>
+  and ps.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customers.present? %>
+  and ps.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  and pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if nomenclature.present? %>
+ And
+   (
+     lower(pl.lot_name) like  <%= nomenclature.join(' or lower(pl.lot_name) like ').gsub 'l.name', 'pl.lot_name' %>
+   )
+<% end %>
+group by pl.root_customer_id, cust.name, org.name, pl.num_tender, pl.id, pl.num_lot, pl.lot_name, pl.state, ttype.name, ct.name, pl.etp_address_id, pl.announce_date
+         , pl_st.name, directions.name
+order by pl.root_customer_id, pl.num_tender, pl.id

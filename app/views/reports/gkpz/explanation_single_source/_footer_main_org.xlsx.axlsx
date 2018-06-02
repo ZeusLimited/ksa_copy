@@ -1,0 +1,14 @@
+prefix = 'reports/gkpz/explanation_single_source.footer_main_org'
+
+@sheet.add_row
+@sheet.add_row [nil, t("#{prefix}.fb_curator",holding: @holding_name), nil, nil, t("#{prefix}.sign"), nil, t("#{prefix}.sign_date")]
+@sheet.add_row
+@sheet.add_row [nil, t("#{prefix}.approval"), nil, nil, t("#{prefix}.approval"), nil, nil]
+@sheet.add_row [nil, t("#{prefix}.tender_boss"), nil, nil, t("#{prefix}.invest_boss"), nil, nil]
+@sheet.add_row
+@sheet.add_row [nil, t("#{prefix}.sign"), nil, nil, t("#{prefix}.sign"), nil, nil]
+@sheet.add_row
+@sheet.add_row [nil, t("#{prefix}.sign_date"), nil, nil, t("#{prefix}.sign_date"), nil, nil]
+@sheet.add_row
+@sheet.add_row [nil, t("#{prefix}.curator"), nil, nil, nil, nil, nil]
+@sheet.add_row [nil, t("#{prefix}.phone_number"), nil, nil, nil, nil, nil]

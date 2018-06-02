@@ -1,0 +1,9 @@
+- name: Ремонт + Эксплуатация
+  filter: { direction: <%= [yaml_directions['erp'], yaml_directions['er']] %> }
+  sum_name: ! 'Итого ремонт + эксплуатация:'
+- name: Инвестиции
+  filter: { direction: <%= Direction.invest.pluck(:id) %> }
+  sum_name: ! 'Итого инвестиции:'
+- name: Прочие
+  filter: { direction: <%= Direction.routine.pluck(:id) - [yaml_directions['er'], yaml_directions['erp']] %> }
+  sum_name: ! 'Итого прочие:'

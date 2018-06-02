@@ -1,0 +1,42 @@
+= input_block_form_for @options, url: reports_gkpz_checklist_show_path(format: 'xlsx'),
+  method: :get, html: { target: '_blank' } do |f|
+
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+      .span2= f.input :date_gkpz_on_state, input_html: { class: 'datepicker' }
+    .row
+      .span2 = f.input :gkpz_year, collection: gkpz_years_range, include_blank: false
+      .span2 = f.input :gkpz_type, collection: Reports::Gkpz::Gkpz::GKPZ_TYPES, include_blank: false
+      .span2 = f.input :gkpz_state, collection: t_enums('plan_lot_state'), input_html: { data: { placeholder: 'Все' } }
+    .row
+      .span6
+        = f.input :customer,
+            collection: Department.customers_by_root(current_user.root_dept_id),
+            label_method: :name_with_depth_symbols, include_blank: false
+    .row
+      .span6
+        = f.input :organizers,
+            collection: Department.organizers_by_root,
+            label_method: :name_with_depth_symbols,
+            include_hidden: false,
+            input_html: multi
+    .row
+      .span3= f.input :gkpz_year, collection: gkpz_years_range, include_blank: false
+      .span3= f.input :gkpz_type, collection: Reports::Gkpz::Gkpz::GKPZ_TYPES, include_blank: false
+    .row
+      .span3= f.input :etp_addresses, collection: Dictionary.etp_addresses, include_hidden: false, input_html: multi
+      .span3
+        = f.input :tender_types,
+            collection: Dictionary.tender_types,
+            include_hidden: false,
+            label_html: { class: 'select-all-clear' },
+            input_html: multi
+    .row
+      .span3= f.input :directions, collection: Direction.order(:position), include_hidden: false, input_html: multi
+      .span3= f.input :subject_type, collection: Dictionary.subject_types
+    .row
+      .span3= f.input :statuses, collection: Dictionary.plan_lot_statuses, include_hidden: false, input_html: multi
+
+    .form-actions= f.submit "Сформировать", name: nil, class: 'btn btn-primary'

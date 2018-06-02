@@ -1,0 +1,37 @@
+ru:
+  activerecord: &contract_form
+    models:
+      contract: 'Договор'
+    attributes:
+      contract: &contract
+        type_id: 'Тип договора (основной / на уменьшение)'
+        lot_id: 'Лот'
+        offer_id: 'Победитель'
+        num: 'Номер'
+        confirm_date: 'Дата подписания'
+        delivery_date_begin: 'Дата начала поставки'
+        delivery_date_end: 'Дата окончания поставки'
+        non_contract_reason: 'Причины невыполнения срока на заключение договора'
+        non_delivery_reason: 'Причины невыполнения срока начала поставки'
+        parent_id: 'Дополнительный договор к'
+        reg_number: 'Регистрационный номер'
+        total_cost: 'Общая стоимость договора без НДС'
+        total_cost_nds: 'Общая стоимость договора с НДС'
+      tender/bidders/offers/contract:
+        <<: *contract
+    errors:
+      models:
+        contract:
+          attributes:
+            non_delivery_reason:
+              non_contract: "не может быть пустым, т.к. дата начала поставки по договору превышает планируемую дату начала поставки больше чем на месяц"
+            confirm_date:
+              less_then_protocol_date: "не может быть меньше даты вступления в силу протокола выбора победителя"
+            delivery_date_begin:
+              less_then_contract_date: "не может раньше чем дата подписания договора"
+            delivery_date_end:
+              less_then_delivery_date_begin: "не может раньше чем дата начала поставки"
+            offer_id:
+              non_uniq: 'уже имеет договор'
+  activemodel:
+    <<: *contract_form

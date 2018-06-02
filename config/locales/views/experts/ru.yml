@@ -1,0 +1,9 @@
+ru:
+  experts:
+    index:
+      title_head: 'Привлечённые эксперты'
+    edits:
+      edit_expert: 'Редактирование списка экспертов'
+    expert_fields:
+      offer: 'Направления оценки предложения'
+      choose_directions: 'Выберите направление оценки'

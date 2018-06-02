@@ -1,0 +1,22 @@
+= simple_form_for tender, url: tender_tender_data_map_path(@tender), method: :patch, html: { class: 'tender-form' } do |f|
+  = error_messages_for @tender
+  .page-header
+    h1 = t('.title')
+
+  = render 'tenders/tender_header', tender: tender
+
+  = render 'edit_offer_reception', f: f
+  - if tender.b2b_center?
+    = render 'edit_b2b_classifiers', f: f
+  - if tender.offer_guarantie?
+    = render 'edit_offer_guarantie', f: f
+  - if tender.alternate_offers?
+    = render 'edit_alternate_offers', f: f
+  - if tender.auction?
+    = render 'edit_auction_step_increment', f: f
+  = render 'edit_additional', f: f
+
+  .form-actions
+    p.text-right
+      => link_to_back_or_default t('.cancel'), tender_tender_data_map_path(@tender), class: 'btn btn-warning'
+      = f.submit t('.submit'), class: 'btn btn-primary'

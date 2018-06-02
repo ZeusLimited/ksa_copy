@@ -1,0 +1,31 @@
+== render 'shared/lk'
+
+- user = current_user.decorate
+.thumbnails
+  li
+    .thumbnail
+      .caption
+        h3 = user.fio_full
+        table.table
+          tbody
+            tr
+              td.span2
+                => user.photo
+              td
+                p
+                  = user.department_name
+                p
+                  = user.user_job
+                p
+                  | тел.
+                  i =< user.phone_public
+                p
+                  | email:
+                  i =< user.email
+                p
+                  | Права доступа:
+                  ==< user.roles_ru
+      p
+        / => link_to t('.update_photo'), update_photo_account_profile_path, method: :patch, class: 'btn btn-inverse'
+        => link_to t('edit'), edit_account_profile_path, class: 'btn btn-inverse'
+        => link_to t('.change_password'), edit_user_registration_path, class: 'btn btn-inverse'

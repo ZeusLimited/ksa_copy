@@ -1,0 +1,23 @@
+ru:
+  reports/reglament/invest_session:
+    row_titles:
+      general: 'свод по выбранным ДЗО'
+  helpers:
+    submit:
+      reports_reglament_invest_session:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/invest_session: 'Доклад к инвест. сессии'
+    attributes:
+      reports/reglament/invest_session:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'

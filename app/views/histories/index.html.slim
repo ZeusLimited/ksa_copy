@@ -1,0 +1,18 @@
+.modal-header
+  button.close data-dismiss="modal" &times;
+  h3 История изменений объекта "#{@object.class.model_name.human}"
+.modal-body
+  - @object.versions.reverse.each do |version|
+    - user = User.find version.version_author
+    table.table.table-hover.table-bordered.table-striped
+      tbody
+        tr.info.bold
+          td= "#{version.created_at} #{user.fio_short} #{I18n.t(version.event.to_sym, scope: :history_events)}"
+          td.center-cell Старое значение
+          td.center-cell Новое значение
+        - version.changeset.each do |k, v|
+          - next if Constants::IGNORE_HISTORY_FIELDS.include?(k)
+          tr
+            td.span6= @object.class.human_attribute_name(k.to_sym)
+            td.span3= association_name(@object, k, v[0])
+            td.span3= association_name(@object, k, v[1])

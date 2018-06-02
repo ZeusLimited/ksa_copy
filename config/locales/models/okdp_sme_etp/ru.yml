@@ -1,0 +1,8 @@
+ru:
+  activerecord:
+    models:
+      okdp_sme_etp: 'Справочник специальный кодов ОКДП'
+    attributes:
+      okdp_sme_etp:
+        code: 'Код'
+        okdp_type: 'Тип ОКДП'

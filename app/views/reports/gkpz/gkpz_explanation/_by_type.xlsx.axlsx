@@ -1,0 +1,13 @@
+@report.by_type_rows.each do |row|
+  text_run = Axlsx::RichText.new(nil, height: 50) do |rich_text|
+    rich_text.add_run(" - #{row['title']} ", b: true)
+    rich_text.add_run(t('.type_description',
+                        cnt: row['cnt'],
+                        cnt_desc: t(:procedure, count: row['cnt']),
+                        cost: xlsx_money(row['cost_nds']),
+                        percent: xlsx_money(@report.gkpz_row['cost_nds'] != 0 ? row['cost_nds'] / @report.gkpz_row['cost_nds'] * 100 : 0)),
+                      height: 50)
+  end
+  add_text_row text_run, 30
+  @sheet.merge_cells @sheet.rows[@sheet.rows.size - 1].cells[0..3]
+end

@@ -1,0 +1,29 @@
+--- # структура
+- sum_name: 'Всего по ГКПЗ'
+  children:
+  - name: Регламентированные закупки
+    children:
+    - name: 1. НИОКР (инвестиции)
+      filter:
+        direction_id: <%= yaml_directions['niokr_invest'] %>
+        tender_type_id: <%= Constants::TenderTypes::REGULATED %>
+      sum_name: ! 'Итого НИОКР (инвестиции):'
+    - name: 2. НИОКР и прочие консультативные услуги
+      filter:
+        direction_id: <%= yaml_directions['niokr'] %>
+        tender_type_id: <%= Constants::TenderTypes::REGULATED %>
+      sum_name: ! 'Итого НИОКР и прочие консультативные услуги:'
+    sum_name: ! 'Итого регламентированные закупки'
+  - name: Не регламентированные закупки
+    children:
+    - name: 1. НИОКР (инвестиции)
+      filter:
+        direction_id: <%= yaml_directions['niokr_invest'] %>
+        tender_type_id: <%= Constants::TenderTypes::UNREGULATED %>
+      sum_name: ! 'Итого НИОКР (инвестиции):'
+    - name: 2. НИОКР и прочие консультативные услуги
+      filter:
+        direction_id: <%= yaml_directions['niokr'] %>
+        tender_type_id: <%= Constants::TenderTypes::REGULATED %>
+      sum_name: ! 'Итого НИОКР и прочие консультативные услуги:'
+    sum_name: ! 'Итого не регламентированные закупки'

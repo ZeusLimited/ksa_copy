@@ -1,0 +1,13 @@
+<%= simple_form_for [@content, @declension], url: polymorphic_url([@content, :declension]), remote: true, html: {class: 'form_declension'} do |f| %>
+  <h5>Именительный</h5>
+  <h5><%= @content.name_i %></h5>
+  <%= f.input :name_r, input_html: { class: 'input-block-level'} %>
+  <%= f.input :name_d, input_html: { class: 'input-block-level'} %>
+  <%= f.input :name_v, input_html: { class: 'input-block-level'} %>
+  <%= f.input :name_t, input_html: { class: 'input-block-level'} %>
+  <%= f.input :name_p, input_html: { class: 'input-block-level'} %>
+  <div class="form-actions">
+    <button type="button" class="btn btn-warning" data-dismiss="modal">Отмена</button>
+    <%= f.submit 'Сохранить', class: 'btn btn-primary' %>
+  </div>
+<% end %>

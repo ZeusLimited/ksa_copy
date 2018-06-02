@@ -1,0 +1,22 @@
+ru:
+  helpers:
+    submit:
+      reports_minenergo_arm51633:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/minenergo/arm51633: 'Отчет о проведенных конкурентных процедурах (Макет 51633 Минэнерго)'
+    attributes:
+      reports/minenergo/arm51633:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customer: 'Заказчик'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'
+        par55555: "Руководитель организации"
+        par77777: "Ответственный за исполнение макета"

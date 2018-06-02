@@ -1,0 +1,9 @@
+development:
+  url: 'redis://localhost:6379'
+  namespace: "torg_dev"
+test:
+  url: 'redis://pub-redis-15669.eu-central-1-1.1.ec2.redislabs.com:15669'
+  namespace: "torg_#{Rails.env}"
+production:
+  url: 'redis://pub-redis-15669.eu-central-1-1.1.ec2.redislabs.com:15669'
+  namespace: "torg_#{Rails.env}"

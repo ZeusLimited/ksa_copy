@@ -1,0 +1,16 @@
+h3 = t('.auction_step_increment')
+fieldset.frame
+  .row
+    .span10
+      table.table.table-bordered.table-hover.table-striped
+        thead
+          tr
+            th = t('.num')
+            th = t('.name')
+            th = t('.step_increment')
+        tbody
+          = f.simple_fields_for :lots do |lot|
+            tr
+              td = lot.input :nums, disabled: true, label: false
+              td = lot.input :name, disabled: true, label: false
+              td = lot.input :step_increment, label: false

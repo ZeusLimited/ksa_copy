@@ -1,0 +1,7 @@
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      th = link_icon_title 'icon-remove', 'Убрать все', '#', class: 'remove-all-from-selected'
+      = render 'table_plan_lots/center_head'
+  tbody
+    = render 'table_plan_lots/selected_body', plan_lots: plan_lots

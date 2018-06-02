@@ -1,0 +1,74 @@
+-- sql_high
+select
+  pl.num_tender || '.' || pl.num_lot as lot_num,
+  pl.lot_name,
+  tt.name || decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, '', ' (ЭТП)') as tender_type,
+  round(sum(ps.qty * ps.cost) / 1000, 2) as cost_nds
+From plan_lots pl
+  INNER JOIN plan_specifications ps on (pl.id = ps.plan_lot_id)
+  INNER JOIN dictionaries tt on (pl.tender_type_id = tt.ref_id)
+  <% unless gkpz_type == 'current' %>
+    inner join protocols p on (pl.protocol_id = p.id)
+    inner join commissions c on (p.commission_id = c.id)
+    inner join (
+      select l.guid, max(p1.date_confirm) as date_confirm from plan_lots l
+      inner join protocols p1 on (p1.id = l.protocol_id)
+      inner join commissions c1 on (p1.commission_id = c1.id)
+      where p1.date_confirm <= :date_gkpz_on_state
+      <% if gkpz_type == 'gkpz' %>
+        and c1.commission_type_id = <%= Constants::CommissionType::SD %>
+      <% end %>
+      Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+  <% end %>
+Where pl.announce_date between :begin_date and :end_date
+<% if gkpz_type == 'unplanned' %>
+  And not exists (select 'x' from plan_lots l where l.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %> and l.guid = pl.guid)
+<% elsif gkpz_type == 'current' %>
+  And pl.version = 0
+<% end %>
+
+<% if customers.present? %>
+  And ps.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if current_user_root_dept_id %>
+  And ps.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if gkpz_years.present? %>
+  And pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if organizers.present? %>
+  And pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if etp_addresses.present? %>
+  And pl.etp_address_id in (<%= etp_addresses.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  And ps.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if subject_types.present? %>
+  And pl.subject_type_id = <%= subject_types.join(', ') %>
+<% end %>
+
+<% if statuses.present? %>
+  And pl.status_id in (<%= statuses.join(', ') %>)
+<% end %>
+
+<% if gkpz_state.present? %>
+  And pl.state = <%= PlanLot.states[gkpz_state] %>
+<% end %>
+
+Group By pl.id, pl.num_tender, pl.num_lot, pl.lot_name, tt.name, pl.etp_address_id
+Having sum(ps.qty * ps.cost) >= 50000000
+Order By sum(ps.qty * ps.cost) desc

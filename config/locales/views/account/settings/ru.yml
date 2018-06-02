@@ -1,0 +1,12 @@
+ru:
+  account:
+    settings:
+      keys: &keys
+        subscribe_send_time: 'Время доставки оповещений'
+      edit:
+        <<: *keys
+        time_zone: 'UTC %{offset}'
+      show:
+        <<: *keys
+        time_zone: '+10 GMT'
+        settings: 'Настройки'

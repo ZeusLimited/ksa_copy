@@ -1,0 +1,16 @@
+styles = Array.new(5, @styles[:td])
+types = Array.new(5, :string)
+
+rows = []
+rows << @sheet.add_row(["Наименование заказчика", nil, nil, @customer.try(:fullname), nil], style: styles)
+rows << @sheet.add_row(["Адрес местонахождения заказчика", nil, nil, @customer.try(:contact_legal_fias_name), nil], style: styles)
+rows << @sheet.add_row(["Телефон заказчика", nil, nil, @customer.try(:contact_phone), nil], style: styles)
+rows << @sheet.add_row(["Электронная почта заказчика", nil, nil, @customer.try(:contact_email), nil], style: styles)
+rows << @sheet.add_row(["ИНН", nil, nil, @customer.try(:inn), nil], style: styles, types: types)
+rows << @sheet.add_row(["КПП", nil, nil, @customer.try(:kpp), nil], style: styles, types: types)
+rows << @sheet.add_row(["ОКАТО", nil, nil, @customer.try(:contact_legal_fias_okato), nil], style: styles, types: types)
+
+rows.each do |row|
+  @sheet.merge_cells row.cells[0..2]
+  @sheet.merge_cells row.cells[3..4]
+end

@@ -1,0 +1,104 @@
+wb = xlsx_package.workbook
+
+alignment_center = { horizontal: :center, vertical: :center, wrap_text: true }
+alignment_left = { horizontal: :left, vertical: :center, wrap_text: true }
+alignment_right = { horizontal: :right, vertical: :center, wrap_text: true }
+td = { sz: 9, border: Axlsx::STYLE_THIN_BORDER, alignment: { vertical: :center } }
+th = { sz: 10, bg_color: "CCFFFF", b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: alignment_center }
+money = { format_code: '#,##0.00' }
+date = { format_code: 'DD.MM.YYYY' }
+title = { sz: 12, b: true, alignment: alignment_center }
+require_field = { bg_color: "FF0000" }
+
+@require_field = wb.styles.add_style require_field
+@style_title = wb.styles.add_style title
+@style_th = wb.styles.add_style th
+@style_td = wb.styles.add_style td
+@style_td_title = wb.styles.add_style td.merge(b: true, alignment: alignment_center)
+@style_td_center = wb.styles.add_style td.merge(alignment: alignment_center)
+@style_td_right = wb.styles.add_style td.merge(alignment: alignment_right)
+@style_td_wrap = wb.styles.add_style td.merge(alignment: { wrap_text: true, vertical: :center })
+@style_td_money = wb.styles.add_style td.merge(money)
+@style_td_date = wb.styles.add_style td.merge(date)
+@item_style = wb.styles.add_style font_name: 'Courier', alignment: alignment_center
+@item_style_left = wb.styles.add_style font_name: 'Courier', alignment: alignment_left
+
+
+wb.add_worksheet(name: "Закупки") do |sheet|
+  CSV.foreach(File.join('db', 'csv', Setting.company, 'import_plan_lots_example.csv'), col_sep: ';') do |ex_row|
+    sheet.add_row ex_row
+  end
+
+  require_fields = ImportLot.require_fields
+
+  sheet.rows[0].height = 0
+  sheet.rows[1].cells.each_with_index do |cell, index|
+    cell.style = @require_field if require_fields.include?(sheet[0][index].value.try(:to_sym))
+  end
+end
+
+wb.add_worksheet(name: "Справочники") do |sheet|
+  col_count = 6
+  sheet.add_row([
+      'Предметы закупок',
+      'Способы закупок',
+      'Адреса ЭТП',
+      'Виды закупаемой продукции',
+      'Направления закупок',
+      'Источники финансирования'
+    ],
+    style: @style_th)
+
+  dics = [
+    Dictionary.subject_types,
+    Dictionary.tender_types,
+    Dictionary.etp_addresses,
+    Dictionary.product_types,
+    Direction.order(:position),
+    Dictionary.financing_sources
+  ]
+
+  max_rows = dics.map(&:count).max
+  max_rows.times { sheet.add_row Array.new(col_count) }
+
+  dics.each_with_index do |rel, col_index|
+    rel.each_with_index do |d, row_index|
+      sheet.rows[row_index + 1].cells[col_index].value = d.name
+    end
+  end
+end
+
+wb.add_worksheet(name: "Подразделения") do |sheet|
+  filter_where = 'cast(is_customer as integer) = 1 or cast(is_organizer as integer) = 1'
+  root_deps = Department.roots.where(filter_where).order(:position)
+  root_names = root_deps.pluck(:name)
+  root_ids = root_deps.pluck(:id)
+
+  sheet.add_row(root_names, style: @style_th)
+
+  deps = ->(root_id) { Department.descendants_of(root_id).where(filter_where) }
+
+  max_rows = root_ids.map { |root_id| deps.call(root_id).count }.max
+  max_rows.times { sheet.add_row Array.new(root_ids.size) }
+
+  root_ids.each_with_index do |root_id, col_index|
+    deps.call(root_id).order(:name).each_with_index do |d, row_index|
+      sheet.rows[row_index + 1].cells[col_index].value = d.name
+    end
+  end
+
+  widths = root_ids.map { 50 }
+  sheet.column_widths *widths
+end
+
+wb.add_worksheet(name: "Курирующие подразделения") do |sheet|
+  deps = Department.monitor_services.order(:name)
+
+  deps.each { |d| sheet.add_row [d.name] }
+end
+
+wb.add_worksheet(name: "Потребители") do |sheet|
+  deps = Department.consumers.order(:name)
+
+  deps.each { |d| sheet.add_row [d.name] }
+end

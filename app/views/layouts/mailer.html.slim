@@ -1,0 +1,16 @@
+doctype strict
+html
+  head
+    meta http-equiv="Content-Type" content="text/html; charset=utf-8"
+    meta name="viewport" content="width=device-width"
+    = stylesheet_link_tag "foundation_emails"
+  body
+    table.body.background-color-blue data-made-with-foundation=""
+      tr
+        td.center align="center" valign="top"
+          center.container-small
+            wrapper class="header"
+              container
+                == yield
+                h6
+                  small = t('.robot')

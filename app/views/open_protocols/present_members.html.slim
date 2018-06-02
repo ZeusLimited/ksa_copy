@@ -1,0 +1,3 @@
+= fields_for @open_protocol do |f|
+  = f.fields_for :open_protocol_present_members, @open_protocol.initialized_present_members do |builder|
+    = render "open_protocol_present_members_fields", builder: builder

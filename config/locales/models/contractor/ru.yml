@@ -1,0 +1,46 @@
+ru:
+  contractor_status:
+    orig: "Новый"
+    active: "Актуальный"
+    old: "Старый"
+    inactive: "Не действующий"
+  contractor_form:
+    person: "Физическое лицо"
+    company: "Юридическое лицо"
+    foreign: "Иностранное лицо"
+    businessman: "Предприниматель"
+  activerecord:
+    models:
+      contractor: 'Контрагент'
+    attributes:
+      contractor:
+        name: 'Наименование'
+        fullname: 'Полное наименование'
+        ownership_id: 'Форма собственности'
+        inn: 'ИНН'
+        kpp: 'КПП'
+        ogrn: 'ОГРН'
+        okpo: 'ОКПО'
+        form: 'Вид контрагента'
+        legal_addr: 'Юридический адрес'
+        status: 'Статус'
+        user_id: 'Автор'
+        is_resident: "Резидент"
+        is_dzo: "ДЗО"
+        is_sme: "Субъект МСП?"
+        jsc_form_id: 'Форма АО'
+        sme_type_id: 'Тип МСП'
+        oktmo: 'ОКТМО'
+        unfair?: 'Недобросовестный?'
+        reg_date: 'Дата регистрации юр. лица'
+        parent_id: 'Головное подразделение'
+    errors:
+      models:
+        contractor:
+          attributes:
+            base:
+              uniq_inn_kpp: "Контрагент с такими ИНН и КПП уже существует"
+            inn:
+              uniq_inn: "уже есть контрагент с таким номером"
+            name:
+              with_quots: "Кавычки запрещены"

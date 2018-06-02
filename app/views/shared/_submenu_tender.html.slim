@@ -1,0 +1,41 @@
+ul.nav.nav-pills
+  li = link_to_session_or_default 'Вернуться к списку', :tenders_filter_path, tenders_path
+  = drop_down 'Закупка' do
+    = my_menu_item 'Основные сведения', tender_path(tender), current_page?(tender_path(tender))
+    = my_menu_item 'Электронные документы', tender_tender_documents_path(tender), current_page?(tender_tender_documents_path(tender))
+    = my_menu_item 'Привлечённые эксперты', tender_experts_path(tender), current_page?(tender_experts_path(tender))
+    = my_menu_item t('.data_map'), tender_tender_data_map_path(tender), current_page?(tender_tender_data_map_path(tender))
+  /   = my_menu_item "Требования к участникам",
+  /     show_bidder_requirements_tender_path(tender),
+  /     current_page?(show_bidder_requirements_tender_path(tender))
+  /   = my_menu_item "Требования к заявкам",
+  /     show_offer_requirements_tender_path(tender),
+  /     current_page?(show_offer_requirements_tender_path(tender))
+  - unless tender.lots_with_status?(Constants::LotStatus::NEW)
+    = drop_down "Журналы" do
+      = menu_item 'Запросы на разъяснение', tender_tender_requests_path(tender)
+    = drop_down 'Предложения' do
+      = my_menu_item 'Участники',
+        tender_bidders_path(tender),
+        current_page?(tender_bidders_path(tender))
+      = my_menu_item 'Карта предложений',
+        map_by_lot_tender_bidders_path(tender),
+        current_page?(map_by_lot_tender_bidders_path(tender))
+    = drop_down "Протоколы" do
+      - if can?(:show_protocols, tender)
+        - if tender.open_protocol
+          = menu_item "Вскрытия конвертов", tender_open_protocol_path(tender, tender.open_protocol)
+          - unless Constants::TenderTypes::FAST.include?(tender.tender_type_id)
+            = menu_item "Рассмотрения", tender_review_protocols_path(tender)
+            - if tender.lots.rebid_only.exists?
+              = menu_item "Переторжки", tender_rebid_protocols_path(tender)
+        - else
+          - if can?(:create, @tender.build_open_protocol)
+            = menu_item "Создать протокол вскрытия конвертов", new_tender_open_protocol_path(tender)
+      = menu_item "Выбора победителя", tender_winner_protocols_path(tender)
+      - if tender.result_protocols.exists? || (can?(:tender_auction?, tender) && can?(:have_lots_for_result_protocol?, tender))
+        = menu_item "О результатах", tender_result_protocols_path(tender)
+      / = menu_item 'Экспертиза', tender_expert_opinions_path(tender)
+    - if tender.lots.in_status(Constants::LotStatus::HELD_WITH_FAIL).exists?
+      = menu_item 'Договоры', contracts_tender_path(tender)
+    = render 'shared/submenu_tender/standard_form'

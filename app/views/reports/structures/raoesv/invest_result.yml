@@ -1,0 +1,37 @@
+--- # разделы
+- name: I. СОСТОЯВШИЕСЯ ЗАКУПКИ С ПОДВЕДЕННЫМИ ИТОГАМИ
+  children:
+  - name: Расходы на новое строительство и расширение
+    children:
+    - name: Закупка услуг под программу нового строительства и расширения
+      filter: { direction_id: <%= yaml_directions['ks'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг под программу  нового строительства и расширения:'
+    - name: Закупка оборудования и материалов под программу нового строительства и расширения
+      filter: { direction_id: <%= yaml_directions['ks'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого оборудования и материалов под программу нового строительства и расширения:'
+    sum_name: ! 'Итого под программу нового строительства и расширения:'
+  - name: Расходы на ТПиР
+    children:
+    - name: Закупки услуг под программу ТПиР
+      filter: { direction_id: <%= yaml_directions['tpir'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг под программу ТПиР:'
+    - name: Закупки материалов под программу ТПиР
+      filter: { direction_id: <%= yaml_directions['tpir'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов под программу ТПиР:'
+    sum_name: ! 'Итого под программу ТПиР:'
+  - name: Расходы в области информационных технологий (инвестиции)
+    children:
+    - name: Закупки услуг в области информационных технологий (инвестиции
+      filter: { direction_id: <%= yaml_directions['it_invest'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг в области информационных технологий (инвестиции:'
+    - name: Закупки материалов и оборудования на эксплуатационные расходы
+      filter: { direction_id: <%= yaml_directions['it_invest'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов в области информационных технологий (инвестиции):'
+    sum_name: ! 'Итого в области в области информационных технологий (инвестиции):'
+  - name: Расходы на НИОКР и прочие консультативные услуги (инвестиции)
+    filter: { direction_id: <%= yaml_directions['niokr_invest'] %> }
+    sum_name: ! 'Итого НИОКР и прочие консультативные услуги:'
+  - name: Расходы на инновационную и высокотехнологичную продукцию (инвестиции)
+    filter: { direction_id: <%= yaml_directions['inivp_invest'] %> }
+    sum_name: ! 'Итого ИНиВП:'
+  sum_name: ! 'Итого по разделу I:'

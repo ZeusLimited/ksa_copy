@@ -1,0 +1,71 @@
+.page-header
+  h1 Отчёты
+
+.row data-no_turbolink=""
+  .span5
+    .well
+      ul.nav.nav-list.reports
+        li.nav-header Раздел I. ГКПЗ
+
+        = rep_link 1, Reports::Gkpz::Gkpz
+        = rep_link 2, Reports::Gkpz::GkpzNiokr
+        = rep_link 3, Reports::Gkpz::Checklist
+        = rep_link 4, Reports::Gkpz::ExplanationSingleSource
+        = rep_link 5, Reports::Gkpz::GkpzExplanation
+        / = rep_link 6, Reports::Gkpz::GkpzOos
+        = rep_link 6, Reports::Gkpz::GkpzOosCommon
+        = rep_link 7, Reports::Gkpz::PlanEisInivp
+
+        li.nav-header Раздел II. Регламент ГКПЗ и отчётности
+
+        = rep_link 1, Reports::Reglament::InvestResult
+        = rep_link 2, Reports::Reglament::CurrentResult
+        = rep_link 3, Reports::Reglament::HighTechResult
+        = rep_link 4, Reports::Reglament::TenderTypesResult
+        = rep_link 5, Reports::Reglament::TotalExplanation
+        = rep_link 6, Reports::Reglament::SmeTable
+        = rep_link 7, Reports::Reglament::IntermediateForm
+        = rep_link 8, Reports::Reglament::MounthlyAnalysis
+        = rep_link 9, Reports::Reglament::ConsolidatedAnalysis
+        = rep_link 10, Reports::Reglament::InvestSession
+        = rep_link 11, Reports::Reglament::PresentationTables
+        = rep_link 12, Reports::Reglament::HundredMillionsTenders
+
+        li.nav-header Раздел III. Минэнерго
+
+        = rep_link 1, Reports::Minenergo::Arm51635
+        = rep_link 2, Reports::Minenergo::Arm51632
+        = rep_link 3, Reports::Minenergo::Arm51633
+
+        li.nav-header Раздел IV. ПУИ
+
+        = rep_link 1, Reports::Pui::CurrentOperation
+        = rep_link 2, Reports::Pui::EffectOperation
+
+        li.nav-header Раздел V. Разное
+
+        = rep_link 1, Reports::Other::TemplateGeneration
+        = rep_link 2, Reports::Other::Rosstat
+        = rep_link 3, Reports::Other::PlanStarts
+        = rep_link 3.1, Reports::Other::StartForm
+        = rep_link 3.2, Reports::Other::ExecuteGkpz
+        = rep_link 3.3, Reports::Other::ExecuteGkpzImp
+        = rep_link 4, Reports::Other::TenderBidders
+        = rep_link 5, Reports::Other::ExpectedEconomicEffect
+        = rep_link 6, Reports::Other::PurchaseFromSme
+        = rep_link 7, Reports::Other::VostekTenders
+        = rep_link 8, Reports::Other::InovationProductAmount
+        = rep_link 9, Reports::Other::SuccessStory
+        = rep_link 10, Reports::Other::AgentsCommission
+        /= rep_link 11, Reports::Other::TendersEfficiency
+        = rep_link 11, Reports::Other::TendersEfficiencyV2
+        = rep_link 13, Reports::Other::TermsViolation
+
+        = rep_link 17.1, Reports::Other::LotByWiner
+        = rep_link 17.2, Reports::Other::LotByWinnerFlat
+        = rep_link 18, Reports::Other::EisTendersResult
+        = rep_link 35, Reports::Other::OverdueContract
+
+
+  .span7
+    #rep_form

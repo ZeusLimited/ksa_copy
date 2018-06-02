@@ -1,0 +1,39 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 Оферты участника
+
+= render 'tenders/tender_header', tender: tender
+
+h3 = bidder.link_to_contractor
+- @lots.each do |lot|
+  - lot_offers = @bidder.offers.for_lot(lot.id).order("num, version desc")
+
+  = field_set_tag lot.name_with_cust, id: dom_id(lot) do
+    table.table.table-bordered.table-nonfluid
+      thead
+        tr
+          th.span2 Тип
+          th width='100%' Оферты
+          th Предварительная
+          th Окончательная
+          th colspan="3" Действия участника
+          th.column-icon
+      tbody
+        - nums = lot_offers.map(&:num).uniq.sort
+        - nums.each do |num|
+          = render 'list', tender: @tender, bidder: @bidder, lot_offers: lot_offers, lot: lot,  num: num
+        tr
+          td colspan="8"
+            = link_to 'Новая оферта',
+              new_tender_bidder_offer_path(@tender, @bidder, lot_id: lot.id),
+              class: 'btn btn-primary pull-right'
+
+p
+  = link_to tender_bidder_offers_path(@tender, @bidder.previous), class: 'btn btn-inverse pull-left' do
+    i.icon-arrow-left
+    | Предыдущий участник
+  - if @bidder.next
+    = link_to tender_bidder_offers_path(@tender, @bidder.next), class: 'btn btn-inverse pull-right' do
+      | Следующий участник
+      i.icon-arrow-right

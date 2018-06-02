@@ -1,0 +1,22 @@
+ru:
+  activerecord:
+    models:
+      result_protocol: 'Протокол о результатах'
+    attributes:
+      result_protocol:
+        num: 'Номер протокола'
+        sign_date: 'Дата подписания'
+        sign_city: 'Город'
+        tender_id: 'Закупка'
+    errors:
+      models:
+        result_protocol:
+          attributes:
+            base:
+              must_have_lots: 'Должен быть выбран хотя бы один лот!'
+            num:
+              must_uniq: "в этой закупке уже есть протокол с таким номером"
+            sign_date:
+              already_use: "уже используется в одном из протоколов для выбранных лотов"
+              less_then_winner_date: "не может быть раньше даты вступления в силу протокола ВП"
+              equal_winner_date: "должна равняться дате вступления в силу протокола ВП"

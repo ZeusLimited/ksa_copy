@@ -1,0 +1,24 @@
+<%= field_set_tag nil, class: "coloring tender_content_offers" do %>
+  <%= f.hidden_field :_destroy %>
+
+  <div class="row">
+    <div class="span1">
+      <%= f.input :num, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span5">
+      <%= f.input :name, as: :text, input_html: {rows: 2, class: 'content-offer-name input-block-level'} %>
+    </div>
+    <div class="span3">
+      <%= f.association :content_offer_type, collection: Dictionary.content_offer_types, include_blank: false, input_html: { class: 'content-offer-type input-block-level' } %>
+    </div>
+    <div class="span1">
+      <label>&nbsp;</label>
+      <%= content_tag :a, "Справочник", href: "#", class: 'btn select_content_offer', data: {toggle: 'modal'} %>
+    </div>
+    <div class="span2">
+      <label>&nbsp;</label>
+      <%= link_to content_tag(:i, '', class: 'icon-minus') + " Удалить", '#', class: "remove_content_offer pull-right btn btn-danger" %>
+    </div>
+  </div>
+
+<% end %>

@@ -1,0 +1,9 @@
+ru:
+  account:
+    profile:
+      edit:
+        ldap: 'Из домена'
+        header: 'Редактирование профиля'
+      show:
+        change_password: 'Сменить пароль'
+        update_photo: 'Обновить фото'

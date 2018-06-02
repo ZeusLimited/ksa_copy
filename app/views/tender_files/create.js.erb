@@ -1,0 +1,22 @@
+<% if @tender_file.new_record? %>
+  alert("Ошибка при закачке файла: <%= j @tender_file.errors.full_messages.join(', ').html_safe %>");
+<% else %>
+  <% case @tender_file.area_id %>
+  <% when Constants::TenderFileArea::PLAN_LOT %>
+    <%= render "plan_lot", tender_file: @tender_file %>
+  <% when Constants::TenderFileArea::TENDER %>
+    <%= render "tender", tender_file: @tender_file %>
+  <% when Constants::TenderFileArea::BIDDER %>
+    <%= render "bidder", tender_file: @tender_file %>
+  <% when Constants::TenderFileArea::CONTRACT %>
+    <%= render "contract", tender_file: @tender_file %>
+  <% when Constants::TenderFileArea::PROTOCOL %>
+    <%= render "protocol", tender_file: @tender_file %>
+  <% when Constants::TenderFileArea::CONTRACTOR %>
+    <%= render "contractor", tender_file: @tender_file %>
+  <% when Constants::TenderFileArea::CONTRACTOR_SINGLE_SOURCE %>
+    <%= render "contract_single_source", tender_file: @tender_file %>
+  <% when Constants::TenderFileArea::ORDER %>
+    <%= render "order", tender_file: @tender_file %>
+  <% end %>
+<% end %>

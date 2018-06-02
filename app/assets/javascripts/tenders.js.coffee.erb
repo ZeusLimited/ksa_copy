@@ -1,0 +1,178 @@
+link_select_draft = ''
+link_select_eval = ''
+link_select_content_offer = ''
+@validate_copy_tenders_form = ->
+  if $('#lots_for_copy').find('input:checkbox:checked').length == 0
+    alert 'Не выбрано ни одного лота'
+    return false
+  else
+    return true
+
+$(document).on 'click', '.history_link', (event) ->
+  link = $(this)
+  $.get "/histories", { type: link.data('item'), item_id: link.data('id') }, (data) ->
+    $('#history').html(data)
+
+$(document).on 'click', '.remove_specification_fields', (event) ->
+  if $(this).closest('table').children('tbody.specification:visible').length > 1
+    $(this).closest('tbody.specification').find('input:hidden:first-of-type').val('1')
+    $(this).closest('tbody.specification').hide 'blind'
+  else
+    alert 'У лота должна быть хотя бы одна спецификация!'
+  event.preventDefault()
+
+load_status = ->
+  if $('#b2b_integration_status').length
+    $.get $('#b2b_integration_status').data('url')
+
+$(document).on 'click', '#b2b_tenders', (event) ->
+  $.get $(this).data('url')
+  $(this).hide()
+  event.preventDefault()
+
+$(document).on 'click', 'a.control_row_to_show', (event) ->
+  $(this).closest('tbody').children('tr.hidden_row').removeClass('hidden_row')
+  $(this).closest('tr').addClass('hidden_row')
+  event.preventDefault()
+
+
+$(document).on 'click', '.add-to-cart-lots', (event) ->
+  link = $(this)
+  $.post '/cart_lots', { lot_id: $(this).data('lot-id') }, (data) ->
+    $('img', link).attr('src', "<%= asset_path('16bag_select.png') %>")
+    link.removeClass('add-to-cart-lots').addClass('remove-from-cart-lots')
+    # src = if data == 0 then "<%= asset_path('32cart.png') %>" else "<%= asset_path('32cart_select.png') %>"
+    # $('img', '.cart-lots').attr('src', src)
+    $('.cart-lots').children('span').html(data)
+  event.preventDefault()
+
+$(document).on 'click', '.remove-from-cart-lots', (event) ->
+  link = $(this)
+  url = '/cart_lots/' + link.data('lot-id')
+  $.ajax
+    url: url,
+    type: "DELETE",
+    dataType: "json"
+  .done (data) ->
+    $('img', link).attr('src', "<%= asset_path('16bag.png') %>")
+    link.removeClass('remove-from-cart-lots').addClass('add-to-cart-lots')
+    # src = if data == 0 then "<%= asset_path('32cart.png') %>" else "<%= asset_path('32cart_select.png') %>"
+    # $('img', '.cart-lots').attr('src', src)
+    $('.cart-lots').children('span').html(data)
+  event.preventDefault()
+
+$(document).on 'click', '.select_draft', (event) ->
+  link_select_draft = $(this)
+  $('#modal_draft').modal()
+  event.preventDefault()
+
+$(document).on 'click', '.select_eval', (event) ->
+  link_select_eval = $(this)
+  $('#modal_eval').modal()
+  event.preventDefault()
+
+$(document).on 'click', '.select_content_offer', (event) ->
+  link_select_content_offer = $(this)
+  $('#modal_content_offer').modal()
+  event.preventDefault()
+
+$(document).on 'click', 'form .remove_lot_fields', (event) ->
+  if $('fieldset.lot:visible').length > 1
+    $(this).closest('fieldset').children('input:hidden:first').val('1')
+    $(this).closest('fieldset').hide 'blind', coloring
+  else
+    alert 'У закупки должен быть хотя бы один лот!'
+  event.preventDefault()
+
+$(document).on 'click', 'form .remove_draft_criterion', (event) ->
+  $(this).closest('fieldset').children('input:hidden').val('1')
+  $(this).closest('fieldset').hide 'blind', ->
+    coloring()
+  event.preventDefault()
+
+$(document).on 'click', 'form .remove_eval_criterion', (event) ->
+  $(this).closest('fieldset').children('input:hidden').val('1')
+  $(this).closest('fieldset').hide 'blind', ->
+    coloring()
+  event.preventDefault()
+
+$(document).on 'click', 'form .remove_content_offer', (event) ->
+  $(this).closest('fieldset').children('input:hidden').val('1')
+  $(this).closest('fieldset').hide 'blind', ->
+    coloring()
+  event.preventDefault()
+
+$(document).on 'click', 'form .remove_expert', (event) ->
+  $(this).closest('fieldset').children('input:hidden').val('1')
+  $(this).closest('fieldset').hide 'blind', coloring
+  event.preventDefault()
+
+$(document).on 'click', '#btn_select_draft', (event) ->
+  link_select_draft.closest('div.row').find('.draft_name').val($('input[name=draft]:radio:checked').val())
+  $('#modal_draft').modal('hide')
+
+$(document).on 'click', '#btn_select_eval', (event) ->
+  link_select_eval.closest('div.row').find('.eval_name').val($('input[name=eval]:radio:checked').val())
+  $('#modal_eval').modal('hide')
+
+$(document).on 'click', '#btn_select_content_offer', (event) ->
+  link_select_content_offer.closest('div.row').find('.content-offer-name').val($('input[name=content_offer]:radio:checked').val())
+  link_select_content_offer.closest('div.row').find('.content-offer-type').select2("val", $('input[name=content_offer]:radio:checked').data('type-id'))
+  $('#modal_content_offer').modal('hide')
+
+$(document).on 'change', '#tender_department_id', (event) ->
+  org_id = $(this).val()
+
+  $('#tender_commission_id').select2("val", "")
+  $('#tender_commission_id').empty()
+  $('#tender_commission_id').append($('<option value=""></option>'))
+
+  for com in gon.commissions when `com.dep_id == org_id`
+    $('#tender_commission_id').append($('<option></option>').attr('value', com.id).text(com.name))
+
+$(document).on 'change', '#tender_etp_address_id', (event) ->
+  $('#tender_etp_num').prop("disabled", $(this).val() == "<%= Constants::EtpAddress::NOT_ETP %>")
+
+document.addEventListener "turbolinks:load", ->
+
+  multi_for_users()
+  load_status()
+
+  $('.tender-form').submit (event) ->
+    event.preventDefault()
+    form = this
+    vals = $('select.lot-sme-type').map -> $(this).val()
+    if $('#tender_public').val() == 'false' && $.inArray("", vals) != -1
+      $('#dialog-confirm').html("<p>Закупка проводится не у МСП?</p>")
+      $('#dialog-confirm').dialog
+        resizable: false
+        modal: true
+        buttons:
+          "Да": ->
+            $(this).dialog('close')
+            form.submit()
+          "Нет": ->
+            $('.tender_sme_type').addClass('error')
+            $(this).dialog('close')
+    else
+      form.submit()
+
+  $('.autocomplete_contractor_name').autocomplete
+    source: '/contractors/search'
+    select: (event, ui) ->
+      $(".autocomplete_contractor_id").val(ui.item.id)
+
+  $('.timepicker').timepicker
+    showMeridian: false
+    minuteStep: 5
+    defaultTime: false
+
+  $('.subscribe_send_timepicker').timepicker
+    showMeridian: false
+    minuteStep: 30
+    defaultTime: '09:30'
+
+  $('#tender_etp_address_id').change()
+
+  if $(location).attr('hash') == '#modal-files'
+    $('#modal_files').modal()

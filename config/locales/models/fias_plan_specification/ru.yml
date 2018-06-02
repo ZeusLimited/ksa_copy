@@ -1,0 +1,18 @@
+ru:
+  activerecord:
+    models:
+      fias_plan_specification: ''
+    attributes:
+      fias_plan_specification: &fias_plan_specification
+        fias_name: "Адрес"
+        fias_okato: "ОКАТО"
+      plan_specifications/fias_plan_specifications:
+        <<: *fias_plan_specification
+    errors:
+      models:
+        fias_plan_specification: &fias_plan_specification
+          attributes:
+            fias_okato:
+              non_okato: "Для данного адреса ОКАТО не существует, уточните адрес (добавьте номер дома, либо ограничьтесь городом)"
+            fias_name:
+              not_exist: 'не найден или не заполнен'

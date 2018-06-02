@@ -1,0 +1,21 @@
+render 'thead'
+
+@result.each do |row|
+  next unless row['stage']
+  offers_array = row['offers_arr'].split(';')
+  columns = @formuls['common'].merge(@formuls[row['stage']]).sort.to_h
+  values = columns.values.map.with_index(1) do |val, column|
+    if val[:formula]
+      val[:formula].call(column: column,
+                         row_val: row,
+                         row: @sheet.rows.size + 1,
+                         add_columns_size: columns.size,
+                         offers_array: offers_array)
+    elsif val[:value]
+      val[:value].call(row)
+    else
+      nil
+    end
+  end
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end

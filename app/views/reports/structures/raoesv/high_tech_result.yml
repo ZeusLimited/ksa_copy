@@ -1,0 +1,82 @@
+--- # структура для очётов
+- name: I. СОСТОЯВШИЕСЯ ЗАКУПКИ С ПОДВЕДЕННЫМИ ИТОГАМИ
+  children:
+  - name: Энергоремонтное производство
+    children:
+    - name: Закупка услуг под программу энергоремонтного производства
+      filter: { direction_id: <%= yaml_directions['erp'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг под программу энергоремонтного производства:'
+    - name: Закупка оборудования и материалов под программу энергоремонтного производства
+      filter: { direction_id: <%= yaml_directions['erp'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого оборудования и материалов под программу энергоремонтного производства:'
+    sum_name: ! 'Итого под программу энергоремонтного производства:'
+  - name: Капитальное строительство
+    children:
+    - name: Закупка услуг под программу капитальное строительство
+      filter: { direction_id: <%= yaml_directions['ks'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг под программу капитальное строительство:'
+    - name: Закупка материалов и оборудования под программу капитальное строительство
+      filter: { direction_id: <%= yaml_directions['ks'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов и оборудования под программу капитальное строительство:'
+    sum_name: ! 'Итого под программу капитального строительства:'
+  - name: Техническое перевооружение и реконструкция
+    children:
+    - name: Закупка услуг под программу технического перевооружения и реконструкции
+      filter: { direction_id: <%= yaml_directions['tpir'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг под программу технического перевооружения и реконструкции:'
+    - name: Закупка материалов и оборудования под программу технического перевооружения и реконструкции
+      filter: { direction_id: <%= yaml_directions['tpir'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов под программу технического перевооружения и реконструкции:'
+    sum_name: ! 'Итого под программу технического перевооружения и реконструкции:'
+  - name: Закупки в области информационных технологий (инвестиции)
+    children:
+    - name: Закупки услуг в области информационных технологий
+      filter: { direction_id: <%= yaml_directions['it_invest'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг в области информационных технологий:'
+    - name: Закупки материалов в области информационных технологий
+      filter: { direction_id: <%= yaml_directions['it_invest'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов в области информационных технологий:'
+    sum_name: ! 'Итого в области информационных технологий:'
+  - name: НИОКР (инвестиции)
+    filter: { direction_id: <%= yaml_directions['niokr_invest'] %> }
+    sum_name: ! 'Итого НИОКР (инвестиции):'
+  - name: ИНиВП (инвестиции)
+    filter: { direction_id: <%= yaml_directions['inivp_invest'] %> }
+    sum_name: ! 'Итого ИНиВП (инвестиции):'
+  - name: Закупки в области информационных технологий (прочие)
+    children:
+    - name: Закупки услуг в области информационных технологий (прочие)
+      filter: { direction_id: <%= yaml_directions['it'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг в области информационных технологий (прочие):'
+    - name: Закупки материалов в области информационных технологий (прочие)
+      filter: { direction_id: <%= yaml_directions['it'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов в области информационных технологий (прочие):'
+    sum_name: ! 'Итого в области информационных технологий (прочие):'
+  - name: Эксплуатационные расходы
+    children:
+    - name: Закупки услуг на эксплуатационные расходы
+      filter: { direction_id: <%= yaml_directions['er'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг на эксплуатационные расходы:'
+    - name: Закупки материалов и оборудования на эксплуатационные расходы
+      filter: { direction_id: <%= yaml_directions['er'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов на эксплуатационные расходы:'
+    sum_name: ! 'Итого в области эксплуатационных расходов:'
+  - name: Закупка топлива
+    filter: { direction_id: <%= yaml_directions['fuel'] %> }
+    sum_name: ! 'Итого топливо:'
+  - name: НИОКР и прочие консультативные услуги
+    filter: { direction_id: <%= yaml_directions['niokr'] %> }
+    sum_name: ! 'Итого НИОКР и прочие консультативные услуги:'
+  - name: ИНиВП (прочие)
+    filter: { direction_id: <%= yaml_directions['inivp'] %> }
+    sum_name: ! 'Итого ИНиВП (прочие):'
+  - name: Продукция административно-хозяйственного назначения
+    filter: { direction_id: <%= yaml_directions['ahn'] %> }
+    sum_name: ! 'Итого Продукция административно-хозяйственного назначения:'
+  - name: Общесистемные закупки
+    filter: { direction_id: <%= yaml_directions['osu'] %> }
+    sum_name: ! 'Итого Общесистемные закупки:'
+  - name: Прочие закупки
+    filter: { direction_id: <%= yaml_directions['other'] %> }
+    sum_name: ! 'Итого Прочие закупки:'
+  sum_name: ! 'Итого по разделу I:'

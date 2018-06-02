@@ -1,0 +1,13 @@
+ru:
+  account:
+    subscribes:
+      create_list:
+        notice: 'Подписки успешно добавлены!'
+      edit_list:
+        empty_collection: 'Не выбрано ни одного лота'
+      update_list:
+        notice: 'Выбранные подписки успешно обновлены!'
+        empty_collection: 'Не выбрано ни одного лота'
+      delete_list:
+        notice: 'Выбранные подписки успешно удалены!'
+        empty_collection: 'Не выбрано ни одного лота'

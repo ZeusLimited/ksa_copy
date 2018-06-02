@@ -1,0 +1,15 @@
+render 'thead'
+
+begin_date = @report.date_begin.to_date
+end_date = @report.date_begin.to_date.end_of_quarter
+end_date =  @report.date_end.to_date if end_date > @report.date_end.to_date
+
+begin
+  render 'part_row', name: "#{(end_date.month / 3.0).ceil} квартал #{end_date.year}", begin_date: begin_date, end_date: end_date
+  if @report.date_begin.to_date != begin_date
+    render 'part_row', name: "Итого за все предыдущие периоды", begin_date: @report.date_begin.to_date, end_date: end_date
+  end
+
+  begin_date = end_date + 1.day
+  end_date = (end_date + 1.months).end_of_quarter > @report.date_end.to_date ? @report.date_end.to_date : (end_date + 1.months).end_of_quarter
+end while begin_date < @report.date_end.to_date

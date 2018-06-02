@@ -1,0 +1,30 @@
+/ - gg
+td style=plan_lot.status_stylename_html title=plan_lot.status_fullname
+  = link_to_if plan_lot.preselection?, plan_lot.full_num, preselection_info_plan_lot_path(plan_lot)
+td
+  - if plan_lot.plan_specifications.size > 1
+    = content_tag :i,
+        '',
+        class: 'icon-list pull-right',
+        data: { toggle: 'tooltip' },
+        title: 'Лот имеет больше 1-ой спецификации'
+  - if params[:plan_filter]
+    = bold_words(plan_lot.lot_name, params[:plan_filter][:name])
+  - else
+    = plan_lot.lot_name
+td = t("plan_lot_state.#{plan_lot.state}")
+td.right-cell = p_money plan_lot.cost
+td = plan_lot.gkpz_year
+td *plan_lot.announce_attributes
+  - if plan_lot.announce_attributes[:class] == 'undeclared-with-comment'
+    = link_to_popover(plan_lot)
+  - else
+    = plan_lot.announce_date
+td
+  == abbr(plan_lot.tender_type_name_with_pkfo, plan_lot.tender_type_fullname_with_pkfo)
+  | &nbsp;
+  == plan_lot.etp
+td == plan_lot.customer_shortnames.join('<br>')
+td *control_attributes(plan_lot.control_user_fio_short, plan_lot.control_created_at.try(:getlocal, Time.zone.utc_offset))
+  = abbr(plan_lot.department_shortname, plan_lot.department_fullname)
+td = link_icon_title 'icon-info-sign', 'Просмотр', (plan_lot.department_id ? plan_lot : plan_innovation_path(plan_lot))

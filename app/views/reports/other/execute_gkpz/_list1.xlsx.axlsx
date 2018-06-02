@@ -1,0 +1,24 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 4)
+@outlines = []
+@column_styles = {}
+@column_styles_ei = {}
+
+@columns = Reports::Other::ExecuteGkpz::COLUMNS
+@column_styles['legal'] = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@column_styles['sum'] = @columns.values.map { |c| @styles[c[:sum_style]] }
+
+@columns_ei = Reports::Other::ExecuteGkpz::COLUMNS_EI
+@column_styles_ei['legal'] = @columns_ei.values.map { |c| @styles[c[:style]] }
+@column_types_ei = @columns_ei.values.map { |c| c[:type] }
+@column_styles_ei['sum'] = @columns_ei.values.map { |c| @styles[c[:sum_style]] }
+
+@simple_sheet.add_row_title @report.row_title('report_title1'), style: @styles[:title_left], columns_count: 2
+@simple_sheet.add_row_title('на ' + @report.date_gkpz_on_state, style: @styles[:text_left], columns_count: 1)
+render 'main_table'
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+
+@simple_sheet.change_column_widths(@widths)

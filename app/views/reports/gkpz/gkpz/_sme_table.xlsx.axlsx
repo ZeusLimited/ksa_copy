@@ -1,0 +1,3 @@
+@report.sme_groups.each do |group|
+  render 'group_sme_rows', group: group
+end

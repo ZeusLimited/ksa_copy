@@ -1,0 +1,13 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+@number_sheet = 0
+
+wb.add_worksheet(name: "Свод") do |sheet|
+  render 'list1', sheet: sheet
+end
+
+Reports::Other::EisTendersResult::FILTERS.each_with_index do |filter, index|
+  wb.add_worksheet(name: filter[:name]) do |sheet|
+    render 'list2', sheet: sheet, number_sheet: index + 2, filter: filter.reject { |k, v| k == :name }
+  end
+end

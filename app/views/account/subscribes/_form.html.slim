@@ -1,0 +1,33 @@
+= simple_form_for @subscribe_form, url: url do |f|
+
+  .row
+    .span6
+      = f.input :theme, input_html: { class: 'input-block-level' }
+
+  = field_set_tag t('.actions') do
+    .row
+      = f.simple_fields_for :subscribe_actions do |sa|
+        .span2
+          = sa.input :_destroy,
+            label: sa.object.action_name,
+            as: :boolean,
+            checked_value: false,
+            unchecked_value: true,
+            input_html: { checked: false }
+          = sa.hidden_field :action_id
+
+  = field_set_tag t('.warnings') do
+    .row
+      = f.simple_fields_for :subscribe_warnings do |sa|
+        .span2
+          = sa.input :days_before,
+            label: sa.object.action_name,
+            input_html: { class: 'input-small' }
+          = sa.hidden_field :action_id
+
+  .form-actions.text-right
+    => link_to t('.cancel'), account_subscribes_path, class: 'btn btn-warning btn-large'
+    = f.submit t('.save'), class: 'btn btn-primary btn-large'
+
+= field_set_tag t('.lots') do
+  = render 'table_plan_lots/subscribes', subscribes: @subscribes

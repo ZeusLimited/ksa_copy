@@ -1,0 +1,9 @@
+render 'total_head'
+
+@report.total_groups.each do |row|
+  result = @report.total_rows(row[:filter].merge(tender_type_id: tender_types))
+  values = @columns.map do |c|
+    c[1][:value].call(result)
+  end
+  @sheet.add_row [row[:name], values].flatten, style: @column_styles, types: @column_types
+end

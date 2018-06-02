@@ -1,0 +1,12 @@
+ru:
+  activerecord:
+    models:
+      regulation_item: 'Пункты положения о закупке'
+    attributes:
+      regulation_item:
+        num: 'Номер пункта'
+        name: 'Наименование'
+        is_actual: 'Действующий?'
+        tender_type_ids: 'Способы закупок'
+        department_ids: 'Подразделение'
+        dictionary_ids: 'Учет в совокупном годовом объеме договоров с МСП (Постановление правительства №1352 от 11.12.2014)'

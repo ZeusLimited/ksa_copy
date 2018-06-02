@@ -1,0 +1,5 @@
+<%= content_tag :li, id: dom_id(page_file) do %>
+  <%= link_to "Удалить", page_file, method: :delete, remote: true, data: { confirm: "Вы уверены?" }, class: 'btn btn-mini btn-danger' %>
+  <%= link_to page_file.wikifile.url, page_file.wikifile.url %>
+  <%= hidden_field_tag 'page[page_file_ids][]', page_file.id, id: nil %>
+<% end %>

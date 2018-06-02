@@ -1,0 +1,71 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 Список договоров
+
+= render 'tenders/tender_header', tender: tender
+
+table.table.table-bordered
+  thead
+    tr
+      th.center-cell rowspan="2"
+      th.center-cell rowspan="2" Победитель
+      th.center-cell rowspan="2" Номер
+      th.center-cell rowspan="2" Дата
+      th.center-cell colspan="2" Стоимость
+      th.center-cell colspan="2" Период поставки
+      th.column-icon rowspan="2"
+      th.column-icon rowspan="2"
+      th.column-icon rowspan="2"
+      th.center-cell rowspan="2" Причины невыполнения 20 дневного срока на заключение договора
+      th.column-icon rowspan="2"
+    tr
+      th.center-cell без НДС
+      th.center-cell с НДС
+      th.center-cell Начало
+      th.center-cell Окончание
+  tbody
+  - @tender.lots.in_status(Constants::LotStatus::HELD_WITH_FAIL).each do |lot|
+    - lot.offers.wins.each_with_index do |offer, index|
+      tr
+        - if index == 0
+          td [rowspan=lot.offers.wins.count]
+            = abbr("<b class=\"nowrap\">#{lot.nums}</b>".html_safe, lot.name_with_cust)
+        td
+          = offer.bidder_contractor_name_short
+          br
+        - if offer.contract
+          td= offer.contract_num
+          td= offer.contract_confirm_date
+          td.right-cell= p_money offer.contract_cost
+          td.right-cell= p_money offer.contract_cost_nds
+          td= offer.contract_delivery_date_begin
+          td= offer.contract_delivery_date_end
+          td= link_show offer_contract_path(offer)
+          td= link_edit edit_offer_contract_path(offer)
+          td= link_delete offer_contract_path(offer)
+        - elsif lot.fail?
+          td.center-cell colspan="9"
+            / TODO Здесь писать решение протокола ВП
+            | Признан несостоявшимся.
+        - else
+          td.center-cell colspan="9"
+            = link_to_if can?(:create_contract, lot), 'Создать договор', new_offer_contract_path(offer)
+        td.td-reason = short_text(offer.non_contract_reason)
+        td
+          = link_icon_title_if offer.contract_date_expired?, 'icon-pencil', "Указать причину", "#contract_expired",
+            { data: { toggle: "modal",
+                      url_edit: edit_offer_contract_expired_path(offer),
+                      url_update: offer_contract_expired_path(offer) },
+              class: 'select_contract_expired' }
+
+
+#contract_expired.bootstrap-modal.modal.hide.fade
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 Причина невыполнения 20 дневного срока на заключение договора
+  .modal-body
+    = text_area_tag 'offer_non_contract_reason', nil, rows: 4, class: 'input-block-level'
+  .modal-footer
+    = button_tag "Отмена", class: "btn btn-warning input-large", data: { dismiss: "modal" }
+    = button_tag "Сохранить", id: "btn_save_expired", class: "btn btn-primary input-large"

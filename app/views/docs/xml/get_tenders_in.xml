@@ -1,0 +1,11 @@
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:WashOut">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:get_tenders soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+         <get_tenders_request xsi:type="urn:get_tenders_request">
+            <plan_lot_guid xsi:type="xsd:string">a6c6fea0a97859b2c1c7744b283eb7cc</plan_lot_guid>
+            <offer_id xsi:type="xsd:int">132539</offer_id>
+         </get_tenders_request>
+      </urn:get_tenders>
+   </soapenv:Body>
+</soapenv:Envelope>

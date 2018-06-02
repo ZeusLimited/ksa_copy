@@ -1,0 +1,7 @@
+.alert.alert-worning
+  = "Договор расторгнут #{termination.type_name.mb_chars.downcase} #{termination.cancel_date}."
+  = "Объем неисполненных обязательств - #{p_money termination.unexec_cost} руб.".html_safe
+  span.pull-right
+    = link_to 'изменить', edit_contract_contract_termination_path(contract)
+    ' |
+    = link_to 'удалить', contract_contract_termination_path(contract), method: :delete, data: { confirm: 'Вы уверены?' }

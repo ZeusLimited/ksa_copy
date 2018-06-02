@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @content_offer.name %>
+</p>
+
+<p>
+  <strong>Num:</strong>
+  <%= @content_offer.num %>
+</p>
+
+<p>
+  <strong>Position:</strong>
+  <%= @content_offer.position %>
+</p>
+
+<p>
+  <strong>Content offer type:</strong>
+  <%= @content_offer.content_offer_type_id %>
+</p>
+
+<%= link_to 'Edit', edit_content_offer_path(@content_offer) %> |
+<%= link_to 'Back', content_offers_path %>

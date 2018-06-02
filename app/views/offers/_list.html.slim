@@ -1,0 +1,48 @@
+tr
+  td = num == 0 ? "Основная" : "Альтернативная №#{num}"
+  td
+    ul.breadcrumb
+      - lot_offers_for_this_num = lot_offers.to_a.select { |a| a.num == num }
+      - lot_offers_for_this_num.each do |offer|
+        li
+          = link_to offer.type_name, tender_bidder_offer_path(tender, bidder, offer)
+          - unless offer == lot_offers_for_this_num.last
+            span.divider
+              i.icon-arrow-right
+  - last_offer = lot_offers_for_this_num.last
+  td.no-wrap.right-cell
+    strong = p_money(last_offer.original_cost)
+    | руб. без НДС
+    br
+    strong = p_money(last_offer.original_cost_nds)
+    | руб. c НДС
+    br
+    | НДС:
+    strong = number_to_percentage(last_offer.original_nds)
+  td.no-wrap.right-cell
+    = "<b>#{p_money(last_offer.final_cost)}</b> руб. без НДС".html_safe
+    br
+    = "<b>#{p_money(last_offer.final_cost_nds)}</b> руб. c НДС".html_safe
+    br
+    = "НДС: <b>#{p_money(last_offer.final_nds)}</b>%".html_safe
+  td
+    = link_to_if can?(:cud, tender) && last_offer && last_offer.type_id == Constants::OfferTypes::PICKUP,
+      content_tag(:i, '', class: 'icon-plus'),
+      control_tender_bidder_offers_path(tender, bidder, num: num, lot_id: lot.id),
+      'data-toggle' => 'tooltip', title: 'Добавление оферты'
+  td
+    = link_to_if can?(:cud, tender) && last_offer && last_offer.type_id != Constants::OfferTypes::PICKUP,
+      content_tag(:i, '', class: 'icon-briefcase'),
+      control_tender_bidder_offers_path(tender, bidder, num: num, lot_id: lot.id),
+      data: { toggle: 'tooltip', confirm: 'Участник точно предоставил конверт с изменениями?' },
+      title: 'Изменение оферты'
+  td
+    = link_to_if can?(:cud, tender) && last_offer && last_offer.type_id != Constants::OfferTypes::PICKUP,
+      content_tag(:i, '', class: 'icon-remove'),
+      pickup_tender_bidder_offers_path(tender, bidder, num: num, lot_id: lot.id),
+      method: :post, 'data-toggle' => 'tooltip', title: 'Отзыв оферты'
+  td
+    = link_to_if can?(:cud, tender) && last_offer,
+      content_tag(:i, '', class: 'icon-trash'),
+      tender_bidder_offer_path(tender, bidder, last_offer.id),
+      method: :delete, 'data-toggle' => 'tooltip', title: 'Удалить последнюю оферту'

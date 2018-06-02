@@ -1,0 +1,14 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to 'Вернуться к договору', offer_contract_path(@contract.offer)
+      li= link_to 'Редактировать', edit_contract_contract_termination_path(@contract)
+
+.page-header
+  h1 Сведения о расторжении договора
+.row
+  = view_text_field('span2', @contract_termination, :type_name)
+  = view_text_field('span2', @contract_termination, :cancel_date)
+  = view_text_field('span3', @contract_termination, :unexec_cost_money, nil, class: 'text-right')
+
+h3= "Договор расторгнут #{@contract_termination.type_name.mb_chars.downcase} #{@contract_termination.cancel_date}. Объем неисполненных обязательств - #{p_money @contract_termination.unexec_cost} руб.".html_safe

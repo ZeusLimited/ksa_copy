@@ -1,0 +1,120 @@
+select
+  t1.root_customer_id,
+  t1.department_id,
+  t1.direction_id,
+  coalesce(sum(case when t1.announce_date >= :begin_date then t1.cnt end), 0) +
+               coalesce(sum(case when t2.plan_lot_id is null and t2.announce_date >= :begin_date then t2.cnt end), 0) as plan_count,
+  coalesce(sum(case when t1.announce_date >= :begin_date then t1.cost_nds end), 0) +
+               coalesce(sum(case when t2.plan_lot_id is null and t2.announce_date >= :begin_date then t2.cost_nds end), 0) as plan_cost,
+  coalesce(sum(t1.cnt), 0) + coalesce(sum(case when t2.plan_lot_id is null then t2.cnt end), 0) as all_plan_count,
+  coalesce(sum(t1.cost_nds), 0) + coalesce(sum(case when t2.plan_lot_id is null then t2.cost_nds end), 0) as all_plan_cost,
+
+
+  coalesce(sum(case when t2.announce_date >= :begin_date then t2.cnt end), 0) as public_count,
+  coalesce(sum(case when t2.announce_date >= :begin_date then t2.cost_nds end), 0) as public_cost,
+  coalesce(sum(t2.cnt), 0) as all_public_count,
+  coalesce(sum(t2.cost_nds), 0) as all_public_cost,
+  coalesce(sum(case when t2.announce_date >= :begin_date
+                and (case when t2.plan_lot_id is not null then t1.announce_date else t2.announce_date end) >= :begin_date
+                and (t1.guid = t2.guid or t2.plan_lot_id is null) then t2.cnt end), 0) as plan_public_count,
+  coalesce(sum(case when t2.announce_date >= :begin_date
+                and (case when t2.plan_lot_id is not null then t1.announce_date else t2.announce_date end) >= :begin_date
+                and (t1.guid = t2.guid or t2.plan_lot_id is null) then t2.cost_nds end), 0) as plan_public_cost,
+  coalesce(sum(case when t1.guid = t2.guid or t2.plan_lot_id is null then t2.cnt end), 0) as all_plan_public_count,
+  coalesce(sum(case when t1.guid = t2.guid or t2.plan_lot_id is null then t2.cost_nds end), 0) as all_plan_public_cost,
+
+  coalesce(sum(case when t2.guid is null and t1.announce_date >= :begin_date then t1.cnt end), 0) as lag_count,
+  coalesce(sum(case when t2.guid is null and t1.announce_date >= :begin_date then t1.cost_nds end), 0) as lag_cost,
+
+  coalesce(sum(case when t2.guid is null then t1.cnt end), 0) as all_lag_count,
+  coalesce(sum(case when t2.guid is null then t1.cost_nds end), 0) as all_lag_cost,
+
+  coalesce(sum(case when t2.status_id in (<%= Constants::LotStatus::HELD_WITH_FATAL.join(', ') %>) then t2.cnt end), 0) as fact_count,
+  coalesce(sum(case when t2.status_id in (<%= Constants::LotStatus::HELD_WITH_FATAL.join(', ') %>) then t2.cost_nds end), 0) as fact_cost
+
+from
+(
+  select department_id, root_customer_id, direction_id, id, guid, announce_date, sum(cnt) as cnt, sum(cost_nds) as cost_nds
+  from (
+    select
+      pl.department_id,
+      pl.root_customer_id,
+      ps.direction_id,
+      pl.id,
+      pl.guid,
+      pl.announce_date,
+      case when pl.main_direction_id = ps.direction_id then 1 else 0 end as cnt,
+      case when pl.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else sum(ps.qty * ps.cost_nds) end as cost_nds
+    from plan_lots pl
+      inner join (
+        select id from
+          (select tpl.id, tpl.status_id, row_number() over (partition by tpl.guid order by tp.date_confirm desc, tpl.version) rn
+            from plan_lots tpl
+            inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+            ) sub
+           where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+      ) plan_pl on (pl.id = plan_pl.id)
+      inner join plan_specifications ps on (pl.id = ps.plan_lot_id)
+    Where pl.announce_date <= :end_date
+      <% if customers.present? %>
+        and pl.root_customer_id in (<%= customers.join(', ') %>)
+      <% end %>
+      <% if gkpz_year.present? %>
+        and pl.gkpz_year in (:gkpz_year)
+      <% end %>
+      <% if tender_types.present? %>
+        And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+      <% end %>
+      <% if directions.present? %>
+        And ps.direction_id in (<%= directions.join(', ') %>)
+      <% end %>
+    Group By pl.root_customer_id, pl.department_id, ps.direction_id, pl.id, pl.guid, pl.tender_type_id, pl.main_direction_id, ps.direction_id, announce_date) sub
+  Group By root_customer_id, department_id, direction_id, id, guid, announce_date
+) t1
+full outer join
+(
+  select
+    id, plan_lot_id, guid, status_id, tender_type_id, announce_date, sum(cnt) as cnt, sum(cost_nds) as cost_nds
+  from (
+    select
+      l.id,
+      l.plan_lot_id,
+      l.plan_lot_guid as guid,
+      t.tender_type_id,
+      l.status_id,
+      t.announce_date,
+      case when l.main_direction_id = s.direction_id then 1 else 0 end as cnt,
+      sum(s.qty * s.cost_nds) as cost_nds
+    from tenders t
+      inner join lots l on (t.id = l.tender_id)
+      inner join specifications s on (l.id = s.lot_id)
+      left join plan_lots pl on (pl.id = l.plan_lot_id)
+      inner join (
+        select
+          max(ll.id) as id
+        from tenders tt
+          inner join lots ll on (ll.tender_id = tt.id)
+          left join plan_lots ppl on (ppl.id = ll.plan_lot_id)
+          left join specifications ss on ss.lot_id = ll.id
+        Where tt.announce_date <= :end_date
+          <% if customers.present? %>
+            and ll.root_customer_id in (<%= customers.join(', ') %>)
+          <% end %>
+          <% if gkpz_year %>
+            And ll.gkpz_year in (:gkpz_year)
+          <% end %>
+          <% if tender_types.present? %>
+            And tt.tender_type_id in (<%= tender_types.join(', ') %>)
+          <% end %>
+          And ll.status_id != <%= Constants::LotStatus::NEW %>
+        Group by case when ppl.guid is null then ll.guid else ppl.guid end) p on (p.id = l.id)
+    Where
+      1 = 1
+    <% if directions.present? %>
+      and s.direction_id in (<%= directions.join(', ') %>)
+    <% end %>
+    Group By l.id, l.plan_lot_id, l.status_id, l.plan_lot_guid, t.tender_type_id, l.main_direction_id, t.announce_date, s.direction_id) sub
+  Group BY id, plan_lot_id, status_id, guid, tender_type_id, announce_date
+) t2 on (t2.guid = t1.guid)
+
+group by department_id, root_customer_id, direction_id

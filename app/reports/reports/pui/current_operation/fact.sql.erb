@@ -1,0 +1,50 @@
+select
+sum(case when wp.confirm_date <= to_date('31.03.'||to_char(l.gkpz_year),'dd.mm.yyyy') then s.qty * os.final_cost end) as kv1_final_cost,
+sum(case when to_char(wp.confirm_date,'Q.YYYY') = '2.' || l.gkpz_year then s.qty * os.final_cost end) as kv2_final_cost,
+sum(case when to_char(wp.confirm_date,'Q.YYYY') = '3.' || l.gkpz_year then s.qty * os.final_cost end) as kv3_final_cost,
+sum(case when to_char(wp.confirm_date,'Q.YYYY') = '4.' || l.gkpz_year then s.qty * os.final_cost end) as kv4_final_cost,
+s.direction_id,
+case when wpl.solution_type_id = <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>
+   then <%= Constants::TenderTypes::ONLY_SOURCE %>
+   else t.tender_type_id
+end as tender_type_id
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join offer_specifications os on (s.id = os.specification_id)
+  inner join offers o on (o.id = os.offer_id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  inner join winner_protocol_lots wpl on (wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id)
+  left join plan_lots pl on (pl.id = l.plan_lot_id)
+  left join (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on pl.guid = can.guid
+Where wp.confirm_date between :begin_date and :end_date
+  And can.guid is null -- неотмененная
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And l.gkpz_year = :gkpz_year
+
+<% if customer.present? %>
+  And s.customer_id in (<%= Department.subtree_ids_for(customer).join(', ') %>)
+<% end %>
+
+<% if organizers.present? %>
+  And t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if directions.present? %>
+  And s.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+Group By s.direction_id,
+  case when wpl.solution_type_id = <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>
+    then <%= Constants::TenderTypes::ONLY_SOURCE %>
+    else t.tender_type_id
+  end
+

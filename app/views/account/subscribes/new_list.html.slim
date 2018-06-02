@@ -1,0 +1,8 @@
+.page-header
+  h1 = t('.head')
+
+- if current_user.subscribe(current_user.plan_lots.map(&:guid))
+  .alert.alert-info
+    = t('.alert')
+
+= render 'form', url: create_list_account_subscribes_url

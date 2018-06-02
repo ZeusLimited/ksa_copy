@@ -1,0 +1,16 @@
+@report.rows_with_organizers.each do |row|
+  next if !row[:org].nil? && customer == Constants::Departments::RAO
+  result = @report.part1_rows(root_customer_id: customer, direction_id: row[:dir], department_id: row[:org])
+  values = @columns.map do |col_key, col_val|
+    if [:c0, :c37].include?(col_key)
+      row[:name].nil? ? customer_name : row[:name]
+    elsif col_val[:formula]
+      col_val[:formula].call(@sheet.rows.size + 1)
+    else
+      col_val[:value].call(result)
+    end
+  end
+  @column_styles[0] = @styles[row[:style]]
+  styles = row[:name].nil? ? @sum_styles : @column_styles
+  @sheet.add_row values, style: styles, types: @column_types
+end

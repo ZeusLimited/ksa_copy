@@ -1,0 +1,25 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Commission:</b>
+  <%= @protocol_user.commission_id %>
+</p>
+
+<p>
+  <b>User:</b>
+  <%= @protocol_user.user_id %>
+</p>
+
+<p>
+  <b>Status:</b>
+  <%= @protocol_user.status %>
+</p>
+
+<p>
+  <b>Is veto:</b>
+  <%= @protocol_user.is_veto %>
+</p>
+
+
+<%= link_to 'Edit', edit_protocol_user_path(@protocol_user) %> |
+<%= link_to 'Back', protocol_users_path %>

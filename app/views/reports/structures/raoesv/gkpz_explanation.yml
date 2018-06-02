@@ -1,0 +1,18 @@
+- name: 'Закупка на ЭТП'
+  regulation_item_num: '2.6.2'
+  kpi: <%= kpi_by_year['b2b_tender'] %>
+  fact: <%= total_reglament != 0 ? gkpz_row['cost_nds_etp'] / total_reglament : 0 %>
+- name: 'Электронный аукцион'
+  regulation_item_num: '2.6.2'
+  kpi: <%= kpi_by_year['e_auction'] %>
+  fact: <%= total_reglament != 0 ? by_type_rows.first['cost_nds'] / total_reglament : 0 %>
+- name: 'Закупка ЕИ'
+  regulation_item_num: '5.11.1.5'
+  kpi: <%= kpi_by_year['only_source'] %>
+  fact: <%= gkpz_row['cost_nds_reg'] != 0 ? gkpz_row['cost_nds_ei'] / gkpz_row['cost_nds_reg'] : 0 %>
+- name: 'Общие закупки у субъектов малого и среднего предпринимательства (учитываются в том числе планируемые к заключению субподрядные договоры)'
+  regulation_item_num: 'План мероприятий "Расширение доступа субъектов малого и среднего предпринимательства к закупкам инфраструктурных монополий и компаний с государственным участием'
+  kpi: <%= kpi_by_year['sme'] %>
+- name: 'Закупки с участием только субъектов малого и среднего предпринимательства (прямые)'
+  kpi: <%= kpi_by_year['sme_direct'] %>
+  fact: <%= gkpz_row['cost_nds_reg_sme_all'] != 0 ? gkpz_row['cost_nds_sme'].to_f / gkpz_row['cost_nds_reg_sme_all'] : 0 %>

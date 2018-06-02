@@ -1,0 +1,9 @@
+.page-header
+  h1 Список предприятий
+
+.row
+  .pull-right
+    => link_to t('.new_department'), new_department_path, class: 'btn btn-primary'
+    = link_to t('.new_child'), new_child_departments_path, class: 'btn btn-primary'
+.row
+  = content_tag :div, nil, id: 'tree_list'

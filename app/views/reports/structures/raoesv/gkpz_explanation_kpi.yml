@@ -1,0 +1,30 @@
+2015:
+  b2b_tender: '≥45%'
+  e_auction: '≥12%'
+  only_source: '≤5%'
+  sme: '≥18%'
+  sme_direct: '≥10%'
+2016:
+  b2b_tender: '≥50%'
+  e_auction: '≥15%'
+  only_source: '≤5%'
+  sme: '≥18%'
+  sme_direct: '≥10%'
+2017:
+  b2b_tender: '≥60%'
+  e_auction: '≥18%'
+  only_source: '≤5%'
+  sme: '≥18%'
+  sme_direct: '≥10%'
+2018:
+  b2b_tender: '≥70%'
+  e_auction: '≥20%'
+  only_source: '≤5%'
+  sme: '≥18%'
+  sme_direct: '≥15%'
+default:
+  b2b_tender: '≥70%'
+  e_auction: '≥20%'
+  only_source: '≤5%'
+  sme: '≥18%'
+  sme_direct: '≥15%'

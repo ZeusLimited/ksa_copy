@@ -1,0 +1,178 @@
+-
+  name: "<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_lot'>..</a>"
+-
+  name: 'id'
+  data_type: 'Integer'
+  desc: 'Идентификатор спецификации в планировании'
+  required: true
+  example: '127001'
+-
+  name: 'plan_spec_amounts'
+  data_type: 'Array'
+  desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_spec_amount'>plan_spec_amount</a>]"
+-
+  name: 'fias_plan_specifications'
+  data_type: 'Array'
+  desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=fias_plan_specification'>fias_plan_specification</a>]"
+-
+  name: 'guid'
+  data_type: 'String'
+  desc: 'Глобальный идентификатор спецификации в планировании'
+  required: true
+  example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+-
+  name: 'plan_lot_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор лота'
+  required: true
+  example: '127001'
+-
+  name: 'num_spec'
+  data_type: 'Integer'
+  desc: 'Номер спецификации в планировании'
+  required: true
+  example: '1'
+-
+  name: 'qty'
+  data_type: 'Integer'
+  desc: 'Номер спецификации в планировании'
+  required: true
+  example: '1'
+-
+  name: 'name'
+  data_type: 'String'
+  desc: 'Наименование спецификации'
+  required: true
+  example: 'Болты'
+-
+  name: 'qty'
+  data_type: 'Integer'
+  desc: 'Количество закупаемой продукции'
+  required: true
+  example: '10'
+-
+  name: 'cost'
+  data_type: 'Double'
+  desc: 'Цена за единицу, руб. без НДС'
+  required: true
+  example: '1000000'
+-
+  name: 'cost_nds'
+  data_type: 'Double'
+  desc: 'Цена за единицу, руб. с НДС'
+  required: true
+  example: '1180000'
+-
+  name: 'unit_code'
+  data_type: 'String'
+  desc: 'Код по ОКЕИ'
+  required: true
+  example: '109'
+-
+  name: 'okdp_code'
+  data_type: 'String'
+  desc: 'Код по ОКДП/ОКПД2'
+  required: true
+  example: '01.49.19.252'
+-
+  name: 'okved_code'
+  data_type: 'String'
+  desc: 'Код по ОКВЭД/ОКВЭД2'
+  required: true
+  example: '01.11.32'
+-
+  name: 'product_type_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор вида закупаемой продукции (из словаря)'
+  required: false
+  example: '610001'
+-
+  name: 'cost_doc'
+  data_type: 'String'
+  desc: 'Документ определяющий цену'
+  required: true
+  example: 'Локальная смета'
+-
+  name: 'direction_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор направления закупки (из словаря)'
+  required: true
+  example: '21003'
+-
+  name: 'financing_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор источника финансирования (из словаря)'
+  required: true
+  example: '11001'
+-
+  name: 'customer_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор предприятия заказчика'
+  required: true
+  example: '5'
+-
+  name: 'consumer_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор предприятия потребителя'
+  required: true
+  example: '5'
+-
+  name: 'monitor_service_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор подразделения куратора закупки'
+  required: true
+  example: '5'
+-
+  name: 'delivery_date_begin'
+  data_type: 'Date'
+  desc: 'Планируемая дата начала поставки'
+  required: true
+  example: '01.06.2016'
+-
+  name: 'delivery_date_end'
+  data_type: 'Date'
+  desc: 'Планируемая дата окончания поставки'
+  required: true
+  example: '30.06.2016'
+-
+  name: 'bp_item'
+  data_type: 'String'
+  desc: 'Номер пункта функционального бюджета / статья бизнес плана'
+  required: true
+  example: '27001'
+-
+  name: 'requirements'
+  data_type: 'String'
+  desc: 'Минимально необходимые требования к закупаемой продукции'
+  required: true
+  example: 'Соответствие техническому заданию'
+-
+  name: 'curator'
+  data_type: 'String'
+  desc: 'Куратор'
+  required: true
+  example: 'Иванов И.И.'
+-
+  name: 'tech_curator'
+  data_type: 'String'
+  desc: 'Технический куратор'
+  required: true
+  example: 'Иванов И.И.'
+-
+  name: 'note'
+  data_type: 'String'
+  desc: 'Примечания'
+  required: true
+  example: 'Служебная записка № б/н от 10.03.2016'
+-
+  name: 'created_at'
+  data_type: 'Datetime'
+  desc: 'Дата создания записи'
+  required: true
+  example: '01.03.2015 12:53'
+-
+  name: 'updated_at'
+  data_type: 'Datetime'
+  desc: 'Дата обновления записи'
+  required: true
+  example: '31.03.2015 12:23'

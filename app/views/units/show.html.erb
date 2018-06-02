@@ -1,0 +1,45 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Code:</b>
+  <%= @unit.code %>
+</p>
+
+<p>
+  <b>Name:</b>
+  <%= @unit.name %>
+</p>
+
+<p>
+  <b>Symbol n:</b>
+  <%= @unit.symbol_n %>
+</p>
+
+<p>
+  <b>Symbol i:</b>
+  <%= @unit.symbol_i %>
+</p>
+
+<p>
+  <b>Letter n:</b>
+  <%= @unit.letter_n %>
+</p>
+
+<p>
+  <b>Letter i:</b>
+  <%= @unit.letter_i %>
+</p>
+
+<p>
+  <b>Unit title:</b>
+  <%= @unit.unit_title_id %>
+</p>
+
+<p>
+  <b>Unit subtitle:</b>
+  <%= @unit.unit_subtitle_id %>
+</p>
+
+
+<%= link_to 'Edit', edit_unit_path(@unit) %> |
+<%= link_to 'Back', units_path %>

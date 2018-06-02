@@ -1,0 +1,44 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to_session_or_default t('return_to_list'), :filter_path, plan_lots_path
+      = content_tag :li, link_to(t('edit'), edit_plan_innovation_path(@plan_lot)) if can?(:update, @plan_lot)
+      li = link_to t('.history'), history_plan_lot_path(@plan_lot.guid_hex)
+      li = link_to t('.to_gkpz'), edit_plan_lot_path(@plan_lot)
+
+.page-header
+  h1 = t('.header')
+
+.row
+  = view_text_field('span4', @plan_lot, :status, @plan_lot.status_name)
+  .span4
+    label = t('.protocol')
+    = link_to_protocol(@plan_lot)
+
+.row
+  = view_text_field('span1', @plan_lot, :num_tender)
+  = view_text_field('span1', @plan_lot, :num_lot)
+  = view_text_field('span2', @plan_lot, :announce_year)
+  = view_text_field('span2', @plan_lot, :subject_type_name)
+  = view_text_field('span6', @plan_lot, :lot_name)
+.row
+  = view_text_field('span12', @plan_lot, :order1352_fullname)
+
+- @plan_lot.plan_specifications.decorate.each do |ps|
+  .row
+    = view_text_field('span12', ps, :requirements)
+  .row
+    = view_text_field('span4', ps, :okdp_fullname)
+    = view_text_field('span4', ps, :okved_fullname)
+    = view_text_field('span2', ps, :direction_name)
+    = view_text_field('span2', ps, :financing_name)
+
+  .row
+    = view_text_field('span4', ps, :customer_name)
+    = view_text_field('span4', ps, :consumer_name)
+    = view_text_field('span2', ps, :delivery_date_begin, ps.delivery_date_begin.year)
+    = view_text_field('span2', ps, :delivery_date_end, ps.delivery_date_end.year)
+  .row
+    = view_text_field('span4', ps, :monitor_service_name)
+    = view_text_field('span4', ps, :curator)
+    = view_text_field('span4', ps, :tech_curator)

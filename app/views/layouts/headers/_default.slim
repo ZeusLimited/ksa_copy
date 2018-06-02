@@ -1,0 +1,24 @@
+header.page-header
+  .left-section
+    / .menu-toggle
+      / = react_component 'MenuButton'
+    / = link_to root_path
+    /   = image_tag 'raoesv.png'
+      / = react_component 'Logo', html_options: { class: 'logo' }
+  .main-section
+    .menu-toggle-mobile
+      / = react_component 'MenuButton', props: { mobile: true }
+    .main-section-content
+      / = react_component 'CustomerSearch'
+  / .right-section
+  /   - if signed_in?
+  /     / = react_component 'NotificationsPopup'
+  /     .profile-container
+  /       .header-icon = material_icon 'account_circle', size: 24
+  /       .profile-dropdown
+  /         .profile-main
+  /           .profile-avatar
+  /           .profile-info
+  /             .h2 = current_user.name
+  /         .profile-footer
+            / = react_component 'SignOutLink'

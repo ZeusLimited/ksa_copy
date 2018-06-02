@@ -1,0 +1,160 @@
+-
+  name: "<a href='#' class='link-to-structure' data-url='docs/structure?id=gkpz_lots'>..</a>"
+-
+  name: 'id'
+  data_type: 'Integer'
+  desc: 'Идентификатор лота в планировании'
+  required: true
+  example: '127001'
+-
+  name: 'plan_lot_contractors'
+  data_type: 'Array'
+  desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_lot_contractor'>plan_lot_contractor</a>]"
+-
+  name: 'plan_specifications'
+  data_type: 'Array'
+  desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_specification'>plan_specification</a>]"
+-
+  name: 'guid_hex'
+  data_type: 'String'
+  desc: 'Глобальный идентификатор лота в планировании'
+  required: true
+  example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+-
+  name: 'additional_to_hex'
+  data_type: 'String'
+  desc: 'Глобальный идентификатор родительского лота в планировании (для дозакупок)'
+  required: false
+  example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+-
+  name: 'preselection_guid_hex'
+  data_type: 'String'
+  desc: 'Глобальный идентификатор родительского лота (со способом Предварительный отбор) в планировании (для закрытых процедур по результатам ПО)'
+  required: false
+  example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+-
+  name: 'gkpz_year'
+  data_type: 'Integer'
+  desc: 'Год ГКПЗ'
+  required: true
+  example: '2016'
+-
+  name: 'num_tender'
+  data_type: 'Integer'
+  desc: 'Номер закупки'
+  required: true
+  example: '139'
+-
+  name: 'num_lot'
+  data_type: 'Integer'
+  desc: 'Номер лота'
+  required: true
+  example: '1'
+-
+  name: 'lot_name'
+  data_type: 'String'
+  desc: 'Наименование лота'
+  required: true
+  example: '1'
+-
+  name: 'announce_date'
+  data_type: 'Date'
+  desc: 'планируемая дата объявления'
+  required: true
+  example: '2016-07-01'
+-
+  name: 'tender_type_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор способа закупки (из словаря)'
+  required: false
+  example: '10015'
+-
+  name: 'etp_address_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор торговой площадки (из словаря)'
+  required: false
+  example: '12002'
+-
+  name: 'point_clause'
+  data_type: 'String'
+  desc: 'Пункт положения о порядке проведения закупки'
+  required: false
+  example: '5.11.1.5'
+-
+  name: 'tender_type_explanation'
+  data_type: 'String'
+  desc: 'Обоснование выбора способа закупки'
+  required: false
+  example: 'Служебная необходимость'
+-
+  name: 'explanation_doc'
+  data_type: 'String'
+  desc: 'Обосновывающий документ'
+  required: false
+  example: 'Служебная записка'
+-
+  name: 'department_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор предприятия организатора закупки'
+  required: true
+  example: '6'
+-
+  name: 'commission_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор закупочной коммиссии'
+  required: false
+  example: '127001'
+-
+  name: 'sme_type_name'
+  data_type: 'String'
+  desc: 'Отношение к участию МСП'
+  required: false
+  example: 'СубМСП'
+-
+  name: 'order1352_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор учета в совокупном объёме договоров с МСП (из словаря)'
+  required: true
+  example: '41008'
+-
+  name: 'state'
+  data_type: 'String'
+  desc: 'Состояние лота в плане. plan - Плановый лот, unplan - Внеплановый лот'
+  required: true
+  example: 'plan'
+-
+  name: 'status_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор статуса лота в плане (из словаря)'
+  required: true
+  example: '15003'
+-
+  name: 'root_customer_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор заказчика (головного предприятия)'
+  required: true
+  example: '2'
+-
+  name: 'main_direction_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор направления закупки (из словаря)'
+  required: true
+  example: '21002'
+-
+  name: 'regulation_item_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор пункта положения о порядке проведения закупки (из справочника пунктов положения)'
+  required: false
+  example: '8'
+-
+  name: 'created_at'
+  data_type: 'Datetime'
+  desc: 'Дата создания записи'
+  required: true
+  example: '01.03.2015 12:53'
+-
+  name: 'updated_at'
+  data_type: 'Datetime'
+  desc: 'Дата обновления записи'
+  required: true
+  example: '31.03.2015 12:23'

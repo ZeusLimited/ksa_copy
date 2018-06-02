@@ -1,0 +1,13 @@
+tr
+  td
+    = f.hidden_field :plan_specification_id
+    = f.object.specification.fullname
+    = f.input :financing_id,
+      collection: Dictionary.financing_sources,
+      label: false,
+      selected: f.object.financing_id || f.object.specification.financing_id,
+      input_html: { class: 'input-block-level' }
+  td.right-cell= p_money f.object.specification.cost
+  td.right-cell= p_money f.object.specification.cost_nds
+  td= f.text_field :final_cost_money, class: 'input-medium text-right money'
+  td= f.text_field :final_cost_nds_money, class: 'input-medium text-right money'

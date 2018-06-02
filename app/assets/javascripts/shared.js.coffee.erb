@@ -1,0 +1,212 @@
+format_select_title = (item, container) ->
+  originalOption = item.element
+  $(container).attr('title', $(originalOption).attr('title'))
+  item.text
+
+money_nds_change = (container, input_class, parent_class) ->
+  container.find("input.#{input_class}").blur ->
+    cost_field = $(this)
+    cost_nds_field = $(this).closest(parent_class).find("input.#{input_class}_nds").first()
+    update_nds_field(cost_field, cost_nds_field)
+
+calc_with_nds = (cost, nds) ->
+  cost_float = parseFloat cost.replace(/\s/g, '')
+  nds_float = parseFloat nds
+  (cost_float * (1.0 + nds_float / 100.0)).toFixed(2)
+
+update_nds_field = (cost_field, cost_nds_field) ->
+  fieldset_spec = cost_field.closest('.container-nds')
+  fieldset_spec = $(document) unless fieldset_spec.length
+  nds = fieldset_spec.find('.nds').last().val()
+
+  unless nds == ''
+    cost_nds_field.val(calc_with_nds(cost_field.val(), nds))
+    cost_nds_field.maskMoney('mask')
+
+@visible_last_year_delete = (fieldset_spec) ->
+  fieldset_spec.find('.remove_amount_fields').hide()
+  fieldset_spec.find('.remove_amount_fields').last().show()
+
+@coloring = ->
+  $("fieldset.coloring:visible").removeClass('alternate-even')
+  $("fieldset.coloring:visible:even").addClass('alternate-even')
+
+@reindex_plan_spec_amounts = (spec) ->
+  $(spec).find('.invest-id').val('')
+  $(spec).find('.invest-name').val('')
+  $(spec).find('.amounts').each (i_amount) ->
+    $(this).find('.amount_year').val(parseInt($('#plan_lot_gkpz_year').val()) + i_amount)
+
+@load_defaults = (container) ->
+  container.find('select:not(.select-title)').select2
+    # containerCssClass: 'input-block-level'
+    allowClear: true
+
+  container.find('.select-title').select2
+    # containerCssClass: 'input-block-level'
+    allowClear: true
+    formatResult: format_select_title
+    formatSelection: format_select_title
+    escapeMarkup: (m) -> m
+
+  container.find('select[readonly]').select2("readonly", true)
+
+  container.find('.money').maskMoney
+    thousands: ' '
+    allowZero: true
+
+  container.find('.money').maskMoney('mask')
+
+  container.find('[data-toggle="tooltip"]').tooltip()
+
+  container.find('.datepicker').datepicker
+    changeMonth: true
+    changeYear: true
+
+  container.find('.unit_name').autocomplete
+    source: "/units/search"
+
+  container.find('.fias-address').suggestions
+    serviceUrl: "https://suggestions.dadata.ru/suggestions/api/4_1/rs"
+    token: "4e6da031d9aa2ef9f8347bac270ff2e38eddee33"
+    type: "ADDRESS"
+    count: 10
+    onSelect: selectFiasAddress
+
+  container.find('.consumer').select2
+    placeholder: "Выберите потребителя"
+    minimumInputLength: 1
+    allowClear: true
+    ajax:
+      url: "/departments/search"
+      dataType: 'json'
+      data: (term, page) ->
+        term: term
+        scope: 'consumers'
+      results: (data, page) -> { results: data }
+    initSelection: (element, callback) ->
+      id = $(element).val()
+      if id isnt ""
+        $.ajax
+          url: "/departments/#{id}"
+          dataType: 'json'
+        .done (data) -> callback(data)
+    formatResult: (dept) ->
+      dept.name
+    formatSelection: (dept) ->
+      dept.name
+
+  container.find('.consumer').change ->
+    production_unit = $(this).closest('fieldset.specifications').find('select.production_unit')
+    production_unit.select2("val", "")
+    production_unit.empty()
+    production_unit.append($('<option value=""></option>'))
+    $.getJSON $(this).data('url'), { dept_id: $(this).val() }, (data) ->
+      $.each data, (key, val) ->
+        production_unit.append($('<option></option>').attr('value', val.id).text(val.title))
+
+  container.find('.user-name').autocomplete
+    source: "/user/search"
+    select: (event, ui) ->
+      $(this).closest(".user-info").find(".user-id").val(ui.item.id)
+
+  container.find('.cost_doc').autocomplete
+    source: (request, response) ->
+      response($(this.element).data('cost-docs'))
+
+  money_nds_change(container, 'cost', '.calc-cost-nds')
+  money_nds_change(container, 'amount_mastery', '.calc-cost-nds')
+  money_nds_change(container, 'amount_finance', '.calc-cost-nds')
+
+  money_nds_change(container, 'cost_offer', '.calc-cost-nds-offer')
+  money_nds_change(container, 'final_cost_offer', '.calc-cost-nds-offer')
+
+  container.find('.calc-cost-nds').find('.nds').change ->
+   unless $(this).val() == ""
+     if confirm("Вы хотите пересчитать все суммы в соответсвии с выбранным значением НДС?")
+       container.find('input.cost').trigger('blur')
+       container.find('input.final_cost').trigger('blur')
+       container.find('input.amount_mastery').trigger('blur')
+       container.find('input.amount_finance').trigger('blur')
+
+  container.find('.calc-cost-nds-offer').each ->
+    $(this).find('.nds').change ->
+      unless $(this).val() == ""
+        $(this).closest('tr').find('.cost_offer').trigger('blur')
+        $(this).closest('tr').find('.final_cost_offer').trigger('blur')
+
+  container.find('.ac-contractor-name').autocomplete
+    source: (request, response) ->
+      element = this.element
+      $.ajax
+        url: '/contractors/search_bidders'
+        dataType: 'json'
+        data:
+          tender_type_id: element.data('tender-type-id')
+          term: request.term
+        success: (data) ->
+          resultCount = data.length
+          response(data)
+    select: (event, ui) ->
+      $(this).closest('fieldset').find('.ac-contractor-id').val(ui.item.id)
+
+# TODO
+# Доделать валидацию ошибок
+$(document).on 'click', '.declension', (event) ->
+  $('#modal_declension').modal()
+  $('#modal_declension').find('.modal-body').load $(this).data('url'), ->
+    $(".form_declension").on("ajax:success", (e, data, status, xhr) ->
+      $('#modal_declension').modal('hide')
+    ).bind "ajax:error", (e, xhr, status, error) ->
+      $(".form_declension").append "<p>ERROR</p>"
+  event.preventDefault()
+
+$(document).on 'click', '.add_assoc_fields', (event) ->
+  time = new Date().getTime()
+  regexp = new RegExp($(this).data('id'), 'g')
+  $(this).before($(this).data('fields').replace(regexp, time))
+  load_defaults($(this).prev())
+  reindex_plan_spec_amounts($(this).prev())
+  coloring()
+  event.preventDefault()
+
+$(document).on 'click', 'form .add_fields_plan_lot_contractor', (event) ->
+  time = new Date().getTime()
+  regexp = new RegExp($(this).data('id'), 'g')
+  $(this).before($(this).data('fields').replace(regexp, time))
+  load_defaults($(this).prev())
+  contractor_for_plan_lot()
+  event.preventDefault()
+
+$(document).on 'click', 'form .add_field_amount', (event) ->
+  time = new Date().getTime()
+  regexp = new RegExp($(this).data('id'), 'g')
+  $(this).before($(this).data('fields').replace(regexp, time))
+  fieldset_spec = $(this).closest('fieldset.specifications')
+  year = parseInt(fieldset_spec.find('.amount_year').first().val())
+  fieldset_spec.find('.amount_year').each (i) -> $(this).val(year + i)
+  load_defaults($(this).prev())
+  visible_last_year_delete(fieldset_spec)
+  event.preventDefault()
+
+$(document).on 'click', 'form .add-plan-annual-limit', (event) ->
+  year = parseInt($('.annual-limit:visible .limit-year').last().val())
+  time = new Date().getTime()
+  regexp = new RegExp($(this).data('id'), 'g')
+  $(this).before($(this).data('fields').replace(regexp, time))
+  $('.annual-limit:visible .limit-year').last().val(year + 1)
+  load_defaults($(this).prev())
+  event.preventDefault()
+
+$(document).on 'click', 'form .remove_amount_fields', (event) ->
+  fieldset_spec = $(this).closest('fieldset.specifications')
+  if fieldset_spec.find('fieldset.amounts').length > 1
+    $(this).closest('fieldset').next('input:hidden').remove() # remove plan_lot[plan_specifications_attributes][0][plan_spec_amounts_attributes][1][id]
+    $(this).closest('fieldset').hide('blind').remove()
+    visible_last_year_delete(fieldset_spec)
+  else
+    alert 'Должен быть заполнен хотя бы один год планируемых сумм!'
+  event.preventDefault()
+
+document.addEventListener "turbolinks:load", ->
+  $('input:checkbox[readonly]').on 'click', (event) -> false

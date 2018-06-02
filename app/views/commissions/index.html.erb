@@ -1,0 +1,50 @@
+<div class="page-header">
+  <h1>Закупочные комиссии</h1>
+</div>
+
+<%= form_tag commissions_path, :method => 'get' do %>
+
+  <div class="row">
+    <div class="span4">
+      <%= label_tag 'department', 'Подразделение' %>
+      <%= select_tag 'department', options_from_collection_for_select(Department.rank_array(current_user.root_dept_id), 'id', 'name_with_depth_symbols', params[:department]), class: 'input-block-level' %>
+    </div>
+
+    <div class="span2">
+      <label>&nbsp;</label>
+      <%= button_tag 'Поиск', class: 'btn btn-success input-block-level', name: nil, id: 'commissions_search_button' %>
+    </div>
+  </div>
+
+<% end %>
+
+<table class="table table-hover table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Наименование</th>
+      <th>Тип комиссии</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @commissions.each do |commission| %>
+    <tr>
+      <td><%= commission.name %></td>
+      <td><%= commission.commission_type.try(:name) %></td>
+      <td><%= link_to_declension(commission) %></td>
+      <td><%= link_to content_tag(:i, '', class: 'icon-info-sign'), commission, {'data-toggle' => 'tooltip', title: 'Просмотр'} %></td>
+      <td><%= link_to content_tag(:i, '', class: 'icon-edit'), edit_commission_path(commission), {'data-toggle' => 'tooltip', title: 'Редактировать'} %></td>
+      <td><%= link_to content_tag(:i, '', class: 'icon-trash'), commission, method: :delete, data: { confirm: 'Вы уверены?', toggle: 'tooltip' }, title: 'Удалить' %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<br />
+
+<%= link_to 'Новая комиссия', new_commission_path(department: params[:department]), class: "btn" if params[:department].present? %>
+
+<%= render "/shared/declension" %>

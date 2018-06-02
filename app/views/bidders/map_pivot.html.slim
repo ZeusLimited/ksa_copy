@@ -1,0 +1,36 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  ul.tender-actions
+    li = link_to 'По лотам', map_by_lot_tender_bidders_path(@tender), class: 'btn btn-warning span1'
+  h1 Карта предложений
+
+= render 'tenders/tender_header', tender: tender
+
+.alert.alert-info
+  | Для перехода к просмотру оферты, нажмите на её стоимость
+
+.horizontal-scroll
+  table.table.table-bordered.horizontal-scroll
+    thead
+      tr
+        th.center-cell rowspan="2" Участник
+        th.span2.center-cell rowspan="2" Оферта
+        th.span2.center-cell rowspan="2" Всего
+        th.center-cell colspan=@tender.lots.size Стоимость
+      tr
+        - @tender.lots.each do |lot|
+          th.span2.center-cell = abbr(lot.nums, lot.name_with_cust)
+    tbody
+      - @tender.bidders.for_pivot.decorate.each do |bidder|
+        tr
+          td.no-wrap = link_to bidder.contractor_name, tender_bidder_offers_path(@tender, bidder), unfair_contractor_html_attributes(bidder.contractor)
+          td = bidder.num_text
+          td.right-cell = p_money bidder.total_cost_pivot
+          - @tender.lots.each do |lot|
+            - offer = Offer.for_bid_lot_num(bidder.id, lot.id, bidder.num).actuals.take
+            - if offer
+              td.right-cell style=offer.status_stylename_html title=offer.status_name
+                = link_to(p_money(offer.final_cost), tender_bidder_offer_path(@tender, bidder, offer))
+            - else
+              td

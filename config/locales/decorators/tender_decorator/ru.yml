@@ -1,0 +1,9 @@
+ru:
+  tender_decorator:
+    oos_b2b_title: 'Закупка № "%{num}" (На ЕИС %{link_to_oos}, На ЭТП %{link_to_b2b})'
+    official_site_title: ', На оф. сайте %{link_to_official_site}'
+    etp: ' ЭТП'
+    gkpz_years: 'ГКПЗ %{years}'
+    working_days: 'Рабочих'
+    calendar_days: 'Календарных'
+    title_single_source: '№ %{num} от %{date} (На ЕИС %{link_to_eis})'

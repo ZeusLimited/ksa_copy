@@ -1,0 +1,78 @@
+select
+  lot_num, lot_name, tender_type_name, round(sum(cost_nds) / 1000, 2) as cost_nds, sum(rn) as cnt
+from (
+  select
+    pl.num_tender || '.' || pl.num_lot as lot_num,
+    pl.lot_name,
+    case when l.frame_id is not null then tt.name else pt.name end as tender_type_name,
+    case when t.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else
+      sum(gkpz_ps.qty * gkpz_ps.cost_nds)
+    end as cost_nds,
+    case when
+      row_number() over (partition by nvl(l.frame_id, l.id), l.plan_lot_id
+                         order by abs(l.main_direction_id - s.direction_id), l.id) = 1
+      then decode(l.main_direction_id, s.direction_id, 1, 0) else 0 end as rn
+  from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (fr.id = l.frame_id)
+  left join specifications fs on (fs.lot_id = fr.id and fs.id = s.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id,fr.plan_lot_id))
+  inner join plan_specifications ps
+    on (ps.id = nvl(s.plan_specification_id, fs.plan_specification_id) and ps.plan_lot_id = pl.id)
+  inner join lateral
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+      where tpl.status_id in (15003, 15006, 15007)) sub
+     where rn = 1 and status_id != 15007) gkpz_pl on true
+  inner join dictionaries tt on (tt.ref_id = gkpz_pl.tender_type_id)
+  inner join dictionaries pt on (pt.ref_id = t.tender_type_id)
+  inner join plan_specifications gkpz_ps on (gkpz_ps.plan_lot_id = gkpz_pl.id and gkpz_ps.guid = ps.guid)
+  inner join (
+  select pl1.guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+  from tenders t1
+  inner join lots l1 on (t1.id = l1.tender_id)
+  inner join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+  Where t1.announce_date between :begin_date and :end_date
+  Group by pl1.guid, l1.frame_id
+  ) vi on ((vi.guid = pl.guid or vi.frame_id = l.frame_id) and t.announce_date = vi.max_announce_date)
+ left join lateral (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and gkpz_pl.guid = tpl.guid
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %> and tc.commission_type_id = <%= Constants::CommissionType::CZK %>
+  group by tpl.guid
+) can on true
+
+
+left join (
+  select max(tp.date_confirm) as sd_date, tc.department_id, tp.gkpz_year
+  from protocols tp
+  inner join commissions tc on tp.commission_id = tc.id
+  where tc.commission_type_id = <%= Constants::CommissionType::SD %>
+  and tp.date_confirm <= :end_date
+  group by tc.department_id, tp.gkpz_year
+) sd on gkpz_pl.root_customer_id = sd.department_id and gkpz_pl.gkpz_year = sd.gkpz_year
+ Where l.status_id = <%= Constants::LotStatus::FAIL %>
+  and (can_date is null or (sd_date is not null and can_date is not null and can_date > sd_date))
+  and l.gkpz_year = :gkpz_year -- gkpz_year
+  and wp.confirm_date between :begin_date and :end_date
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>
+  Group By pl.num_tender, pl.num_lot, pl.lot_name, tt.name, l.id, l.frame_id, pt.name,
+    l.main_direction_id, s.direction_id, l.plan_lot_id, t.tender_type_id
+) sub
+group by lot_num, lot_name, tender_type_name

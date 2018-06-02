@@ -1,0 +1,40 @@
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 4)
+@sheet = sheet
+@holding_name = @report.holding_name
+
+sheet.add_row [Russian.strftime(Time.now, '%d %B %Y'),
+               "Председателю ЦЗК #{@report.customer_names}",
+               nil,
+               nil],
+              style: [nil, @styles[:text_right]]
+
+sheet.merge_cells sheet.rows[0].cells[1..3]
+
+def row_height(names)
+  max_length = Array(names).map(&:to_s).map(&:length).max
+  max_length > 85 ? (max_length.to_f / 85).ceil * 20 : 20
+end
+
+def add_text_row(text, height = row_height(text))
+  @sheet.add_row [text, nil, nil, nil], style: @styles[:text_left], height: height
+end
+
+@simple_sheet.add_row_title(t(".title", holding: @holding_name, customer_names: @report.customer_names, years: @report.gkpz_years.try(:join, ', ')),
+                            style: @styles[:title],
+                            columns_count: 4)
+
+render 'gkpz'
+
+render 'by_type'
+
+render 'etp_info'
+
+render 'high_table'
+
+sheet.add_row
+
+render 'summary'
+
+render 'footer'
+
+sheet.column_widths 15, 45, 10, 15

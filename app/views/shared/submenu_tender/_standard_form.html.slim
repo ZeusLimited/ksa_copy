@@ -1,0 +1,7 @@
+= drop_down t('.standard_form') do
+  - unless @tender.only_source?
+    = menu_item t('.forma1'), show_standard_form_tender_path(@tender, template: 'notice.docx'), target: '_blank'
+    - if docx_template_exist?(tender.docx_template_name)
+      = menu_item t('.forma_common'), show_standard_form_tender_path(@tender, template: tender.docx_template_name), target: '_blank'
+  -else
+    = menu_item t('.forma26'), show_standard_form_tender_path(@tender, template: 'forma_26_only_source.docx'), target: '_blank'

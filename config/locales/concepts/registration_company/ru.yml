@@ -1,0 +1,10 @@
+ru:
+  activemodel:
+    attributes:
+      user:
+        login: 'Логин'
+        password: 'Пароль'
+        password_confirmation: 'Подтверждение пароля'
+        surname: 'Фамилия'
+        name: 'Имя'
+        patronymic: 'Отчество'

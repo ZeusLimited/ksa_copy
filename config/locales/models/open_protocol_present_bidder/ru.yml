@@ -1,0 +1,10 @@
+ru:
+  activerecord:
+    models:
+      open_protocol_present_bidder: 'Присутствовавшие представители участников'
+    attributes:
+      open_protocol_present_bidder:
+        open_protocol_id: 'Протокол вскрытия'
+        bidder_id: 'Участник'
+        bidder: 'Участник'
+        delegate: 'ФИО представителя'

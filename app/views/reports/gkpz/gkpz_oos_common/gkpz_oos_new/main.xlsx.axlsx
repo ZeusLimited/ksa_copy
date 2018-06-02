@@ -1,0 +1,6 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+wb.add_worksheet(name: "ГКПЗ ЕИС") do |sheet|
+  render 'reports/gkpz/gkpz_oos_common/gkpz_oos_new/list1', sheet: sheet
+end

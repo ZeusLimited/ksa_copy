@@ -1,0 +1,95 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  .btn-group.pull-right.span2
+    button.btn.btn-primary.input-block-level.dropdown-toggle(data-toggle='dropdown')
+      = t('actions')
+      span.caret
+    ul.dropdown-menu
+      - if can?(:update, @rebid_protocol)
+        li = link_to t('edit'), edit_tender_rebid_protocol_path(@tender, @rebid_protocol)
+      - if can?(:destroy, @rebid_protocol)
+        li
+          = link_to t('.delete'),
+            tender_rebid_protocol_path(@tender, @rebid_protocol),
+            method: :delete,
+            data: { confirm: t('.confirm') }
+        li = link_to t('to_docx'), tender_rebid_protocol_path(@tender, @rebid_protocol, format: :docx)
+        li = link_to t('.reference'), reference_tender_rebid_protocol_path(@tender, @rebid_protocol, format: :docx)
+  h1 = t('.header')
+
+h4
+  = t('.caption', num: @rebid_protocol.num, date: @rebid_protocol.confirm_date.strftime('%d.%m.%Y'), city: @rebid_protocol.confirm_city)
+  = link_to_history_icon(@rebid_protocol)
+
+dl
+  dt = t('.tender_caption')
+  dd
+    p = @tender.name
+    - if @rebid_protocol.lots.size > 1
+      - @rebid_protocol.lots.each do |lot|
+        p = lot.fullname
+  dt = t('.attended')
+  dd
+    p
+      => abbr(RuPropisju.propisju(@rebid_protocol.rebid_protocol_present_members.size, 1).mb_chars.capitalize,
+        @rebid_protocol.rebid_protocol_present_members.map(&:user_fio_full).join("\n"))
+      => Russian.p(@rebid_protocol.rebid_protocol_present_members.count, 'член', 'члена', 'членов')
+      = @rebid_protocol.commission.name_r
+  dt = t('.questions')
+  dd
+    ol
+      - if @tender.etp?
+        - if @rebid_protocol.offers.rebid.count > 0
+          li
+            => t('.org_recieved')
+            => count_with_description(@rebid_protocol.offers.rebid.count, 2, :offer)
+            = t('.etp_participant_covers', etp: link_to_b2b).html_safe
+          li = t('.etp_open_covers', etp: link_to_b2b).html_safe
+      - else
+        li
+          => t('.org_recieved')
+          => count_with_description(@rebid_protocol.offers.rebid.count, 2, :offer)
+          = t('.participant_covers')
+        - if @rebid_protocol.rebid_protocol_present_bidders.size > 0
+          li
+            p = t('.open_covers')
+            - @rebid_protocol.rebid_protocol_present_bidders.each do |delegat|
+              p = "#{delegat.bidder.contractor_name_short} - #{delegat.delegate}"
+      li = t('.begin_time', time: local_time_with_msk(@rebid_protocol.rebid_date, @tender.local_time_zone))
+      li = t('.place', location: @rebid_protocol.location)
+      - unless @tender.etp?
+        li = t('.whole_covers')
+      - if @rebid_protocol.lots.count > 0
+        li
+          p = t('.offers_found')
+          - @rebid_protocol.lots.each do |lot|
+            - next if lot.offers.rebid.count == 0
+            p
+              b = lot.nums
+            table.table.table-striped.table-bordered
+              thead
+                tr
+                  th = t('.table.row_num')
+                  th = t('.table.contractor_name')
+                  th = t('.table.cost_before')
+                  th = t('.table.cost_after')
+              tbody
+                - lot.offers.rebid.each_with_index do |offer, index|
+                  tr
+                    td = index + 1
+                    td
+                      p
+                        strong = offer.bidder.contractor_name_short
+                      p = offer.bidder.contractor_legal_addr
+                    td = "#{p_money(offer.original_cost)} руб. (без НДС)".html_safe
+                    td = "#{p_money(offer.final_cost)} руб. (без НДС)".html_safe
+  dt = t('.resolve')
+  dd
+    ol = content_tag :li, @rebid_protocol.resolve
+
+table.protocol-head
+  tbody
+    tr
+      td = t('.clerk')
+      td.text-right = @rebid_protocol.clerk.fio_full

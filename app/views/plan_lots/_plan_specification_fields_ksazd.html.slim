@@ -1,0 +1,83 @@
+  = f.hidden_field :_destroy
+  .row.calc-cost-nds
+    .span1
+      = f.input :num_spec, input_html: { value: f.object.num_spec, class: 'input-block-level' }
+    .span1
+      = f.input :qty, input_html: { value: f.object.qty, class: 'input-block-level' }
+    .span2
+      = f.input :cost_money, input_html: { value: f.object.cost_money, class: 'cost input-block-level text-right money' }
+    .span2
+      label = t('.nds')
+      = f.select :nds, Dictionary.nds_values.map { |n| [n.fullname, n.name] }, { include_blank: true },
+        class: 'nds input-block-level', data: { placeholder: t('.nds_placeholder') }
+    .span2
+      = f.input :cost_nds_money,
+        input_html: { value: f.object.cost_nds_money, class: 'cost_nds input-block-level text-right money' }
+    .span2
+      = f.input :unit_name, input_html: { value: f.object.unit_name, class: 'unit_name input-block-level' }
+    .span2
+      = f.label :product_type_id
+      = f.select :product_type_id,
+        options_for_select(Dictionary.product_types.map { |t| [t.name, t.id, { 'title' => t.fullname }] },
+        f.object.product_type_id),
+        {},
+        class: 'select-title input-block-level'
+
+  .row
+    .span4
+      = f.input :cost_doc,
+        input_html: { class: 'cost_doc input-block-level', data: { 'cost-docs' => Dictionary.cost_docs.map(&:name) } }
+    .span4
+      = f.label :direction_id
+      = f.select :direction_id,
+        options_for_select(Direction.collection_for_select, f.object.direction_id),
+        {},
+        class: 'select-title input-block-level'
+    .span4
+      = f.label :financing_id
+      = f.select :financing_id,
+        options_for_select(Dictionary.financing_sources.map { |t| [t.name, t.id, { 'title' => t.fullname }] },
+          f.object.financing_id),
+        {},
+        class: 'select-title input-block-level'
+
+  .row
+    .span4
+      = f.input :name, as: :text, input_html: { rows: 2, value: f.object.name, class: 'input-block-level' }
+    .span4
+      = f.input :requirements, as: :text, input_html: { rows: 2, class: 'input-block-level' }
+    .span4
+      = f.input :bp_item, as: :text, input_html: { rows: 2, class: 'input-block-level' }
+
+  .row
+    .span4
+      = f.association :customer,
+        collection: Department.customers_by_root(current_user.root_dept_id),
+        label_method: :name_with_depth_symbols,
+        include_blank: false,
+        input_html: { class: 'customers input-block-level',
+                      'data-next-free-number-path' => next_free_number_plan_lots_path,
+                      data: { url: for_type_regulation_items_url } }
+    .span4
+      = f.input :consumer_id do
+        = f.hidden_field :consumer_id, data: { url: nodes_for_parent_departments_path }, class: 'consumer input-block-level'
+    .span2
+      = f.input :delivery_date_begin, as: :string,
+        input_html: { value: f.object.delivery_date_begin, class: 'input-block-level datepicker' }
+    .span2
+      = f.input :delivery_date_end, as: :string,
+        input_html: { value: f.object.delivery_date_end, class: 'input-block-level datepicker' }
+
+  .row
+    .span4
+      = f.input :monitor_service_id,
+        collection: Department.monitor_services,
+        include_blank: false,
+        input_html: { class: 'input-block-level' }
+    .span4
+      = f.input :curator, input_html: { class: 'input-block-level' }
+    .span4
+      = f.input :tech_curator, input_html: { class: 'input-block-level' }
+  .row
+    .span8
+      = f.input :note, as: :text, input_html: { rows: 2, class: 'input-block-level' }

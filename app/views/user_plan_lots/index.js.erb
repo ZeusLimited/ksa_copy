@@ -1,0 +1,17 @@
+<% unless action_name == "index" %>
+  $('#selected-lots-table table tbody').empty();
+  $('#selected-lots-count').html('<%= @plan_selected_lots.total_count %>').effect('highlight');
+
+  <%= render 'visibility_actions' %>
+<% end %>
+
+$('#selected-lots-table table tbody').append('<%= j render('table_plan_lots/selected_body', plan_lots: @plan_selected_lots) %>');
+<% if @plan_selected_lots.next_page %>
+  $('.pagination-scroll').replaceWith('<%= j paginate(@plan_selected_lots, param_name: 'page_sel', theme: 'pagination_scroll', params: { controller: 'user_plan_lots', action: 'index' }) %>');
+<% else %>
+  $('.pagination-scroll').remove();
+<% end %>
+
+$('[data-toggle="tooltip"]').tooltip();
+
+<% sleep(1) if action_name == "index" %>

@@ -1,0 +1,5 @@
+ru:
+  web_servoce_mailer:
+    contract_notification:
+      hello_male: 'Уважаемый %{io_full}'
+      hello_female: 'Уважаемая %{io_full}'

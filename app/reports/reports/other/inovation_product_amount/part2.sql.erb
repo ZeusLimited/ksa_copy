@@ -1,0 +1,131 @@
+--part 2
+select
+<% if detail.present? %>
+  pl.num_tender || '.' || pl.num_lot as num_gkpz,
+  pl.lot_name,
+  d.name as customer,
+  c.num as contract_num,
+  c.confirm_date as date_contract,
+  con.name as contragent,
+  c.id,
+  coalesce(sum(case when c.confirm_date >= :begin_date then cs.cost_nds * s.qty else 0 end), 0) as cost_nds,
+  coalesce(sum(case when c.confirm_date >= :begin_date then cs.cost * s.qty else 0 end), 0) as cost,
+  coalesce(sum(case when EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance_nds else 0 end), 0) as cost_amount_nds,
+  coalesce(sum(case when EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance else 0 end), 0) as cost_amount,
+  case when c.confirm_date >= :begin_date then 1 else 0 end as is_current,
+  case when EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null then 1 else 0 end as is_ca
+<% else %>
+  count(distinct(case
+                  when dir.yaml_key like 'inivp%' and c.confirm_date >= :begin_date
+                    then c.id
+                    else null
+                 end
+  )) as count_contracts,
+  coalesce(sum(case
+                when dir.yaml_key like 'inivp%' and c.confirm_date >= :begin_date
+                  then cs.cost*s.qty
+                  else 0
+              end),0
+  ) as sum_contracts,
+  coalesce(sum(case
+                when t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+                  and c.confirm_date >= :begin_date
+                  then cs.cost*s.qty
+                  else 0
+              end),0
+  ) as sum_contracts_all,
+
+  coalesce(sum(case
+                when dir.yaml_key like 'inivp%' and c.confirm_date >= :begin_date
+                  then cs.cost_nds * s.qty
+                  else 0
+              end),0
+  ) as sum_contracts_nds,
+  coalesce(sum(case
+                when t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+                   and c.confirm_date >= :begin_date
+                  then cs.cost_nds * s.qty
+                  else 0
+              end),0
+  ) as sum_contracts_all_nds,
+  count(distinct(case
+                  when dir.yaml_key like 'inivp%'
+                    and EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null
+                    then c.id
+                    else null
+                 end
+  )) as count_contracts_amount,
+  coalesce(sum(case
+                when dir.yaml_key like 'inivp%'
+                  and EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null
+                  then ca.amount_finance
+                  else 0
+              end),0
+  ) as sum_contracts_amount,
+  coalesce(sum(case
+                when t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+                  and EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null
+                  then ca.amount_finance
+                  else 0
+              end),0
+  ) as sum_contracts_all_amount,
+
+  coalesce(sum(case
+                when dir.yaml_key like 'inivp%'
+                  and EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null
+                  then ca.amount_finance_nds
+                  else 0
+              end),0
+  ) as sum_contracts_amount_nds,
+  coalesce(sum(case
+                when t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+                   and EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null
+                  then ca.amount_finance_nds
+                  else 0
+              end),0
+  ) as sum_contracts_all_amount_nds
+<% end %>
+from contracts c
+  inner join lots l on l.id = c.lot_id
+  inner join tenders t on t.id = l.tender_id
+  inner join contract_specifications cs on cs.contract_id = c.id
+  inner join specifications s on s.id = cs.specification_id and l.id = s.lot_id
+  inner join offers o on o.id = c.offer_id
+  inner join plan_lots pl on (pl.id = l.plan_lot_id)
+  inner join plan_specifications ps on (ps.id = s.plan_specification_id and ps.plan_lot_id = pl.id)
+  inner join dictionaries tt on (tt.ref_id = t.tender_type_id)
+  inner join directions dir on dir.id = s.direction_id
+  inner join departments d on d.id = l.root_customer_id
+  inner join bidders b on b.id = o.bidder_id
+  inner join contractors con on con.id = b.contractor_id
+  left join lateral
+    ( select tpl.guid, max(tp.date_confirm) as can_date
+      from plan_lots tpl
+           inner join protocols tp on tp.id = tpl.protocol_id and pl.guid = tpl.guid
+                                      and extract(year from tp.date_confirm) <= extract(year from DATE :end_date)
+           inner join commissions tc on tp.commission_id = tc.id
+      where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+      group by tpl.guid
+    ) can on true
+  left join contract_amounts ca on ca.contract_specification_id = cs.id and ca.year = extract(year from DATE :end_date)
+where c.confirm_date <= :end_date
+  and can.guid is null -- неотмененная
+  and pl.order1352_id in (<%= Constants::Order1352::ALL.join(', ') %>)
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+  and c.type_id = <%= Constants::ContractTypes::BASIC %>
+
+<% if detail.present? %>
+  and dir.yaml_key like 'inivp%'
+  group by (pl.num_tender || '.' || pl.num_lot), pl.lot_name, d.name, c.num, c.confirm_date, con.name, c.id
+           ,case when EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null then 1 else 0 end
+  order by (pl.num_tender || '.' || pl.num_lot)
+<% end %>

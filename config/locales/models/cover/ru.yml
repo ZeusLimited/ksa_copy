@@ -1,0 +1,12 @@
+ru:
+  activerecord:
+    models:
+      cover: 'Конверт'
+    attributes:
+      cover:
+        bidder_id: 'Участник'
+        register_num: 'Регистрационный номер'
+        register_time: 'Дата и время регистрации'
+        type_id: 'Пометка'
+        provision: 'Форма предоставления'
+        delegate: 'ФИО представителя'

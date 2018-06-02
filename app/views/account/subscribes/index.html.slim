@@ -1,0 +1,8 @@
+= render 'shared/lk'
+
+p.text-right
+  => link_to t('.send'), send_now_account_subscribe_notifications_path, method: :post, remote: true, class: 'btn btn-success'
+  => link_to t('.edit'), edit_list_account_subscribes_path, class: 'btn btn-warning'
+  = link_to t('.delete'), delete_list_account_subscribes_path, method: :delete, class: 'btn btn-danger'
+
+= render 'lots'

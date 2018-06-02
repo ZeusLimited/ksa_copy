@@ -1,0 +1,20 @@
+ru:
+  docs:
+    open_protocols:
+      tender_id: 'Id закупки'
+      num: 'Номер'
+      sign_date: 'Дата подписания'
+      sign_city: 'Город'
+      open_date: 'Дата время'
+      location: 'Место'
+      resolve: 'Решение'
+      tender_id: 'Закупка'
+      clerk_id: 'Секретарь ЗК'
+      commission_id: 'Коммиссия'
+      open_protocol_present_members:
+        open_protocol_id: 'Id протокола вскыртия'
+        status_id: 'Id должности'
+        user_id: 'Id пользователя'
+        status_name: 'Наименование должности'
+        enable: 'Присутствовал'
+        id: 'Id члена коиммиссии протокла вскрытия'

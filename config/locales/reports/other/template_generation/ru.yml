@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_template_generation:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/template_generation: 'Шаблон Генерация'
+    attributes:
+      reports/other/template_generation:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customer: 'Заказчик'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'

@@ -1,0 +1,6 @@
+.page-header
+  h1 Создание протокола переторжки
+
+= render 'tenders/tender_header', tender: tender
+
+= render 'form', tender: @tender, rebid_protocol: @rebid_protocol, lots: @tender.lots.for_rebid_protocol

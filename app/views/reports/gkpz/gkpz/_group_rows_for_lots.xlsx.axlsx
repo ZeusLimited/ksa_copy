@@ -1,0 +1,36 @@
+row_begin = @sheet.rows.size
+first_row_merge = nil
+last_row_merge = nil
+
+@report.result_rows(tender_type_id: tender_types).each do |row|
+
+  if row['rn_lot'] == 1
+    title_values = @lot_title_columns.values.map { |value| value[:value].call(row) }
+    @sheet.add_row title_values, style: @lot_title_column_styles, types: @lot_title_column_types
+    values = @columns.values.map { |value| value[:value].call(row) }
+    if row['span'] != 1 && row['rn'] == 1
+      first_row_merge = @sheet.add_row values, style: @column_styles[row['style']], types: @column_types
+    else
+      @sheet.add_row values, style: @column_styles[row['style']], types: @column_types
+    end
+  elsif row['span'] != 1 && row['rn'] == 1
+    values = @columns.values.map { |value| value[:value].call(row) }
+    first_row_merge = @sheet.add_row values, style: @column_styles[row['style']], types: @column_types
+  elsif row['rn'] != 1 && row['span'] != 1
+    values = @columns.values.map { |value| value[:no_merge] ? value[:value].call(row) : nil }
+    last_row_merge = @sheet.add_row values, style: @column_styles[row['style']], types: @column_types
+  else
+    values = @columns.values.map { |value| value[:value].call(row) }
+    @sheet.add_row values, style: @column_styles[row['style']], types: @column_types
+  end
+
+  if row['rn'] == row['span'] && row['span'] != 1
+    @columns.each_with_index do |col, index|
+      first_row_merge.cells[index].merge last_row_merge.cells[index] unless col[1][:no_merge]
+    end
+  end
+end
+
+row_end = @sheet.rows.size
+
+@outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }

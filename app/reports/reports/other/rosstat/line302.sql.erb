@@ -1,0 +1,65 @@
+-- line 302 Rosstat Part1
+select
+<% if detail %>
+  <%= detail_select.html_safe %>
+<% else %>
+  coalesce(sum(cost_all), 0) as cost_all,
+  coalesce(sum(cost_ok), 0) as cost_ok,
+  coalesce(sum(cost_zk), 0) as cost_zk,
+  coalesce(sum(cost_ok_etp), 0) as cost_ok_etp,
+  coalesce(sum(cost_oa), 0) as cost_oa,
+  coalesce(sum(cost_za), 0) as cost_za,
+  coalesce(sum(cost_oa_etp), 0) as cost_oa_etp,
+  coalesce(sum(cost_ei), 0) as cost_ei,
+  coalesce(sum(cost_other_o), 0) as cost_other_o,
+  coalesce(sum(cost_other_z), 0) as cost_other_z,
+  coalesce(sum(cost_other_etp), 0) as cost_other_etp
+from (
+select
+  (case when t.tender_type_id in (<%= Constants::TenderTypes::ROSSTAT_EI.join(',') %>) then sum(s.qty * cs.cost_nds) else sum(s.qty * s.cost_nds) end) as cost_all,
+  <%= line301_row('cost_ok', Constants::TenderTypes::OK.join(','), false) %>,
+  <%= line301_row('cost_zk', Constants::TenderTypes::ZK.join(',')) %>,
+  <%= line301_row('cost_ok_etp', Constants::TenderTypes::OK.join(','), true) %>,
+  <%= line301_row('cost_oa', Constants::TenderTypes::OA, false) %>,
+  <%= line301_row('cost_za', Constants::TenderTypes::ZA) %>,
+  <%= line301_row('cost_oa_etp', Constants::TenderTypes::OA, true) %>,
+  <%= line301_ei_row('cost_ei', Constants::TenderTypes::ROSSTAT_EI.join(', ')) %>,
+  <%= line301_row('cost_other_o', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), false) %>,
+  <%= line301_row('cost_other_z', Constants::TenderTypes::ROSSTAT_OTHER_CLOSE.join(',')) %>,
+  <%= line301_row('cost_other_etp', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), true) %>
+<% end %>
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join winner_protocols wp on (l.winner_protocol_id = wp.id)
+  inner join winner_protocol_lots wpl on (wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id)
+  left join contracts c on (l.id = c.lot_id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+  left join contract_specifications cs on (cs.contract_id = c.id and cs.specification_id = s.id)
+  left join lots fr on (l.frame_id = fr.id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  left join plan_lots ppl on (pl.guid = ppl.guid and ppl.status_id = <%= Constants::PlanLotStatus::CANCELED %> and pl.version > ppl.version)
+<% if detail %>
+  <%= detail_join.html_safe %>
+<% end %>
+where t.tender_type_id not in (<%= Constants::TenderTypes::FRAMES.join(', ') %>)
+  And case when t.tender_type_id in (<%= Constants::TenderTypes::ROSSTAT_EI.join(', ') %>)
+           then c.confirm_date
+           else wp.confirm_date
+      end between :begin_date and :end_date
+  and l.root_customer_id = :customer
+  and c.parent_id is null
+  and pl.additional_to is null
+  And (
+    (l.status_id = <%= Constants::LotStatus::FAIL %> and (ppl.id is not null or cast(l.not_lead_contract as integer) = 1))
+     or
+     wpl.solution_type_id = <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>
+  )
+<% if detail %>
+  <%= additional_filter(col) %>
+<% end %>
+
+Group By l.id, t.tender_type_id, t.etp_address_id, pl.num_tender, t.num, l.frame_id, pl.num_lot, l.num, l.name,
+  wp.confirm_date, c.confirm_date, c.id <%= ", gkpz_pl.id" if detail %>
+<% unless detail %>
+) sub
+<% end %>

@@ -1,0 +1,24 @@
+ru:
+  activerecord: &contract_specification_form
+    models:
+      contract_specification: 'Спецификация договора'
+    attributes:
+      contract_specification: &contract_specification
+        cost: 'Цена, руб. без НДС'
+        cost_nds: 'Цена, руб. с НДС'
+        specification_id: 'Спецификация'
+        contract_id: 'Договор'
+        cost_money: 'Цена, руб. без НДС'
+        cost_nds_money: 'Цена, руб. с НДС'
+      contract_specifications:
+        <<: *contract_specification
+    errors:
+      models:
+        contract_specification:
+          attributes:
+            cost_money:
+              fail: "должна равняться сумме по финансированию за все года (стоимость спецификации: %{spec}, сумма по годам: %{summa})"
+            cost_nds_money:
+              fail: "должна равняться сумме по финансированию за все года (стоимость спецификации: %{spec}, сумма по годам: %{summa})"
+  activemodel:
+    <<: *contract_specification_form

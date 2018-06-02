@@ -1,0 +1,77 @@
+@columns.each_pair do |ckey, cvalue|
+  group["#{ckey}_total"] = 0 if cvalue[:sum]
+end
+
+@simple_sheet.add_row_title group['name'], style: @styles["group_row_h#{nesting_level}".to_sym], merge_count: 7
+
+if group.key?('children')
+  group['children'].each do |child|
+    render 'group_rows', group: child, nesting_level: nesting_level + 1, tender_types: tender_types
+    @columns.each_pair do |ckey, cvalue|
+      group["#{ckey}_total"] += child["#{ckey}_total"] || 0 if cvalue[:sum]
+    end
+  end
+end
+
+if group.key?('filter')
+  displayed_rows = 0
+  row_num = 0
+  first_row_merge = nil
+  last_row_merge = nil
+  row_begin = @sheet.rows.size
+
+  @report.part1_rows(group['filter'].merge(tender_type_id: tender_types)).each do |row|
+    displayed_rows = row['cnt_offers'] if displayed_rows == 0
+
+    is_first_row = displayed_rows == row['cnt_offers']
+
+    row_num += 1 if is_first_row
+
+    values = @columns.map do |c|
+      if is_first_row
+        c[0] == :c1 ? row_num : c[1][:value].call(row)
+      else
+        c[1][:no_merge] ? c[1][:value].call(row) : nil
+      end
+    end
+
+    excel_row = @sheet.add_row values, style: @column_styles, types: @column_types
+
+    if is_first_row
+      first_row_merge = excel_row
+      @columns.each_pair do |ckey, cvalue|
+        group["#{ckey}_total"] += cvalue[:value].call(row) || 0 if cvalue[:sum]
+      end
+    else
+      last_row_merge = excel_row
+    end
+
+    displayed_rows -= 1
+    if displayed_rows == 0 && row['cnt_offers'] > 1
+      @columns.each_with_index do |col, index|
+        first_row_merge.cells[index].merge last_row_merge.cells[index] unless col[1][:no_merge]
+      end
+    end
+  end
+
+  row_end = @sheet.rows.size
+
+  @outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }
+end
+
+if group.key?('sum_name')
+  values = @columns.map do |c|
+    if c[0] == :c1
+      group['sum_name']
+    else
+      if c[1][:sum]
+        c[1][:sum_value] ? c[1][:sum_value].call(group) : group["#{c[0]}_total"]
+      else
+        nil
+      end
+    end
+  end
+
+  row = @sheet.add_row values, style: @sum_styles
+  @sheet.merge_cells row.cells.first(7)
+end

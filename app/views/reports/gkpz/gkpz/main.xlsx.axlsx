@@ -1,0 +1,57 @@
+wb = xlsx_package.workbook
+
+# styles
+td = { border: Axlsx::STYLE_THIN_BORDER, alignment: { vertical: :center } }
+th = { b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: { horizontal: :center, vertical: :center, wrap_text: true } }
+money = { format_code: '#,##0.00' }
+date = { format_code: 'DD.MM.YYYY' }
+group = { bg_color: "CCFFFF", b: true, border: Axlsx::STYLE_THIN_BORDER }
+group_nz = { bg_color: "0070C0", b: true, border: Axlsx::STYLE_THIN_BORDER }
+title = { b: true, sz: 12, alignment: { horizontal: :center, vertical: :center, wrap_text: true } }
+sum = { bg_color: "87CEFA", b: true, border: Axlsx::STYLE_THIN_BORDER }
+wrap = { alignment: { wrap_text: true, vertical: :center } }
+percent = { bg_color: "87CEFA", b: true, border: Axlsx::STYLE_THIN_BORDER, format_code: "0.00%" }
+
+@style_td = wb.styles.add_style td
+@style_td_wrap = wb.styles.add_style td.merge(wrap)
+@style_th = wb.styles.add_style th
+
+@style_td_money = wb.styles.add_style td.merge(money)
+@style_th_money = wb.styles.add_style th.merge(money)
+
+@style_td_date = wb.styles.add_style td.merge(date)
+
+@style_group = wb.styles.add_style group
+@style_group_nz = wb.styles.add_style group_nz
+@style_group_money = wb.styles.add_style group.merge(money)
+@style_group_wrap = wb.styles.add_style group.merge(wrap)
+
+@style_title = wb.styles.add_style title
+
+@style_sum = wb.styles.add_style sum
+@style_sum_money = wb.styles.add_style sum.merge(money)
+
+@style_none = wb.styles.add_style
+@style_percent = wb.styles.add_style percent
+
+render 'reports/default_styles', wb: wb
+
+unless @report.divide_by_customers.to_b
+  wb.add_worksheet(name: "Сводная таблица") do |sheet|
+    render partial: 'gkpz_summary_sheet', locals: { sheet: sheet, groups: @report.groups[0]['children'] }
+  end
+
+  wb.add_worksheet(name: "ГКПЗ") do |sheet|
+    render 'list1', sheet: sheet
+  end
+
+  wb.add_worksheet(name: "Лоты") do |sheet|
+    render 'list2', sheet: sheet
+  end
+else
+  @report.result_rows_by_customers.each do |cust, rows|
+    wb.add_worksheet(name: "#{cust}") do |sheet|
+      render 'lots', sheet: sheet, customer_rows: rows
+    end
+  end
+end

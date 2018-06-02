@@ -1,0 +1,21 @@
+prefix = 'reports/gkpz/checklist.footer'
+
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.boss_main_org",holding: @holding_name), nil, nil, t("#{prefix}.sign"), nil, t("#{prefix}.sign_date")]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.approval"), t("#{prefix}.approval"), nil, t("#{prefix}.approval"), nil, t("#{prefix}.approval")]
+@sheet.add_row [t("#{prefix}.boss"), t("#{prefix}.economic_boss"), nil, t("#{prefix}.tender_boss"), nil, t("#{prefix}.economic_boss_main_org",holding: @holding_name)], style: @styles[:plain]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.sign"), t("#{prefix}.sign"), nil, t("#{prefix}.sign"), nil, t("#{prefix}.sign")]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.sign_date"), t("#{prefix}.sign_date"), nil, t("#{prefix}.sign_date"), nil, t("#{prefix}.sign_date")]
+@sheet.add_row
+@sheet.add_row [nil, nil, nil, t("#{prefix}.approval"), nil, t("#{prefix}.approval")]
+@sheet.add_row [nil, nil, nil, t("#{prefix}.tender_boss_main_org",holding: @holding_name), nil, t("#{prefix}.invest_boss_main_org",holding: @holding_name)], style: @styles[:plain]
+@sheet.add_row
+@sheet.add_row [nil, nil, nil, t("#{prefix}.sign"), nil, t("#{prefix}.sign")]
+@sheet.add_row
+@sheet.add_row [nil, nil, nil, t("#{prefix}.sign_date"), nil, t("#{prefix}.sign_date")]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.curator"), nil, nil, nil, nil, nil]
+@sheet.add_row [t("#{prefix}.phone_number"), nil, nil, nil, nil, nil]

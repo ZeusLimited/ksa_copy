@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_execute_gkpz_imp:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/execute_gkpz_imp: 'Еженедельный отчет по исполнению ГКПЗ (дополнительный)'
+    attributes:
+      reports/other/execute_gkpz_imp:
+        customers: 'Заказчики'
+        organizers: 'Организаторы'
+        date_begin: 'Дата начала'
+        date_end: 'Дата окончания'
+        date_gkpz_on_state: 'На дату'
+        gkpz_years: 'Год ГКПЗ'
+        format: 'Формат'
+  reports/other/execute_gkpz_imp:
+    row_titles:
+      report_title1: 'Еженедельный отчет по исполнению ГКПЗ'

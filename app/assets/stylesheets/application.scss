@@ -1,0 +1,290 @@
+/*
+ * This is a manifest file that'll be compiled into application.css, which will include all the files
+ * listed below.
+ *
+ * Any CSS and SCSS file within this directory, lib/assets/stylesheets, vendor/assets/stylesheets,
+ * or vendor/assets/stylesheets of plugins, if any, can be referenced here using a relative path.
+ *
+ * You're free to add application-wide styles to this file and they'll appear at the top of the
+ * compiled file, but it's generally better to create a new file per style scope.
+ */
+ @import "bootswatch/cerulean/variables";
+
+$bodyBackground: lighten($navbarBackground, 40%);
+$baseFontSize: 12px;
+$baseLineHeight: 15px;
+
+@import "bootstrap";
+
+body { padding-top: 60px; }
+
+@import "bootstrap-responsive";
+
+@import "bootswatch/cerulean/bootswatch";
+
+@import "select2";
+@import "jquery.minicolors";
+@import "dynatree/skin";
+@import "jquery-ui/datepicker";
+@import "jquery-ui/redmond";
+@import "suggestions";
+@import "markitup/skins/markitup/style";
+@import "markitup/sets/markdown/style";
+@import "plan_lots";
+@import "tasks";
+@import "tenders";
+@import "bidders";
+@import "bootstrap-timepicker";
+@import "open_protocols";
+@import "contractors";
+@import "expert_opinions";
+@import "unfair_contractors";
+@import "main_contacts";
+
+/*@import "base";*/
+
+.turbolinks-progress-bar {
+  height: 3px;
+  background-color: red;
+}
+
+.footer {
+  /*background-color: #F5F5F5;*/
+  border-top: 1px solid #E5E5E5;
+  margin-top: 20px;
+  padding: 20px 0;
+  /*text-align: center;*/
+}
+
+.plain {
+    background-color: #FFFFFF;
+    /*border: 2px  solid #CACACA;*/
+    padding: 10px 35px;
+}
+
+.table th.right-cell,
+.table td.right-cell {
+  text-align: right;
+}
+
+.table th.center-cell,
+.table td.center-cell {
+  text-align: center;
+}
+
+.table-center th {
+  text-align: center;
+}
+
+.table-report th {
+  background-color: #AAAAAA;
+}
+
+.simple {
+  background-color: White;
+  padding-top: 0px;
+}
+
+div.horizontal-scroll {
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+
+th.column-icon {
+  width: 15px;
+}
+
+th.column-btn {
+  width: 50px;
+}
+
+tr.pending {
+  background-color: #FCF8E3
+}
+
+
+tr.select {
+  background-color: #CAFFFF
+}
+
+tr.not-confirm {
+  background-color: #FFCAFF
+}
+
+tr.excluded {
+  background-color: #C2A385
+}
+
+tr.bold {
+  font-weight: bold;
+}
+
+body {
+  overflow-y: scroll;
+}
+
+
+.wrapped-text {
+    white-space: pre-wrap;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.subnav {
+    background-color: #EEEEEE;
+    background-image: -moz-linear-gradient(center top , #F5F5F5 0%, #EEEEEE 100%);
+    background-repeat: repeat-x;
+    border: 1px solid #E5E5E5;
+    border-radius: 4px 4px 4px 4px;
+    height: 36px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.subnav .nav > li > a {
+    border-left: 1px solid #F5F5F5;
+    border-radius: 0 0 0 0;
+    border-right: 1px solid #E5E5E5;
+    margin: 0;
+    padding-bottom: 11px;
+    padding-top: 11px;
+}
+
+
+.navbar .brand {
+    padding: 0px !important;
+}
+
+.navbar .cart-lots {
+    padding: 9px !important;
+}
+
+a {
+  cursor: pointer;
+}
+
+.affix {
+    border-color: #D5D5D5;
+    border-radius: 0 0 0 0;
+    border-width: 0 0 1px;
+    box-shadow: 0 1px 0 #FFFFFF inset, 0 1px 5px rgba(0, 0, 0, 0.1);
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 50px;
+    z-index: 1020;
+}
+
+.affix .nav {
+    width: 1168px;
+    margin: 0 auto;
+    padding: 0 1px;
+}
+
+.table-nonfluid {
+   width: auto;
+}
+
+.alternate {
+  #background-color: #A7DFF1;
+  #border: 1px solid #033C73;
+  padding-bottom: 10px;
+}
+
+.alternate-even {
+  background-color: #FFFFDB;
+}
+
+.even {
+  background-color: #FFFFDB;
+}
+
+.odd {
+
+}
+
+.large-font {
+  font-size: 16px;
+}
+
+.frame {
+  border: 1px solid #DDDDDD;
+  border-radius: 4px;
+  margin: 15px 0;
+  padding: 19px 19px 14px;
+  position: relative;
+}
+
+.markdown {
+  font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
+  position: relative;
+  margin-top: 1em;
+  margin-bottom: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.markdown h2 {
+  padding-bottom: 0.3em;
+  font-size: 1.75em;
+  line-height: 1.225;
+  border-bottom: 1px solid #eee;
+}
+
+.markdown h3 {
+  font-size: 1.5em;
+  line-height: 1.43;
+}
+
+.markdown h4 {
+  font-size: 1.25em;
+}
+
+.markdown img {
+  max-width: 100%;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.markdown li {
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.bgcolor-pink {
+  background-color: #FAAFBE !important;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+/*input {
+  height: 30px !important;
+}
+
+
+.def-width {
+  width: 240px !important;
+  height: 30px;
+}
+
+.btn {
+  font-weight: bold;
+}
+
+.attr {
+  width: 200px;
+}*/
+
+#loadImg {
+  position:absolute;
+  z-index:1000;
+  display:none
+}

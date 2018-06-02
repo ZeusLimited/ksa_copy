@@ -1,0 +1,28 @@
+render 'thead'
+
+customer_name = ""
+row_begin = @sheet.rows.size
+
+
+@report.part1_sql_rows.group_by { |r| r["customer_name"] }.each do |customer|
+  @simple_sheet.add_row_title customer[0], style: @styles[:group_row_h1]
+
+  row_begin = @sheet.rows.size
+
+  customer[1].each do |row|
+    values = @columns.values.map { |value| value[:value].call(row) }
+    @sheet.add_row values, style: @column_styles, types: @column_types
+  end
+
+  row_end = @sheet.rows.size
+
+  count = customer[1].map { |c| c["id"] }.uniq.count
+
+  group = Array.new(@columns.size)
+  group[0] = "Итого #{customer[0]}: #{count} #{t(:tender, count: count)}"
+  group[3] = AxlsxExt::Formula.sum_by_column('D', row_begin + 1, row_end)
+  group[4] = AxlsxExt::Formula.sum_by_column('E', row_begin + 1, row_end)
+  summary = @sheet.add_row group, style: @sum_styles
+  @sheet.merge_cells summary.cells.first(3)
+
+end

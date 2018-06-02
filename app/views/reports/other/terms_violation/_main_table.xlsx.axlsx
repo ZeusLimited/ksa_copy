@@ -1,0 +1,49 @@
+render 'main_head'
+
+displayed_rows = 0
+first_row_merge = nil
+last_row_merge = nil
+
+first_sum_row = @sheet.rows.size + 1
+
+@report.violation_sql_rows.each do |result_row|
+  displayed_rows = result_row['spec_cnt'] if displayed_rows == 0
+
+  is_first_row = displayed_rows == result_row['spec_cnt']
+
+  values = @columns.values.map do |val|
+    if is_first_row
+      val[:value].call(result_row)
+    else
+      val[:no_merge] ? val[:value].call(result_row) : nil
+    end
+  end
+
+  excel_row = @sheet.add_row values, style: @column_styles, types: @column_types
+
+  if is_first_row
+    first_row_merge = excel_row
+  else
+    last_row_merge = excel_row
+  end
+
+  displayed_rows -= 1
+  next unless displayed_rows == 0 && result_row['spec_cnt'] > 1
+  @columns.each_with_index do |col, index|
+    first_row_merge.cells[index].merge last_row_merge.cells[index] unless col[1][:no_merge]
+  end
+end
+
+last_sum_row = @sheet.rows.size
+
+sums = @columns.values.map do |val|
+  if val[:sum_title]
+    val[:sum_title]
+  elsif val[:formula]
+    val[:formula].call(first_sum_row, last_sum_row)
+  else
+    nil
+  end
+end
+
+@sheet.add_row sums, style: @sum_styles, types: @sum_types

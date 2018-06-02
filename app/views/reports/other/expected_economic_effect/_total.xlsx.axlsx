@@ -1,0 +1,56 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 7, @styles)
+@columns = Reports::Other::ExpectedEconomicEffect::TOT_COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@sum_styles = @columns.values.map do |c|
+  case c[:style]
+  when :td_money then @styles[:sum_money]
+  when :td_percent then @styles[:sum_percent]
+  else @styles[:sum]
+  end
+end
+
+@simple_sheet.add_row_title(t('.title', db: @report.date_begin, de: @report.date_end), style: @styles[:text_left_bold])
+
+sheet.add_row
+
+rows = @simple_sheet.add_rows_from_csv File.expand_path("../csv/tot_head.csv", __FILE__)
+rows[0].height = 60
+rows[1].height = 30
+
+row_begin = @sheet.rows.size
+
+@report.total_sql_rows.each do |row|
+  values = @columns.values.map do |value|
+    value[:value] ? value[:value].call(row) : value[:formula].call(@sheet.rows.size + 1)
+  end
+
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end
+
+row_end = @sheet.rows.size
+
+total = { start_index: row_begin + 1, end_index: row_end }
+
+values = @columns.map do |col_key, col_val|
+  if col_key == :c1
+    'Всего'
+  else
+    if col_val[:sum]
+      col_letter = col_val[:col]
+      if col_val[:sum_formula]
+        col_val[:formula].call(@sheet.rows.size + 1)
+      else
+        AxlsxExt::Formula.sum_by_column(col_letter, total[:start_index], total[:end_index])
+      end
+    else
+      nil
+    end
+  end
+end
+
+@sheet.add_row values, style: @sum_styles
+
+sheet.column_widths *@widths

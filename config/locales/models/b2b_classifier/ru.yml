@@ -1,0 +1,16 @@
+ru:
+  activerecord:
+    models:
+      b2b_classifier: 'Классификаторы B2b-center'
+    attributes:
+      b2b_classifier:
+        classifier_id: 'Id классификатора'
+        name: 'Наименование классификатора'
+    errors:
+      models:
+        b2b_classifier:
+          attributes:
+            classifier_id:
+              not_exist: 'не найден или не заполнен'
+            name:
+              not_exist: 'не найден или не заполнен'

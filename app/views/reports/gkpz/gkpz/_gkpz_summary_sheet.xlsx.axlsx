@@ -1,0 +1,67 @@
+@columns_count = 4
+@outlines = []
+
+values = Array.new(@columns_count)
+values[0] = "Сводные показатели проекта Годовой комплексной программы закупок товаров, работ, услуг"
+row = sheet.add_row values, style: @style_title
+sheet.merge_cells row.cells[0..3]
+
+values = Array.new(@columns_count)
+sheet.add_row values
+
+values = Array.new(@columns_count)
+values[0] = "Наименование раздела"
+values[1] = "Кол-во закупок"
+values[2] = "Стоимость (тыс. руб. без НДС)"
+values[3] = "Стоимость (тыс. руб. с НДС)"
+sheet.add_row values, style: @style_th
+
+def print_groups(sheet, groups)
+  sum_row_numbers = []
+  groups.each { |group| sum_row_numbers << print_group(sheet, group) }
+  sum_row_numbers
+end
+
+def print_group(sheet, group)
+  values = Array.new(@columns_count)
+  values[0] = group['name']
+  group_row = sheet.add_row(values, style: [@style_group_wrap, @style_group, @style_group_money, @style_group_money])
+
+  if group.key?('children')
+    sum_row_numbers = print_groups(sheet, group['children'])
+    group_row.cells[1].value = AxlsxExt::Formula.sum_numbers_by_column("B", sum_row_numbers)
+    group_row.cells[2].value = AxlsxExt::Formula.sum_numbers_by_column("C", sum_row_numbers)
+    group_row.cells[3].value = AxlsxExt::Formula.sum_numbers_by_column("D", sum_row_numbers)
+  end
+
+  if group.key?('filter')
+    rows = @report.total_rows(group['filter'])
+    row_begin = sheet.rows.size
+
+    @report.ref_tender_types.each do |type|
+      row = rows.select { |r| r[:ref_id] == type.ref_id }.first || {}
+      values = Array.new(@columns_count)
+      values[0] = type.fullname
+      values[1] = row[:cnt] || 0
+      values[2] = row[:cost] || 0.0
+      values[3] = row[:cost_nds] || 0.0
+      sheet.add_row(values, style: [@style_td_wrap, @style_td, @style_td_money, @style_td_money])
+    end
+    row_end = sheet.rows.size
+    group_row.cells[1].value = AxlsxExt::Formula.sum_by_column("B", row_begin + 1, row_end)
+    group_row.cells[2].value = AxlsxExt::Formula.sum_by_column("C", row_begin + 1, row_end)
+    group_row.cells[3].value = AxlsxExt::Formula.sum_by_column("D", row_begin + 1, row_end)
+    @outlines << { start_index: row_begin, end_index: row_end - 1, level: 1, collapsed: true }
+  end
+
+  group_row.row_index + 1
+end
+
+print_groups(sheet, groups)
+
+group = { "name" => "Итого по закупкам товаров, работ и услуг:", "filter" => {} }
+print_group(sheet, group)
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], o[:collapsed]) }
+
+sheet.column_widths 80, 12, 20, 20

@@ -1,0 +1,33 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 Список предложений участников для оценки
+
+table.table.table-bordered
+  thead
+    tr
+      th.center-cell Лоты
+      th.span2.center-cell Оферты
+      - @experts.each do |expert|
+        th = abbr(expert.user_surname, expert.user_fio_full)
+  tbody
+    - @tender.bidders.each do |bidder|
+      - if bidder.offers.count > 0
+        tr
+          = content_tag :td, colspan: @experts.size + 2, class: 'center-cell' do
+            h4= bidder.contractor_name_short
+        - @tender.lots.each do |lot|
+          - offers = lot.offers.where(bidder_id: bidder.id)
+          - offers_size = offers.size
+          - if offers_size > 0
+            - offers.each_with_index do |offer, index|
+              tr
+                = content_tag(:td, "<b>#{lot.fullname}</b>".html_safe, rowspan: offers_size) if index == 0
+                td= link_to(offer.num_text, tender_bidder_offer_path(@tender, bidder, offer), target: "_blank")
+                - @experts.each do |expert|
+                  td
+                    = link_to(content_tag(:i, '', class: 'icon-info-sign'),
+                      show_draft_tender_expert_opinion_path(@tender, offer, expert_id: expert.id))
+                    - if expert.user_id == current_user.id
+                      = link_to(content_tag(:i, '', class: 'icon-edit'),
+                        edit_draft_tender_expert_opinion_path(@tender, offer))

@@ -1,0 +1,11 @@
+= simple_form_for @okdp_sme_etp do |f|
+  = error_messages_for @okdp_sme_etp
+
+  .row
+    .span2
+      = f.input :code, input_html: { class: 'input-block-level' }
+    .span2 = f.input :okdp_type, collection: { 'ЕТП' => 'ЕТП', 'МСП' => 'МСП' }, include_blank: false, input_html: { class: 'input-block-level', data: { placeholder: 'Нет' } }
+
+  .form-actions.text-right
+    => f.submit t('save'), class: 'btn btn-primary'
+    = link_to t('cancel'), url_from_session_or_default(:okdp_sme_etps, okdp_sme_etps_path), class: 'btn input-small btn-warning'

@@ -1,0 +1,255 @@
+
+= my_simple_form_for plan_lot, url, http_method do |f|
+  = error_messages_for plan_lot
+
+  p
+  .row
+   .span2 = f.input :is_additional, as: :boolean, inline_label: true, label: false
+   .span2 = f.input :non_eis, as: :boolean, inline_label: true, label: false
+
+  br
+
+  .row
+    .span6
+      .additional
+        = f.input :additional_to_hex, label: false do
+          label = t('.additional_to')
+          = f.hidden_field :additional_to_hex, class: 'input-block-level'
+    .span2
+      .additional
+        = f.input :additional_num, input_html: { class: 'input-block-level' }
+    .span2
+      - if %w(new create).exclude?(action_name)
+        = f.input :state,
+          collection: t_enums('plan_lot_state'),
+          input_html: { class: 'input-block-level',
+            readonly: !plan_lot.can_edit_state?(current_user) }
+    .span2
+      - if %w(new create).include?(action_name)
+        = f.input :gkpz_year, collection: gkpz_years_range, include_blank: false,
+            input_html: { class: 'input-block-level' }
+      - else
+        = f.input :gkpz_year, input_html: { class: 'input-block-level', readonly: true }
+
+  .row
+    .span12
+      p#message_next_number.text-warning
+  .row
+    .span1 = f.input :num_tender, input_html: { class: 'input-block-level' }
+    .span1 = f.input :num_lot, input_html: { class: 'input-block-level' }
+    .span2
+      = f.input :announce_date, as: :string,
+        input_html: { value: f.object.announce_date, class: 'datepicker input-block-level okved-control okdp-control' }
+    .span2
+      = f.association :subject_type, collection: Dictionary.subject_types, include_blank: false,
+        input_html: { class: 'input-block-level', data: { placeholder: t('.subject') } },
+        include_blank: false
+    .span2
+      = f.input :tender_type_id do
+        = f.select :tender_type_id,
+          options_for_select(Dictionary.tender_types.map { |t| [t.name, t.id, { 'title' => t.fullname }] }, f.object.tender_type_id),
+          { include_blank: false },
+          class: 'select-title input-block-level',
+          data: { 'preselection' => Constants::TenderTypes::PO,
+                  'only-source-id' => Constants::TenderTypes::ONLY_SOURCE,
+                  'unregulated' => Constants::TenderTypes::UNREGULATED,
+                   url: for_type_regulation_items_url,
+                   placeholder: t('.tender_type') }
+
+    - tender_type = f.object.tender_type_id ? f.object.tender_type_id : Dictionary.tender_types.first.id
+    .span2
+      = f.association :etp_address,
+        collection: Dictionary.etp_addresses,
+        input_html: { class: 'input-block-level',
+                      data: { placeholder: t('.address_etp') } }
+    .span2
+      = f.input :regulation_item_id,
+        collection: RegulationItem.actuals.for_type(tender_type),
+        include_blank: true,
+        label_method: :num,
+        input_html: { class: 'input-block-level', data: { placeholder: t('.reg_item'), url: order1352_reg_item_dictionaries_url } }
+    - reg_item = f.object.regulation_item_id
+  .row.preselection
+    .span12
+      = f.input :preselection_guid_hex do
+        = f.hidden_field :preselection_guid_hex, class: 'input-block-level'
+  .row
+    .span4 = f.input :tender_type_explanations, as: :text, input_html: { class: 'input-block-level', rows: 4 }
+    .span4 = f.input :explanations_doc, as: :text, input_html: { class: 'input-block-level', rows: 4 }
+    .span4 = f.input :lot_name, as: :text, input_html: { class: 'main_form input-block-level', rows: 4 }
+
+  .row
+    .span4
+      = f.association :department,
+        collection: Department.organizers_by_root,
+        label_method: :name_with_depth_symbols,
+        include_blank: false,
+        input_html: { class: 'input-block-level', data: { url: for_organizer_commissions_path, placeholder: t('.orginizer') } }
+    - dep_id = f.object.department_id ? f.object.department_id : Department.organizers_by_root.first.id
+    .span4
+      = f.association :commission,
+        collection: Commission.for_organizer(dep_id),
+        input_html: { class: 'input-block-level', data: { placeholder: t('.commission_placeholder') } }
+
+    /- if current_user.can?(:edit_charge_date, plan_lot)
+      .span2
+        = f.input :charge_date, as: :string,
+          input_html: { value: f.object.charge_date, class: 'datepicker input-block-level' }
+    .span4
+      = f.association :sme_type,
+        collection: Dictionary.sme_types,
+        input_html: { class: 'input-block-level', data: { placeholder: t('.sme_type_placeholder') } }
+
+  .row
+    .span12
+      = f.input :order1352_id,
+        collection: Dictionary.order1352_special(reg_item),
+        label_method: :fullname,
+        include_blank: true,
+        input_html: { class: 'order1352-fullname input-block-level', data: { placeholder: t('.order_1352') } }
+
+  .row
+    .span3.offset9
+      = link_to t('.files'), '#assign_files', class: "btn btn-warning input-large pull-right", "data-toggle" => "modal"
+
+  = field_set_tag t('.potential_participants'), class: 'potential_contractors' do
+    - if f.object.plan_lot_contractors.size == 0 && f.object.preselection_guid.nil?
+      - f.object.render_minimum_contractors.times { |i| f.object.plan_lot_contractors.build }
+
+    = f.simple_fields_for :plan_lot_contractors do |builder|
+      = render 'plan_lot_contractor_fields', f: builder
+
+    = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + t('.add_participant'),
+      f,
+      :plan_lot_contractors,
+      "add_fields_plan_lot_contractor btn btn-success pull-right input-large"
+
+  - if f.object.plan_annual_limits.size == 0
+    - 1.times { |i| f.object.plan_annual_limits.build(year: plan_lot.gkpz_year + i) }
+
+
+  = field_set_tag t('.annual_limits'), class: 'annual-limits' do
+    = f.simple_fields_for :plan_annual_limits do |builder|
+      == render 'plan_annual_limit_fields', f: builder
+
+    .row
+      .span12
+        = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + t('.add_plan_annual_limit'),
+          f,
+          :plan_annual_limits,
+          "add-plan-annual-limit btn btn-success pull-right input-large"
+
+  = f.simple_fields_for :plan_specifications, @plan_lot.plan_specifications.sort_by(&:num_spec) do |builder|
+    = render 'plan_specification_fields', f: builder, gkpz_year: plan_lot.gkpz_year
+
+  .row
+    .span12
+      = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + t('.add_specification'),
+        f,
+        :plan_specifications,
+        locals: { gkpz_year: plan_lot.gkpz_year }
+
+  .form-actions
+    .pull-right
+      => link_to t('cancel'), url_from_session_or_default(:filter_path, plan_lots_url), class: 'btn btn-large'
+      = f.submit t('.submit'), class: 'btn btn-primary btn-large'
+
+  #assign_files.bootstrap-modal.modal.hide.fade
+    .modal-header
+      button.close data-dismiss="modal" &times;
+      h3 = t('.files')
+    .modal-body
+      = render "tender_files/field", area_id: Constants::TenderFileArea::PLAN_LOT, year: Time.now.year
+      table.table.table-hover.table-striped
+        thead
+          tr
+            th
+            th = t('.modal_files.file')
+            th = t('.modal_files.size')
+            th = t('.modal_files.type')
+            th = t('.modal_files.note')
+            th = t('.modal_files.load')
+            th = t('.modal_files.owner')
+        tbody#tender_files
+          = f.simple_fields_for :plan_lots_files do |builder|
+            = render 'plan_lots_file_fields', f: builder
+    .modal-footer
+      button.btn data-dismiss="modal" = t('.close')
+
+#select_okdp.bootstrap-modal.modal.hide.fade.modal-ip
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 = t('.select_okdp')
+  .modal-body
+    form.form-search
+      = text_field_tag "filter_okdp", nil, class: "input-xxlarge search-query"
+      = button_tag t('.filter'), id: "btn_filter_okdp", type: "button", class: "btn btn-inverse input-large"
+      = button_tag t('.cancel_filter'), id: "btn_reset_filter_okdp", type: "button", class: "btn btn-warning input-large"
+    #tree_okdp
+  .modal-footer
+    = button_tag t('.cancel'), class: "btn btn-warning input-large", data: { dismiss: "modal" }
+    = button_tag t('.select'), id: "btn_select_okdp", class: "btn btn-primary input-large"
+
+#select_okved.bootstrap-modal.modal.hide.fade.modal-ip
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 = t('.select_okved')
+  .modal-body
+    form.form-search
+      = text_field_tag "filter_okved", nil, class: "input-xxlarge search-query"
+      = button_tag t('.filter'), id: "btn_filter_okved", type: "button", class: "btn btn-inverse input-large"
+      = button_tag t('.cancel_filter'), id: "btn_reset_filter_okved", type: "button", class: "btn btn-warning input-large"
+    #tree_okved
+  .modal-footer
+    = button_tag t('.cancel'), class: "btn btn-warning input-large", data: { dismiss: "modal" }
+    = button_tag t('.select'), id: "btn_select_okved", class: "btn btn-primary input-large"
+
+#invest_projects.bootstrap-modal.modal.hide.fade.modal-max-width
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 = t('.select_ip')
+    form.form-search
+      = label_tag 'invest_department', t('.invest_department')
+      = select_tag 'invest_department',
+          options_from_collection_for_select(Department.rank_array(current_user.root_dept_id),
+                                             'id',
+                                             'name_with_depth_symbols', params[:department]),
+          class: 'input-xxlarge'
+      = content_tag(:a, t('.filter'), href: '#', id: 'filter_invest_projects', class: 'btn btn-inverse',
+        data: { 'filter-url' => filter_rows_for_select_invest_projects_path })
+  .modal-body
+    table.table.table-hover.table-bordered.table-striped
+      thead
+        tr
+          th= t('.ip.num')
+          th= t('.ip.name')
+          th= t('.ip.object_name')
+          th= t('.ip.date_install')
+          th= t('.ip.power')
+          th= t('.ip.amount_financing')
+          th &nbsp;
+      tbody#invest_rows
+  .modal-footer
+    = button_tag t('.cancel'), class: "btn btn-warning input-large", data: { dismiss: "modal" }
+    = button_tag t('.select'), id: "btn_select_invest", class: "btn btn-primary input-large"
+
+#order1352.bootstrap-modal.modal.hide.fade.modal-max-width
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 = t('.order1352')
+  .modal-body
+    table.table.table-bordered
+      thead
+        tr
+          th = PlanLot.human_attribute_name(:order1352_fullname)
+          th.span1
+      tbody
+        - Dictionary.order1352.each do |order|
+          tr
+            td= order.fullname
+            td
+              - unless order.id == Constants::Order1352::NOT_SELECT
+                = link_to t('.select'), '#', class: 'select_order1352 btn btn-warning',
+                  data: { id: order.id, fullname: order.fullname }
+  .modal-footer
+    = button_tag t('.cancel'), class: "btn btn-warning input-large", data: { dismiss: "modal" }

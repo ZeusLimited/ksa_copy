@@ -1,0 +1,33 @@
+tbody.specification.container-nds.calc-cost-nds
+  tr
+    = f.hidden_field :_destroy
+    = f.hidden_field :plan_specification_id
+    = f.hidden_field :prev_id
+    = f.hidden_field :frame_id
+    - if f.object.frame_id.present?
+      td rowspan="2"
+        = link_icon_title 'icon-remove', t('.remove_specification'), '#', data: { confirm: 'Вы уверены?' },
+          class: 'remove_specification_fields'
+      td rowspan="2" = f.object.num
+      td rowspan="2" = f.input :name, label: false, as: :text, input_html: { rows: 3, class: 'input-block-level' }
+    - else
+      td rowspan="2" = f.object.num
+      td rowspan="2" = f.object.name
+    td rowspan="2" = f.object.customer_name
+    td rowspan="2" = f.object.direction_name
+    - if can?(:change_public_cost, f.object)
+      td = f.input :qty, label: false, input_html: { class: 'input-block-level' }
+      td = f.input :cost_money, label: false, input_html: { class: 'cost input-block-level text-right money' }
+      td
+        = f.select :nds, Dictionary.nds_values.map { |n| [n.fullname, n.name] }, { include_blank: true },
+          class: 'nds input-block-level', data: { placeholder: t('.nds_placeholder') }
+      td = f.input :cost_nds_money, label: false, input_html: { class: 'cost_nds input-block-level text-right money' }
+    - else
+      td = f.object.count_with_unit
+      td.right-cell = p_money f.object.cost
+      td.right-cell = p_money f.object.nds
+      td.right-cell = p_money f.object.cost_nds
+  tr
+    td.span5 colspan="4"
+      = f.association :financing, collection: Dictionary.financing_sources, label: false,
+        input_html: { class: 'input-block-level' }

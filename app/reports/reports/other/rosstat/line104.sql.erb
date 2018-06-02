@@ -1,0 +1,36 @@
+-- line 104 Rosstat Part1
+select
+<% if detail %>
+  <%= detail_select.html_safe %>
+<% else %>
+  count(*) as num_all,
+  <%= line101_row('num_ok', Constants::TenderTypes::OK.join(','), false) %>,
+  <%= line101_row('num_zk', Constants::TenderTypes::ZK.join(',')) %>,
+  <%= line101_row('num_ok_etp', Constants::TenderTypes::OK.join(','), true) %>,
+  <%= line101_row('num_oa', Constants::TenderTypes::OA, false) %>,
+  <%= line101_row('num_za', Constants::TenderTypes::ZA) %>,
+  <%= line101_row('num_oa_etp', Constants::TenderTypes::OA, true) %>,
+  <%= line101_row('num_ei', Constants::TenderTypes::ROSSTAT_EI.join(', ')) %>,
+  <%= line101_row('num_other_o', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), false) %>,
+  <%= line101_row('num_other_z', Constants::TenderTypes::ROSSTAT_OTHER_CLOSE.join(',')) %>,
+  <%= line101_row('num_other_etp', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), true) %>
+<% end %>
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  inner join contracts c on (c.lot_id = l.id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+  left join lots fr on (l.frame_id = fr.id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  left join plan_lots ppl on (pl.guid = ppl.guid and ppl.status_id = <%= Constants::PlanLotStatus::CANCELED %> and pl.version > ppl.version)
+<% if detail %>
+  <%= detail_join.html_safe %>
+<% end %>
+Where t.tender_type_id not in (<%= Constants::TenderTypes::FRAMES.join(', ') %>)
+  And l.root_customer_id = :customer
+  And c.confirm_date between :begin_date and :end_date
+  And l.status_id = <%= Constants::LotStatus::CONTRACT %>
+  And c.parent_id is null
+  And pl.additional_to is null
+<% if detail %>
+  <%= additional_filter(col) %>
+<% end %>

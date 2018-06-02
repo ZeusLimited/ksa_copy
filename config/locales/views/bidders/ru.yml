@@ -1,0 +1,10 @@
+ru:
+  bidders:
+    index:
+      header: 'Участники'
+      bidder: 'Участник'
+      offers: 'Оферты участника'
+    show:
+      header: 'Просмотр информации по участнику'
+      documents: 'Документы %{bidder}'
+      cover_num: 'Конверт №%{num}'

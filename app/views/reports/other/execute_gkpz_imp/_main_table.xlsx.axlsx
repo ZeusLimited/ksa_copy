@@ -1,0 +1,49 @@
+@sheet.add_row
+
+render 'thead'
+
+row_end = 0
+row_begin = 0
+
+@report.part1_sql_rows.each do |result_row|
+  values = @columns.values.map do |val|
+    if val[:value]
+      val[:value].call(result_row)
+    else
+      val[:formula].call(@sheet.rows.size + 1)
+    end
+  end
+  @column_styles[0] = @styles[result_row[:style]]
+  @sheet.add_row values, style: @column_styles[result_row['style']], types: @column_types
+
+  if row_end > row_begin && result_row['style'] == 'sum' && @report.gkpz_years.count > 1
+    @outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }
+  end
+  row_begin = @sheet.rows.size if result_row['style'] == 'sum'
+  row_end = @sheet.rows.size if result_row['style'] == 'legal'
+end
+
+@sheet.add_row
+
+@simple_sheet.add_row_title('Справочно, прогноз по ЕИ', style: @styles[:text_left], columns_count: 1)
+
+@sheet.add_row
+render 'thead_2'
+
+row_end = 0
+row_begin = 0
+
+@report.part2_sql_rows.each do |result_row|
+  values = @columns_ei.values.map do |val|
+      val[:value].call(result_row)
+  end
+
+  @column_styles_ei[0] = @styles[result_row[:style]]
+  @sheet.add_row values, style: @column_styles_ei[result_row['style']], types: @column_types_ei
+
+  if row_end > row_begin && result_row['style'] == 'sum' && @report.gkpz_years.count > 1
+    @outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }
+  end
+  row_begin = @sheet.rows.size if result_row['style'] == 'sum'
+  row_end = @sheet.rows.size if result_row['style'] == 'legal'
+end

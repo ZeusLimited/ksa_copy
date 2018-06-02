@@ -1,0 +1,26 @@
+render 'thead'
+
+group = {}
+@columns.each_pair do |ckey, cvalue|
+  group["#{ckey}_total"] = 0 if cvalue[:sum]
+end
+
+@report.sme_sql_rows.each do |row|
+  @columns.each_pair { |ckey, cvalue| group["#{ckey}_total"] += cvalue[:value].call(row) || 0 if cvalue[:sum] }
+  values = @columns.values.map { |c| c[:value].call(row) }
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end
+
+values = @columns.map do |k, v|
+  if k == :c1
+    'ИТОГО по Разделам I,II'
+  else
+    v[:sum_value] ? v[:sum_value].call(group) : group["#{k}_total"]
+  end
+end
+
+row = @sheet.add_row values, style: @sum_styles
+
+@sheet.add_row
+@sheet.add_row [t('.order1352')]
+

@@ -1,0 +1,8 @@
+-
+  name: "<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_lot'>..</a>"
+-
+  name: 'contractor_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор контрагента'
+  required: true
+  example: '805671'

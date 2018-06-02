@@ -1,0 +1,26 @@
+@sheet = sheet
+render 'thead', sheet_name: 'sheet5', sheet: @sheet
+
+result = @report.slide5_sql_rows.first
+
+styles = [@styles[:td], @styles[:td_money], @styles[:td_money], @styles[:td_money], @styles[:td_money], @styles[:td_percent], @styles[:td_money], @styles[:td_percent]]
+types = [:string, :float, :float, :float, :string, :string, :string, :string]
+
+def table_row(result, field)
+  row_index = @sheet.rows.size + 1
+  [t(".#{Setting.company}.#{field[:name]}"),
+   result["#{field[:name]}_pcost_nds"],
+   result["#{field[:name]}_avg_cost"],
+   result["#{field[:name]}_fcost_nds"],
+   "=B#{row_index}-D#{row_index}",
+   "=IF(B#{row_index}=0,0,E#{row_index}/B#{row_index})",
+   "=C#{row_index}-D#{row_index}",
+   "=IF(C#{row_index}=0,0,G#{row_index}/C#{row_index})"
+  ]
+end
+
+@report.fields.each do |field|
+  @sheet.add_row table_row(result, field), style: styles, types: types
+end
+
+sheet.column_widths 40, 15, 15, 15, 15, 15, 15, 15

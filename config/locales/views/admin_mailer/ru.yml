@@ -1,0 +1,15 @@
+ru:
+  admin_mailer:
+    new_user_waiting_for_approval:
+      hello: 'Здравствуйте, в %{app_name} зарегистрировался новый пользователь: '
+      position: 'Должность: '
+      department: 'Предприятие, с которым хочет работать %{fio}: '
+      branch: 'Подразделение: '
+      wait: 'Он ожидает активации аккаунта!'
+      activate: 'Активировать'
+    user_approval:
+      hello: 'Здравствуйте, %{fio}'
+      activate: 'Ваша учетная запись в %{app_name} активирована.'
+      login: 'Ваш логин: '
+      welcome: 'Добро пожаловать в систему %{app_name}'
+      go_torg: 'Вход в систему'

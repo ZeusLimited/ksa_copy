@@ -1,0 +1,44 @@
+ru:
+  tender_data_maps:
+    default: &def
+      title: 'Информационная карта'
+      submit: 'Сохранить'
+      cancel: "Отмена"
+      edit: 'Редактировать'
+      offer_reception: 'Предоставление заявок'
+      offer_guarantie: 'Обеспечение заявок'
+      alternate_offers: 'Альтернативные предложения'
+      additional: 'Дополнительно'
+      b2b_classifiers: 'Классификаторы B2b-center'
+    show:
+      <<: *def
+    edit:
+      <<: *def
+    offer_reception: &offer_reception
+      offer_reception: 'Предоставление заявок'
+    offer_guarantie: &offer_guarantie
+      offer_guarantie: 'Обеспечение заявок'
+      num: 'Номер'
+      name: 'Наименование'
+      guarantie_cost: 'Размер обеспечения, руб.'
+    alternate_offers: &alternate_offers
+      alternate_offers: 'Альтернативные предложения'
+    additional: &additional
+      additional: 'Дополнительно'
+    b2b_classifiers: &b2b_classifiers
+      b2b_classifiers: 'Классификаторы B2b-center'
+    auction_step_increment: &auction_step_increment
+      auction_step_increment: 'Шаг аукциона'
+      step_increment: 'Шаг аукциона, %'
+    edit_offer_reception:
+      <<: *offer_reception
+    edit_offer_guarantie:
+      <<: *offer_guarantie
+    edit_alternate_offers:
+      <<: *alternate_offers
+    edit_additional:
+      <<: *additional
+    edit_auction_step_increment:
+      <<: *auction_step_increment
+    edit_b2b_classifiers:
+      <<: *b2b_classifiers

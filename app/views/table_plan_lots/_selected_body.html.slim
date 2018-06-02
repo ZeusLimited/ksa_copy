@@ -1,0 +1,4 @@
+- plan_lots.decorate.each do |plan_lot|
+  tr data-plan-lot-id=plan_lot.id
+    th = link_icon_title 'icon-remove', 'Убрать', '#', class: 'remove-from-selected'
+    = render 'table_plan_lots/center_body', plan_lot: plan_lot

@@ -1,0 +1,47 @@
+= field_set_tag nil, class: "frame offers nested-fields" do
+  = f.hidden_field :plan_lot_id
+
+  h4
+    = f.object.lot.name
+    = link_to_plan_lot(f.object.lot)
+  hr
+
+  = f.input :status_id, collection: Dictionary.offer_statuses_u, label: false,
+            include_blank: false, input_html: { class: 'input-medium offer-status' }
+
+  table.table.table-bordered
+    thead
+      tr
+        th.center-cell rowspan="2" Спецификация
+        th.center-cell colspan="2" Цена по извещению
+        th.center-cell colspan="2" Цена предложения
+      tr
+        th.center-cell без НДС
+        th.center-cell с НДС
+        th.center-cell без НДС
+        th.center-cell с НДС
+    tbody
+      = f.simple_fields_for :offer_specifications do |f_offer_specification|
+        = render 'offer_specification_fields', f: f_offer_specification
+
+  - f.object.build_contract unless f.object.contract
+  = field_set_tag 'Информация о договоре', class: "contract-info nested-fields" do
+    = f.simple_fields_for :contract do |f_contract|
+      = f_contract.hidden_field :_destroy
+      .row
+        .span2= f_contract.input :num, input_html: { class: 'input-block-level text-right' }
+        .span2
+          = f_contract.input :confirm_date, as: :string,
+            input_html: { value: f_contract.object.confirm_date, class: 'input-block-level datepicker' }
+        .span2
+          = f_contract.input :delivery_date_begin, as: :string,
+            input_html: { value: f_contract.object.delivery_date_begin, class: 'input-block-level datepicker' }
+        .span2
+          = f_contract.input :delivery_date_end, as: :string,
+            input_html: { value: f_contract.object.delivery_date_end, class: 'input-block-level datepicker' }
+
+      .row
+        .span4= f_contract.input :non_delivery_reason, as: :text, input_html: { rows: 2, class: 'input-block-level' }
+        .span5= f.input :non_contract_reason, as: :text, input_html: { rows: 2, class: 'input-block-level' }
+
+  = link_to_remove_association text_minus('Удалить оферту'), f, class: minus_default_classes

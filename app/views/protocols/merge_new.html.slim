@@ -1,0 +1,59 @@
+.page-header
+  h1 = t('.header')
+
+p.text-warning
+  = t('.warn')
+
+= simple_form_for @protocol, url: merge_create_protocols_path do |f|
+  = error_messages_for @protocol
+
+  = f.hidden_field :protocol_type
+  = f.hidden_field :gkpz_year
+
+  - @protocol.merge_ids.each do |m_id|
+    = f.hidden_field :merge_ids, multiple: true, value: m_id, id: nil
+
+  - dep_id = @protocol.commission.department_id
+  - commissions = @protocol.sd? ? Commission.confirm_group_sd(dep_id) : Commission.confirm_group(dep_id)
+
+  = field_set_tag t('.param_for_new') do
+    = render 'protocol_fields', f: f, commissions: commissions
+
+  = field_set_tag t('.files') do
+    = render "tender_files/field", area_id: Constants::TenderFileArea::PROTOCOL, year: Time.now.year
+
+    table.table.table-hover.table-striped
+      thead
+        tr
+          th
+          th = t('modal_files.file')
+          th = t('modal_files.size')
+          th = t('modal_files.note')
+          th = t('modal_files.load')
+          th = t('modal_files.owner')
+          th
+      tbody#tender_files
+        = f.simple_fields_for :protocol_files do |builder|
+          = render 'protocol_file_fields', f: builder
+
+  = field_set_tag t('.lots') do
+
+    table.table.table-hover.table-bordered.table-striped
+      thead
+        tr
+          th = Protocol.human_attribute_name(:num)
+          th = Protocol.human_attribute_name(:date_confirm)
+          th = Protocol.human_attribute_name(:format)
+          th = Protocol.human_attribute_name(:commission)
+          th = t('lot_count_short')
+      tbody
+        - @protocol.merge_protocols.includes(:commission, :format).each do |mprotocol|
+          tr
+            td = mprotocol.num
+            td = mprotocol.date_confirm
+            td = mprotocol.format_name
+            td = mprotocol.commission_name
+            td = mprotocol.plan_lots.count
+  .form-actions
+    => f.submit t('.merge'), class: 'btn btn-primary'
+    = link_to t('cancel'), url_from_session_or_default(:protocol_filter_path, protocols_path), class: 'btn'

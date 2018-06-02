@@ -1,0 +1,17 @@
+h3 = t('.additional')
+fieldset.frame
+  .row
+    .span2
+      = f.input :agency_contract_num, input_html: { class: 'input-block-level' }
+    .span2
+      = f.input :agency_contract_date, as: :string,
+        input_html: { value: f.object.offer_reception_stop, class: 'datepicker input-block-level' }
+    .span3
+      = f.input :hidden_offer, as: :select, input_html: { class: 'input-block-level' }
+    .span4
+      = f.input :price_begin_limited, as: :select, include_blank: false,
+        input_html: { class: 'input-block-level' }
+  - if tender.service_subject_type?
+    .row
+      .span4
+        = f.input :is_gencontractor, as: :select, input_html: { class: 'input-block-level' }

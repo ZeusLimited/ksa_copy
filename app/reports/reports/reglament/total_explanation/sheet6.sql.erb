@@ -1,0 +1,53 @@
+select
+  case when fact_cost_reg = 0 then 0 else fact_cost_etp / fact_cost_reg end as etp_dp,
+  case when fact_cost_reg = 0 then 0 else fact_cost_auction_etp / fact_cost_reg end as auction_dp,
+  case when fact_cost = 0 then 0 else fact_cost_ei / fact_cost end as ei_dp
+from (
+select
+ sum(case when t.etp_address_id != <%= Constants::EtpAddress::NOT_ETP %> then s.qty * s.cost_nds end) as fact_cost_etp,
+ sum(
+  case
+    when t.etp_address_id != <%= Constants::EtpAddress::NOT_ETP %> and
+         t.tender_type_id in (<%= Constants::TenderTypes::AUCTIONS.join(', ')%>)
+    then s.qty * s.cost_nds
+  end) as fact_cost_auction_etp,
+ sum(case
+      when t.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %> and
+           (ri.num = '5.11.1.5' or (ri.id is null and (pl.point_clause like '%5.9.1.4%' or pl.point_clause like '%5.11.1.5%')))
+      then s.qty * s.cost_nds end) as fact_cost_ei,
+ sum(s.qty * s.cost_nds) as fact_cost,
+ sum(case when t.tender_type_id != <%= Constants::TenderTypes::ONLY_SOURCE %> then s.qty * s.cost_nds end) as fact_cost_reg
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (fr.id = l.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+  left join regulation_items ri on pl.regulation_item_id = ri.id
+Where l.gkpz_year = :gkpz_year
+  And can.guid is null -- неотмененная
+  and t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+  and wp.confirm_date between :begin_date and :end_date
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+  <% end %>
+
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+  <% end %>
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+) sub

@@ -1,0 +1,6 @@
+head_rows = CSV.read('app/views/reports/gkpz/explanation_single_source/csv/head.csv')
+
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+
+rows[0].height = 70

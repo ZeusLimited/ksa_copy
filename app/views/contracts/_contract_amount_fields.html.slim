@@ -1,0 +1,17 @@
+fieldset.amounts
+  = f.hidden_field :_destroy
+
+  .row
+    .span1
+      = f.input :year, input_html: { value: f.object.year, class: 'input-block-level amount_year', readonly: true }
+    .span2
+      = f.input :amount_finance_money,
+        input_html: { value: f.object.amount_finance_money, class: 'input-block-level text-right money' }
+    .span2
+      = f.input :amount_finance_nds_money,
+        input_html: { value: f.object.amount_finance_nds_money,
+          class: 'input-block-level text-right money' }
+    .span3
+      label &nbsp;
+      = link_to content_tag(:i, '', class: 'icon-minus') + " Удалить год", '#',
+        class: "remove_amount_fields btn btn-danger pull-right input-large"

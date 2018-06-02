@@ -1,0 +1,6 @@
+render 'pivot_head'
+
+@report.part2_sql_rows.each do |row|
+  values = @columns.values.map { |value| value[:value].call(row) }
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end

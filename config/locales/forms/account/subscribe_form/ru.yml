@@ -1,0 +1,5 @@
+ru:
+  activerecord:
+    attributes:
+      account/subscribe_form:
+        theme: 'Тема'

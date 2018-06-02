@@ -1,0 +1,34 @@
+@sheet.add_row
+@sheet.add_row [report['period_name']], style: @styles[:title_left]
+
+render 'thead'
+
+rows = []
+results = {}
+
+report['children'].each do |efficiency_part|
+  selections = []
+  efficiency_part['children'].each do |selection|
+    selections << @report.select_lots(selection['filter']).to_hash.first
+  end
+  values = [
+    efficiency_part['part_name'],
+    Reports::Other::TendersEfficiency.row_calculation(selections.last,
+                                                      selections.first,
+                                                      efficiency_part['work_name'],
+                                                      @report.gkpz_years)
+  ]
+  rows << values
+  results[efficiency_part['work_name']] = values.last
+end
+
+head_values = [
+  report['common'],
+  Reports::Other::TendersEfficiency.head_calculation(results)
+]
+
+rows.unshift(head_values)
+
+rows.each do |row|
+  @sheet.add_row row, style: @column_styles, types: @column_types
+end

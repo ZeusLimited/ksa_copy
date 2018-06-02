@@ -1,0 +1,61 @@
+-- plan
+Select
+  decode(pl.main_direction_id, ps.direction_id, 1, 0) as plan_count,
+  decode(pl.main_direction_id, ps.direction_id, decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 0, 1), 0) as plan_count_etp,
+  sum(ps.qty * ps.cost) as plan_cost,
+  decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, 0, sum(ps.qty * ps.cost)) as plan_cost_etp,
+  pl.tender_type_id,
+  lower(pl.lot_name) as lot_name,
+  ps.direction_id
+From plan_lots pl
+  inner join plan_specifications ps on pl.id = ps.plan_lot_id
+  inner join (
+    Select id
+    From (
+      Select
+      pl.id, row_number() over (partition by pl.guid order by p.date_confirm desc, pl.version) as row_num
+      From plan_lots pl
+        inner join protocols p on p.id = pl.protocol_id
+        inner join commissions c on c.id = p.commission_id
+        left join (
+          Select distinct l.gkpz_year, l.root_customer_id
+          From plan_lots l
+            inner join protocols pr on l.protocol_id = pr.id
+          Where l.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %>
+            And pr.date_confirm <= :end_date
+        ) sd on (sd.root_customer_id = pl.root_customer_id and sd.gkpz_year = pl.gkpz_year)
+      Where p.date_confirm <= :end_date
+        And nvl2(sd.gkpz_year, c.commission_type_id, <%= Constants::CommissionType::SD %>) = <%= Constants::CommissionType::SD %>
+      ) sub
+      Where row_num = 1
+    ) gkpz_pl on gkpz_pl.id = pl.id
+Where pl.gkpz_year = :gkpz_year
+  And pl.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %>
+
+<% if customer.present? %>
+  And ps.customer_id in
+    (<%= Department.subtree_ids_for(customer).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  And pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  And ps.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  And ps.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  And pl.subject_type_id = <%= subject_type %>
+<% end %>
+
+Group By pl.id, pl.main_direction_id, ps.direction_id, pl.etp_address_id, pl.lot_name, pl.tender_type_id

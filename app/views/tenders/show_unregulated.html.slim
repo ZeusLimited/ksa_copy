@@ -1,0 +1,107 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li = link_to_session_or_default t('return_to_list'), :tenders_filter_path, tenders_path
+      li = link_to t('edit'), edit_unregulated_path(@tender)
+
+.page-header
+  h1
+    = t('.header')
+    =< link_to_history_icon(@tender)
+
+h3 = @tender.name
+
+table.table.table-nonfluid.table-bordered
+  tbody
+    tr
+      th.span3 = Tender.human_attribute_name(:num)
+      td = tender.num
+      th.span3 = Tender.human_attribute_name(:announce_date)
+      td = tender.announce_date
+    tr
+      th = Tender.human_attribute_name(:department_id)
+      td = tender.department_name
+      th = Tender.human_attribute_name(:user_id)
+      td = tender.user_fio_full
+    - if tender.show_official_num?
+      tr
+        th colspan="2" = Tender.human_attribute_name(:official_site_num)
+        td colspan="2"
+
+= link_to t('.files'), '#modal_files', class: "btn btn-warning pull-right", data: { toggle: "modal" }
+
+.clearfix
+
+= field_set_tag t('.lots') do
+
+  - @tender.lots.each do |lot|
+    = content_tag :div, class: cycle("even", "odd") + " frame", id: dom_id(lot) do
+
+      h3
+        => t('.lot', num: lot.num)
+        =< link_to_history_icon(lot)
+        = link_to_plan_lot(lot)
+      h4 = lot.name
+      hr
+
+      .row
+        = view_text_area('span5', lot, :non_public_reason)
+        = view_text_area('span5', lot, :note)
+
+= field_set_tag t('.bidders') do
+  - @tender.bidders.each do |bidder|
+
+    = field_set_tag nil, class: "coloring frame" do
+      h3 = link_to bidder.contractor_name_long, bidder.contractor
+      hr
+
+      - bidder.offers.each do |offer|
+
+        h3
+          = t('.offer', lot_num: offer.lot_num)
+          =< offer.decorate.label_status
+          =< link_to_plan_lot(offer.lot)
+        h4= offer.lot_name
+
+        table.table.table-bordered
+          thead
+            tr
+              th.center-cell rowspan="2" = t('.table.specification')
+              th.center-cell colspan="2" = t('.table.public_cost')
+              th.center-cell colspan="2" = t('.table.bid_cost')
+            tr
+              th.center-cell = t('.table.with_nds')
+              th.center-cell = t('.table.without_nds')
+              th.center-cell = t('.table.with_nds')
+              th.center-cell = t('.table.without_nds')
+          tbody
+            - offer.offer_specifications.each_with_index do |os, index_offer_spec|
+              tr
+                td = os.specification.fullname
+                td.right-cell = p_money os.specification.cost
+                td.right-cell = p_money os.specification.cost_nds
+                td = p_money os.final_cost
+                td = p_money os.final_cost_nds
+
+        - contract = offer.contract
+        - if contract
+          = field_set_tag t('.contract_info') do
+            .row
+              = view_text_field('span2', contract, :num)
+              = view_text_field('span2', contract, :confirm_date)
+              = view_text_field('span2', contract, :delivery_date_begin)
+              = view_text_field('span2', contract, :delivery_date_end)
+
+            .row
+              = view_text_area('span4', contract, :non_delivery_reason)
+              = view_text_area('span5', offer, :non_contract_reason)
+
+#modal_files.bootstrap-modal.modal.hide.fade
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 = t('.e_documents')
+  .modal-body
+    = render 'tender_files'
+  .modal-footer
+    = link_to t('edit'), edit_tender_path(tender, anchor: 'modal-files'), class: 'btn btn-warning'
+    button.btn.btn-info data-dismiss="modal" = t('.close')

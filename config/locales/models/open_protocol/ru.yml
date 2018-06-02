@@ -1,0 +1,16 @@
+ru:
+  activerecord:
+    models:
+      open_protocol: 'Протокол выскрытия конвертов'
+    attributes:
+      open_protocol:
+        num: 'Номер'
+        sign_date: 'Дата подписания'
+        sign_city: 'Город'
+        open_date: 'Дата время'
+        location: 'Место'
+        resolve: 'Решение'
+        tender_id: 'Закупка'
+        clerk_id: 'Секретарь ЗК'
+        commission_id: 'Коммиссия'
+        commission: 'Коммиссия'

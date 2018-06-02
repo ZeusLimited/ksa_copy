@@ -1,0 +1,16 @@
+head_rows = CSV.read('app/views/reports/other/agents_commission/csv/head.csv')
+head_rows_add = CSV.read('app/views/reports/other/agents_commission/csv/head_2.csv')
+
+add_cols = []
+(1..@add_count_columns).each do |col|
+  add_cols << "Участник #{col}"
+end
+head_rows.concat add_cols
+head_rows.concat head_rows_add
+
+head_rows = [head_rows.flatten]
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+
+rows[0].height = 50
+AxlsxExt::AutoMergeNil.merge_rows(rows)

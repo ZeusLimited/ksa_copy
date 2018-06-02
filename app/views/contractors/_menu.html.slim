@@ -1,0 +1,51 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to t('.list'), url_from_session_or_default(:filter_contractors, contractors_path)
+      li= link_to t('.edit'), edit_contractor_path(@contractor) if @contractor.can_edit?(current_user)
+      li= link_to t('.rename'), new_contractor_rename_path(@contractor) if @contractor.can_rename?(current_user)
+      - if @contractor.can_change_status?(current_user)
+        - if @contractor.active? || @contractor.inactive?
+          li
+            = link_to t('.to_new'),
+              change_status_contractor_path(@contractor, status: "orig"), method: :patch
+        - else
+          li
+            = link_to t('.to_actual'),
+              change_status_contractor_path(@contractor, status: "active"), method: :patch
+        - if @contractor.active? || @contractor.orig?
+          li
+            = link_to t('.to_inactive'),
+              change_status_contractor_path(@contractor, status: "inactive"), method: :patch
+      - if @contractor.can_delete?(current_user)
+        li = link_to t('.delete'), @contractor, method: :delete, data: { confirm: t('.confirm') }
+      li = link_to t('.prev'), contractor_path(@contractor.prev_id) if @contractor.prev_id
+      li = link_to t('.next'), contractor_path(@contractor.next_id) if @contractor.next_id
+
+.page-header
+  h1 = t('.show')
+
+h3 *unfair_contractor_html_attributes(@contractor)
+  = @contractor.name_short
+  =< link_to_history_icon(@contractor)
+
+- if @contractor.ogrn
+  .row
+    .span6
+      => link_to "https://focus.kontur.ru/entity?query=#{@contractor.ogrn}", target: :_blank, title: t('.no_official') do
+        i.icon-check
+        = t('.check')
+      br
+      span.text-error = t('.no_official')
+
+br
+.row
+  .span12.text-error
+      span.text-error == t('.reestr_msp')
+
+hr
+
+ul.nav.nav-tabs
+  = my_menu_item t('.profile'), contractor_path(@contractor), current_page?(contractor_path(@contractor))
+  = my_menu_item t('e_documents'), contractor_documents_path(@contractor), current_page?(contractor_documents_path(@contractor))
+  = my_menu_item t('.tenders'), tenders_contractor_path(@contractor), current_page?(tenders_contractor_path(@contractor))

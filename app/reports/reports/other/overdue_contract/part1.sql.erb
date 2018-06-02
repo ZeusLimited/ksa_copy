@@ -1,0 +1,86 @@
+select
+cust.name as customer_name,
+pl.num_tender || case when frames.id is not null then '.' || t.num else '' end || '.' || nvl(pl.num_lot, l.num) as lot_num,
+l.name as lot_name,
+tt.name
+  || decode(t.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, '', ' (ЭТП)')
+  || decode(wpl.solution_type_id, <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>, ' ЕИ', '')
+as tender_type_name,
+sum(case when pl.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else ps.qty * ps.cost end) as cost,
+sum(s.qty * os.final_cost) as winner_cost,
+contr.name || ' (' || ow.shortname || ')' as winner_name,
+wp.confirm_date as wp_confirm_date,
+c.confirm_date as contract_confirm_date,
+nvl(c.confirm_date, :end_date) - case CAST(t.contract_period_type as integer) when 1 then interval_business_date(wp.confirm_date, nvl(t.contract_period, 20))
+when 0 then wp.confirm_date + nvl(t.contract_period, 20) end as delta,
+o.non_contract_reason as non_contract_reason,
+l.id,
+t.contract_period_type
+from tenders t
+inner join lots l on t.id = l.tender_id
+inner join specifications s on l.id = s.lot_id
+inner join offer_specifications os on s.id = os.specification_id
+inner join offers o on o.id = os.offer_id and o.status_id = <%= Constants::OfferStatuses::WIN %> and o.version = 0
+inner join bidders b on (b.id = o.bidder_id)
+inner join contractors contr on (contr.id = b.contractor_id)
+left join ownerships ow on ow.id = contr.ownership_id
+inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+inner join winner_protocol_lots wpl on wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id
+inner join dictionaries tt on (tt.ref_id = t.tender_type_id)
+inner join departments cust on cust.id = s.customer_id
+
+left join lots frames on frames.id = l.frame_id
+
+inner join plan_lots pl on pl.id = nvl(l.plan_lot_id,frames.plan_lot_id)
+left join plan_specifications ps on pl.id = ps.plan_lot_id and ps.id = s.plan_specification_id
+
+left join contracts c on (c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+  group by tpl.guid
+) can on pl.guid = can.guid
+
+Where wp.confirm_date between :begin_date and :end_date
+  And can.guid is null -- неотмененная
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And l.gkpz_year = :gkpz_year
+  And (
+    (cast(t.contract_period_type as integer) = 1 and nvl(c.confirm_date, :end_date) > interval_business_date(wp.confirm_date, nvl(t.contract_period, 20)))
+    or
+    (cast(t.contract_period_type as integer) = 0 and nvl(c.confirm_date, :end_date) > wp.confirm_date + nvl(t.contract_period, 20))
+  )
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  and t.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  and s.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  and s.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  and l.subject_type_id = <%= subject_type %>
+<% end %>
+
+Group By l.id, pl.num_tender, frames.id, t.num, l.num, l.name, tt.name, t.etp_address_id, wpl.solution_type_id,
+  pl.tender_type_id, wp.confirm_date, c.confirm_date, contr.name, ow.shortname, cust.name,
+  pl.num_lot, o.non_contract_reason, t.contract_period, t.contract_period_type
+Order by cust.name, pl.num_tender, nvl(pl.num_lot, l.num), t.num

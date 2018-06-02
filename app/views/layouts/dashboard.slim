@@ -1,0 +1,31 @@
+doctype html
+html
+  head
+    meta charset="utf-8"
+    meta name="turbolinks-cache-control" content="no-cache"
+    title = content_for?(:title) ? yield(:title) : general_title
+    = csrf_meta_tags
+
+    / javascript_include_tag "//www.google.com/jsapi", "chartkick"
+
+    = stylesheet_link_tag('dashboard', media: 'all', 'data-turbolinks-track': 'reload')
+    = javascript_pack_tag('vendor-bundle', 'data-turbolinks-track': 'reload')
+    = javascript_pack_tag('app-bundle', 'data-turbolinks-track': 'reload')
+    = stylesheet_pack_tag('app-bundle', 'data-turbolinks-track': 'reload')
+
+    / Dadata Service
+    / = stylesheet_link_tag "https://cdn.jsdelivr.net/jquery.suggestions/17.2/css/suggestions.css"
+    / = javascript_include_tag "https://cdn.jsdelivr.net/jquery.suggestions/17.2/js/jquery.suggestions.min.js"
+
+    / For all other devices
+    / Size should be 32 x 32 pixels
+    = favicon_link_tag 'favicon4.ico', rel: 'shortcut icon'
+  body
+    .page-container
+      = render 'layouts/headers/default'
+      .page-content
+        nav.left-section
+          = react_component 'SideMenu'
+        main.main-section == yield
+
+    = redux_store_hydration_data

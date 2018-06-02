@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_tenders_result:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/tenders_result: 'Итоги закупочных процедур ПАО "Квадра"'
+    attributes:
+      reports/other/tenders_result:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        consumers: 'Потребитель'
+        subject_type: 'Предметы закупок'
+        gkpz_years: 'Годы ГКПЗ'
+        directions: 'Направления закупок'
+        tender_types: 'Способы закупок'
+        state: 'Состояние в ГКПЗ'
+        format: 'Формат'

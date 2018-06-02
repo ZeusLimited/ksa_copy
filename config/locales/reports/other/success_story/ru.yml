@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_success_story:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/success_story: 'Истории успеха'
+    attributes:
+      reports/other/success_story:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчик'
+        organizers: 'Организатор'
+        format: 'Формат'
+  reports:
+    other:
+      success_story:
+        detail:
+          detail_head: 'Детализация по победителю:'

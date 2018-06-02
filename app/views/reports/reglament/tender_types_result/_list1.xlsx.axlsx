@@ -1,0 +1,19 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 4)
+@outlines = []
+@holding_name = @report.holding_name
+
+@rows = Reports::Reglament::TenderTypesResult::ROWS
+
+@prefix = @report.class.to_s.underscore
+
+@sheet.add_row [nil, nil, nil, t("#{@prefix}.header.application")], style: @styles[:comment]
+@sheet.add_row [nil, nil, nil, t("#{@prefix}.header.note", holding: @holding_name)], style: @styles[:comment]
+
+@sheet.add_row
+@simple_sheet.add_row_title(Reports::Reglament::TenderTypesResult.model_name.human,
+                            style: @styles[:title], columns_count: 4)
+@sheet.add_row
+
+render 'main_table'
+

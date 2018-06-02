@@ -1,0 +1,16 @@
+<soapenv:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:WashOut">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <urn:create_contract soapenv:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+         <plan_lot_guid xsi:type="xsd:string">a6c6fea0a97859b2c1c7744b283eb7cc</plan_lot_guid>
+         <offer_id xsi:type="xsd:int">132539</offer_id>
+         <num xsi:type="xsd:string">123-456</num>
+         <reg_number xsi:type="xsd:string">НГ-09</reg_number>
+         <confirm_date xsi:type="xsd:date">15.12.2015</confirm_date>
+         <begin_date xsi:type="xsd:date">18.12.2015</begin_date>
+         <end_date xsi:type="xsd:date">20.12.2015</end_date>
+         <cost xsi:type="xsd:double">888.78</cost>
+         <cost_nds xsi:type="xsd:double">999.89</cost_nds>
+      </urn:create_contract>
+   </soapenv:Body>
+</soapenv:Envelope>

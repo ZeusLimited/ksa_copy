@@ -1,0 +1,52 @@
+.topnav
+  z-index: 1030
+  top: 0
+  left: 0
+  right: 0
+  overflow: hidden
+  margin-bottom: 15px
+  min-height: $navbar-height
+  background-color: $navbar-background-color
+  border: 1px solid #1990d5
+  padding: 0
+
+
+  ul
+    list-style: none
+    margin: 0 10px 0 0
+    padding: 0
+    display: block
+
+    li
+      display: block
+      line-height: 20px
+      float: left
+      &.divider
+        height: $navbar-height
+        margin: 0 9px
+        border-left: 1px solid #2FA4E7
+        border-right: 1px solid #54b4eb
+
+
+/* Style the links inside the navigation bar */
+.topnav a
+  float: left
+  display: block
+  margin: 0
+  padding: 16px 16px 14px 16px
+  text-align: center
+  text-decoration: none
+  color: #f2f2f2
+
+  &.brand
+    padding: 0
+
+  /* Change the color of links on hover */
+  &:hover
+    background-color: #1684c2
+    color: black
+
+/* Add a color to the active/current link */
+.topnav a.active
+  background-color: #1684c2
+  color: white

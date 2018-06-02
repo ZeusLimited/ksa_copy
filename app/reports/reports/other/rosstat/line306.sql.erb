@@ -1,0 +1,121 @@
+-- line 306 Rosstat Part1
+select
+<% if detail %>
+  num, name, gkpz_cost, plan_cost, protocol_confirm_date, contract_cost, fact_cost, contract_cost, contract_date
+<% else %>
+  coalesce(sum(cost_nds), 0) as cost_all,
+  <%= line306_row('cost_ok', Constants::TenderTypes::OK.join(','), false) %>,
+  <%= line306_row('cost_zk', Constants::TenderTypes::ZK.join(',')) %>,
+  <%= line306_row('cost_ok_etp', Constants::TenderTypes::OK.join(','), true) %>,
+  <%= line306_row('cost_oa', Constants::TenderTypes::OA, false) %>,
+  <%= line306_row('cost_za', Constants::TenderTypes::ZA) %>,
+  <%= line306_row('cost_oa_etp', Constants::TenderTypes::OA, true) %>,
+  <%= line306_row('cost_ei', Constants::TenderTypes::ROSSTAT_EI.join(', ')) %>,
+  <%= line306_row('cost_other_o', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), false) %>,
+  <%= line306_row('cost_other_z', Constants::TenderTypes::ROSSTAT_OTHER_CLOSE.join(',')) %>,
+  <%= line306_row('cost_other_etp', Constants::TenderTypes::ROSSTAT_OTHER_OPEN.join(','), true) %>
+<% end %>
+from (
+select
+<% if detail %>
+  ppl.num_tender || nvl2(pl.frame_id, '.' || pt.num, '') || '.' ||
+    nvl2(pl.frame_id, pl.num, ppl.num_lot) as num,
+  pl.name,
+  sum(case when pt.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else
+  (
+    select gkpz_ps.qty * gkpz_ps.cost_nds
+    from plan_specifications gkpz_ps
+    where gkpz_ps.plan_lot_id = gkpz_pl.id and gkpz_ps.guid = pps.guid
+  ) end)  as gkpz_cost,
+  sum(s.qty * s.cost_nds) as plan_cost,
+  wp.confirm_date as protocol_confirm_date,
+  sum(s.qty * (select os.final_cost_nds from offers o
+      inner join offer_specifications os on (os.offer_id = o.id)
+      where o.version = 0 and s.id = os.specification_id and o.status_id = 26004)) as fact_cost,
+  c.confirm_date as contract_date,
+  sum(s.qty * cs.cost_nds) as contract_cost,
+  pl.frame_id
+<% else %>
+t.tender_type_id,
+t.etp_address_id,
+sum(s.qty * cs.cost_nds) as cost_nds
+<% end %>
+from tenders pt
+  inner join lots pl on (pt.id = pl.tender_id)
+  inner join specifications s on (pl.id = s.lot_id)
+  inner join contracts c on (pl.id = c.lot_id and c.type_id = 37001)
+  inner join contract_specifications cs on (cs.contract_id = c.id and cs.specification_id = s.id)
+  inner join contracts p on (c.parent_id = p.id)
+  inner join lots l on (l.id = p.lot_id)
+  inner join tenders t on (t.id = l.tender_id)
+  inner join winner_protocols wp on (wp.id = pl.winner_protocol_id)
+  left join lots fr on (pl.frame_id = fr.id)
+  inner join plan_lots ppl on (ppl.id = nvl(pl.plan_lot_id, fr.plan_lot_id))
+  left join plan_specifications pps on (pps.plan_lot_id = ppl.id and pps.id = s.plan_specification_id)
+  left join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+     where rn = 1) gkpz_pl on (ppl.guid = gkpz_pl.guid)
+Where pt.tender_type_id not in (<%= Constants::TenderTypes::FRAMES.join(', ') %>)
+  and pl.status_id = <%= Constants::LotStatus::CONTRACT %>
+  and c.confirm_date between :begin_date and :end_date
+  and pl.root_customer_id = :customer
+<% if detail %>
+  <%= additional_filter(col) %>
+<% end %>
+Group By pl.id, t.tender_type_id, t.etp_address_id, ppl.num_tender, pt.num, pl.frame_id, ppl.num_lot, pl.num, pl.name,
+  wp.confirm_date, c.confirm_date, c.id <%= ", gkpz_pl.id" if detail %>
+Union All
+select
+<% if detail %>
+  ppl.num_tender || nvl2(l.frame_id, '.' || t.num, '') || '.' ||
+    nvl2(l.frame_id, l.num, ppl.num_lot) as num,
+  l.name,
+  sum(case when t.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else
+  (
+    select gkpz_ps.qty * gkpz_ps.cost_nds
+    from plan_specifications gkpz_ps
+    where gkpz_ps.plan_lot_id = gkpz_pl.id and gkpz_ps.guid = pps.guid
+  ) end ) as gkpz_cost,
+  sum(s.qty * s.cost_nds) as plan_cost,
+  wp.confirm_date as protocol_confirm_date,
+  sum(s.qty * (select os.final_cost_nds from offers o
+      inner join offer_specifications os on (os.offer_id = o.id)
+      where o.version = 0 and s.id = os.specification_id and o.status_id = 26004)),
+  c.confirm_date,
+  -sum(s.qty * cs.cost_nds),
+  l.frame_id
+<% else %>
+  t.tender_type_id,
+  t.etp_address_id,
+  -sum(s.qty * cs.cost_nds)
+<% end %>
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join contracts c on (l.id = c.lot_id and c.type_id = 37002)
+  inner join contract_specifications cs on (cs.contract_id = c.id and cs.specification_id = s.id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (l.frame_id = fr.id)
+  inner join plan_lots ppl on (ppl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  left join plan_specifications pps on (pps.plan_lot_id = ppl.id and pps.id = s.plan_specification_id)
+  left join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+     where rn = 1) gkpz_pl on (ppl.guid = gkpz_pl.guid)
+Where t.tender_type_id not in (<%= Constants::TenderTypes::FRAMES.join(', ') %>)
+  and l.status_id = <%= Constants::LotStatus::CONTRACT %>
+  and c.confirm_date between :begin_date and :end_date
+  and l.root_customer_id = :customer
+<% if detail %>
+  <%= additional_filter(col) %>
+<% end %>
+Group By l.id, t.tender_type_id, t.etp_address_id, ppl.num_tender, t.num, l.frame_id, ppl.num_lot, l.num, l.name,
+  wp.confirm_date, c.confirm_date, c.id <%= ", gkpz_pl.id" if detail %>
+) sub

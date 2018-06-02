@@ -1,0 +1,28 @@
+ru:
+  reports/reglament/mounthly_analysis:
+    header_raoesv: 'Ежемесячный анализ исполнения ГКПЗ ДЗО ПАО "РусГидро" - %{customer}'
+    table_rows:
+      row1:
+        num: '1'
+        name: 'План по ГКПЗ 201_ года, в т.ч.:'
+      row2:
+        num: '1.1'
+        name: 'текущая деятельность'
+      row3:
+        num: '1.2'
+        name: 'инвестиционная деятельность'
+  helpers:
+    submit:
+      reports_reglament_mounthly_analysis:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/mounthly_analysis: 'Ежемесячный анализ исполнения ГКПЗ'
+    attributes:
+      reports/reglament/mounthly_analysis:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        gkpz_years: 'Годы ГКПЗ'
+        customers: 'Заказчики'
+        organizers: 'Организаторы'
+        format: 'Формат'

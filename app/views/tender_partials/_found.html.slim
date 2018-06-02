@@ -1,0 +1,30 @@
+- cart = current_user.lots.pluck(:lot_id)
+
+table.table.table-bordered.tenders_list
+  thead
+    tr
+      th
+      = render 'tender_partials/center_head'
+      th.column-icon
+  - tenders.decorate.each do |tender|
+    tbody
+      tr *tender.title_row_class
+        td
+        = render 'tender_partials/center_caption', tender: tender
+        td
+          = link_icon_title_if can?(:destroy, tender.object), 'icon-trash', t('.delete'), tender,
+            method: :delete, data: { confirm: t('.confirm') }
+      - tender.lots.select { |l| current_user.can?(:read, l.object) }.sort_by { |l| [l.num, l.sublot_num] }.each_with_index do |lot, index|
+        = render 'tender_partials/control_row', colspan: "12" if index == 5
+        tr class=(index >= 5 ? "hidden_row" : "")
+          td
+            - if cart.include?(lot.id)
+              = content_tag :a, data: { lot_id: lot.id }, class: 'remove-from-cart-lots' do
+                = image_tag("16bag_select.png", alt: t('.cart'), title: t('.remove_from_cart'))
+            - else
+              = content_tag :a, data: { lot_id: lot.id }, class: 'add-to-cart-lots' do
+                = image_tag("16bag.png", alt: t('.cart'), title: t('.add_to_cart'))
+          = render 'tender_partials/center_body', tender: tender, lot: lot
+          td
+            = link_icon_title_if lot.plan_lot_id, 'icon-search', t('.search_in_plan'),
+              plan_lots_path(lot.search_plan_lots_params)

@@ -1,0 +1,16 @@
+= field_set_tag f.object.specification_fullname, class: "specifications" do
+  = f.hidden_field :specification_id
+  .row
+    = view_text_field('span1', f.object.specification, :qty, f.object.specification.count_with_unit)
+    .span2= f.input :cost_money, input_html: { class: "input-medium text-right money" }
+    .span2= f.input :cost_nds_money, input_html: { class: "input-medium text-right money" }
+
+  - if f.object.contract_amounts.size == 0
+    - f.object.contract_amounts.build(year: lot.gkpz_year)
+
+  = field_set_tag "Объем обязательств по финансированию" do
+    = f.simple_fields_for :contract_amounts do |builder|
+      = render 'contracts/contract_amount_fields', f: builder
+  .row
+    .span8
+      = link_to_add_fields content_tag(:i, '', class: 'icon-plus') + ' Добавить год', f, :contract_amounts, "add_field_amount btn btn-success pull-right input-large"

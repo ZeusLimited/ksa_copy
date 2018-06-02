@@ -1,0 +1,156 @@
+wb = xlsx_package.workbook
+
+# styles
+td = { border: Axlsx::STYLE_THIN_BORDER, alignment: { vertical: :center } }
+th = { b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: { horizontal: :center, vertical: :center, wrap_text: true } }
+align_left_middle = { alignment: { horizontal: :left, vertical: :center } }
+money = { format_code: '#,##0.00' }
+date = { format_code: 'DD.MM.YYYY' }
+grey = { bg_color: "C0C0C0" }
+group = { bg_color: "CCFFFF", b: true, border: Axlsx::STYLE_THIN_BORDER }
+group_nz = { bg_color: "0070C0", b: true, border: Axlsx::STYLE_THIN_BORDER }
+title = { b: true, sz: 12, alignment: { horizontal: :center, vertical: :center, wrap_text: true } }
+sum = { bg_color: "87CEFA", b: true, border: Axlsx::STYLE_THIN_BORDER }
+wrap = { alignment: { wrap_text: true, vertical: :center } }
+
+@style_td = wb.styles.add_style td
+@style_td_wrap = wb.styles.add_style td.merge(wrap)
+@style_th = wb.styles.add_style th
+@style_th_left = wb.styles.add_style th.merge(align_left_middle)
+@style_th_grey = wb.styles.add_style th.merge(grey)
+
+@style_td_money = wb.styles.add_style td.merge(money)
+@style_th_money = wb.styles.add_style th.merge(money)
+
+@style_td_date = wb.styles.add_style td.merge(date)
+
+@style_group = wb.styles.add_style group
+@style_group_nz = wb.styles.add_style group_nz
+@style_group_money = wb.styles.add_style group.merge(money)
+@style_group_wrap = wb.styles.add_style group.merge(wrap)
+
+@style_title = wb.styles.add_style title
+
+@style_sum = wb.styles.add_style sum
+@style_sum_money = wb.styles.add_style sum.merge(money)
+
+@style_none = wb.styles.add_style
+
+head_rows = CSV.read('app/views/reports/gkpz/gkpz_oos/csv/head.csv', col_sep: ';')
+
+wb.add_worksheet(name: "ГКПЗ ЕИС") do |sheet|
+  sheet.add_row []
+  sheet.add_row [nil, nil, nil, nil, "План закупок товаров (работ, услуг)"], style: @style_title
+  sheet.add_row []
+
+  @columns_count = 4
+
+  styles = Array.new(@columns_count) { @style_th_left }
+  styles[0] = @style_none
+
+
+  customer = @rep_gkpz_oos.customer.present? ? Department.find(@rep_gkpz_oos.customer[0]) : nil
+
+  if customer
+    rows = []
+    rows << sheet.add_row([nil, "Наименование заказчика", nil, customer.fullname], style: styles)
+    rows << sheet.add_row([nil, "Адрес местонахождения заказчика", nil, customer.contact_legal_fias_name], style: styles)
+    rows << sheet.add_row([nil, "Телефон заказчика", nil, customer.contact_phone], style: styles)
+    rows << sheet.add_row([nil, "Электронная почта заказчика", nil, customer.contact_email], style: styles)
+    rows << sheet.add_row([nil, "ИНН", nil, customer.inn], style: styles)
+    rows << sheet.add_row([nil, "КПП", nil, customer.kpp], style: styles)
+    rows << sheet.add_row([nil, "ОКАТО", nil, customer.contact_legal_fias_okato], style: styles, types: :string)
+
+    rows.each { |row| sheet.merge_cells row.cells[1..2] }
+
+    3.times { sheet.add_row [] }
+  end
+
+  @columns_count = 16
+
+  money_cols = [10, 11]
+  date_cols = [12, 13]
+  string_cols = [1, 2, 5, 8]
+
+  @outlines = []
+
+  rows = []
+  head_rows.each { |head_row| rows << sheet.add_row(head_row, height: 60, style: @style_th_grey) }
+  AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+  quarter_rows = []
+
+  row_num = 0
+  (1..4).each do |quarter|
+    specs = @rep_gkpz_oos.get_gkpz_rows(quarter)
+
+    row_begin = sheet.rows.size
+    row_end = row_begin + specs.size
+
+    values = Array.new(@columns_count)
+    values[0] = "#{quarter} квартал #{@rep_gkpz_oos.gkpz_year} г."
+    values[10] = specs.size > 0 ? AxlsxExt::Formula.sum_by_column('K', row_begin + 2, row_end + 1) : 0
+    values[11] = specs.size > 0 ? AxlsxExt::Formula.sum_by_column('L', row_begin + 2, row_end + 1) : 0
+
+    styles = Array.new(@columns_count) { @style_group }
+    money_cols.each { |i| styles[i] = @style_group_money }
+
+    sheet.add_row values, style: styles
+
+    @outlines << { start_index: row_begin + 1, end_index: row_end, level: 1, collapsed: true }
+
+    quarter_rows << sheet.rows.size
+
+    specs.each_with_index do |spec, i|
+      row_num += 1 if spec['span'] == 1 || spec['rn'] == 1
+
+      styles = Array.new(@columns_count) { @style_td_wrap }
+      money_cols.each { |i| styles[i] = @style_td_money }
+      date_cols.each { |i| styles[i] = @style_td_date }
+
+      types = Array.new(@columns_count)
+      string_cols.each { |i| types[i] = :string }
+
+      sheet.add_row [
+        row_num,
+        spec['okved_code'],
+        spec['okdp_code'],
+        spec['lot_name'].try(:strip),
+        spec['requirements'],
+        spec['unit_code'],
+        spec['unit_name'],
+        spec['qty'],
+        spec['fias_okato'],
+        spec['fias_name'],
+        spec['cost'],
+        spec['cost_nds'],
+        spec['announce_date'].try(:to_date),
+        spec['delivery_date_end'].try(:to_date),
+        spec['type_name'],
+        spec['is_elform']
+      ], style: styles, types: types
+
+      if spec['is_merge'] == 1
+        (0..(@columns_count - 1)).each do |col_i|
+          unless [8, 9].include?(col_i)
+            cell1 = sheet.rows[-spec['span']].cells[col_i]
+            cell2 = sheet.rows.last.cells[col_i]
+            cell1.merge cell2
+          end
+        end
+      end
+    end
+  end
+
+  styles = Array.new(@columns_count) { @style_sum }
+  money_cols.each { |i| styles[i] = @style_sum_money }
+
+  values = Array.new(@columns_count)
+  values[0] = "Итого:"
+  values[10] = AxlsxExt::Formula.sum_numbers_by_column('K', quarter_rows)
+  values[11] = AxlsxExt::Formula.sum_numbers_by_column('L', quarter_rows)
+  sheet.add_row values, style: styles
+
+  @outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], o[:collapsed]) }
+  sheet.column_widths 20, 20, 20, 60, 40, 10, 20, 15, 20, 40, 20, 20, 15, 15, 10, 10
+end

@@ -1,0 +1,76 @@
+--part5.sql
+select
+<% if detail.present? %>
+  pl.num_tender || (case when fr.id is not null then '.' || t.num else '' end) || '.'
+    || (case when fr.id is not null then l.num else pl.num_lot end) as tender_num,
+  l.name,
+  tt.name || decode(t.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, '', ' (ЭТП)') as tender_type_name,
+  coalesce(sum(case when c.confirm_date >= :begin_date then cs.cost_nds * s.qty else 0 end), 0) as cost_nds,
+  coalesce(sum(case when c.confirm_date >= :begin_date then cs.cost * s.qty else 0 end), 0) as cost,
+  <%= ActiveRecord::Base.concatinate("con.name || ' (' || ow.shortname || ')'", "'\n'", "con.name, ow.shortname").html_safe %> as contractors,
+  c.num, to_char(c.confirm_date, 'dd.mm.yyyy') as confirm_date,
+  coalesce(sum(case when EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance_nds else 0 end), 0) as cost_amount_nds,
+  coalesce(sum(case when EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance else 0 end), 0) as cost_amount,
+  case when c.confirm_date >= :begin_date then 1 else 0 end as is_current,
+  case when EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null then 1 else 0 end as is_ca
+<% else %>
+  coalesce(sum(case when c.confirm_date >= :begin_date then cs.cost_nds * s.qty else 0 end), 0) as cost_nds,
+  coalesce(sum(case when c.confirm_date >= :begin_date then cs.cost * s.qty else 0 end), 0) as cost,
+  count(distinct case when c.confirm_date >= :begin_date then c.id else null end) as cnt,
+  coalesce(sum(case when EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance_nds else 0 end), 0) as cost_amount_nds,
+  coalesce(sum(case when EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance else 0 end), 0) as cost_amount,
+  count(distinct(case when EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null then c.id else null end)) as cnt_amount
+<% end %>
+from tenders t
+  inner join lots l on (l.tender_id = t.id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join offers o on o.lot_id = l.id and o.status_id = <%= Constants::OfferStatuses::WIN %> and o.version = 0
+  inner join contracts c on c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %>
+  inner join contract_specifications cs on (cs.specification_id = s.id and cs.contract_id = c.id)
+  left join lots fr on (fr.id = l.frame_id)
+  left join specifications frs on (frs.id = s.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  inner join plan_specifications ps on (ps.id = nvl(s.plan_specification_id, frs.plan_specification_id) and ps.plan_lot_id = pl.id)
+  inner join dictionaries tt on (tt.ref_id = t.tender_type_id)
+
+  inner join lateral
+    (select * from
+      (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and pl.guid = tpl.guid and tp.date_confirm <= :end_date
+        where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) tpl2
+       where rn = 1) gkpz_pl on true
+
+  inner join plan_specifications gkpz_ps on (gkpz_pl.id = gkpz_ps.plan_lot_id and gkpz_ps.guid = ps.guid)
+  inner join bidders b on (b.id = o.bidder_id)
+  inner join contractors con on (con.id = b.contractor_id and Cast(con.is_sme as integer) = 1)
+  left join ownerships ow on ow.id = con.ownership_id
+  left join contract_amounts ca on ca.contract_specification_id = cs.id and ca.year = date_part('year', timestamp :end_date)
+
+Where c.confirm_date <= :end_date
+
+  And t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+  And gkpz_pl.order1352_id = <%= Constants::Order1352::SELECT %>
+  And l.sme_type_id = <%= Constants::SmeTypes::SME %>
+  
+<% if customers.present? %>
+  And s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if current_user_root_dept_id.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if detail.present? %>
+  Group By l.id, pl.num_tender, fr.id, t.num, l.num,pl.num_lot, l.name, tt.name, t.etp_address_id, c.num, c.confirm_date
+           ,case when EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null then 1 else 0 end
+  Order By pl.num_tender, (case when fr.id is not null then t.num else '' end),
+    (case when fr.id is not null then l.num else pl.num_lot end)
+<% end %>

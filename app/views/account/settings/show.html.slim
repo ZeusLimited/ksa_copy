@@ -1,0 +1,9 @@
+== render 'shared/lk'
+
+- @settings.each do |setting|
+  table.table.table-nonfluid
+    tbody
+      tr
+        th.span3 = t(".#{setting.var}")
+        td.span2 = setting.value
+        td.column-icon = link_edit edit_account_settings_path(id: setting.var)

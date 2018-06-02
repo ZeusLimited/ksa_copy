@@ -1,0 +1,7 @@
+:verbose: false
+:pidfile: ./tmp/pids/sidekiq.pid
+:logfile: ./log/sidekiq.log
+staging:
+  :concurrency: 2
+production:
+  :concurrency: 3

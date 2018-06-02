@@ -1,0 +1,26 @@
+update_cost_fields = (event) ->
+  unless $('#offer_rebidded').prop('checked')
+    $(this).closest(event.data.closest_tag).find(event.data.update_field).val($(this).val())
+
+change_final_conditions = ->
+  if $('#offer_rebidded').prop( "checked" )
+    $('#offer_final_conditions').prop('readonly', false)
+  else
+    $('#offer_final_conditions').prop('value', '')
+    $('#offer_final_conditions').prop('readonly', true)
+
+$(document).on 'change', '#offer_status_id', (event) ->
+  if $(this).val() == '<%= Constants::OfferStatuses::WIN %>'
+    $('.final_conditions').show()
+    change_final_conditions()
+  else
+    $('.final_conditions').hide()
+
+$(document).on 'change', '#offer_rebidded', (event) ->
+  change_final_conditions()
+
+document.addEventListener "turbolinks:load", ->
+  $('.cost_money').blur { update_field: '.final_cost_money', closest_tag: 'tr' }, update_cost_fields
+  $('.cost_nds_money').blur { update_field: '.final_cost_nds_money', closest_tag: 'tr' }, update_cost_fields
+
+  $('#offer_status_id').change()

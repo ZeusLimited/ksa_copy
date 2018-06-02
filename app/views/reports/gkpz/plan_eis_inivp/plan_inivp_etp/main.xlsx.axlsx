@@ -1,0 +1,6 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+wb.add_worksheet(name: "Лист 1") do |sheet|
+  render 'reports/gkpz/plan_eis_inivp/plan_inivp_etp/list1', sheet: sheet
+end

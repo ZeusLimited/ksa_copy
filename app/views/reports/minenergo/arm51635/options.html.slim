@@ -1,0 +1,50 @@
+= input_block_form_for @options, url: reports_minenergo_arm51635_show_path, method: :get, html: { target: '_blank' } do |f|
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+      .span2= f.input :date_gkpz_on_state, input_html: { class: 'datepicker' }
+    .row
+      .span6
+        = f.input :customer, collection: Department.customers_by_root(current_user.root_dept_id),
+          include_blank: false, label_method: :name_with_depth_symbols
+    .row
+      .span6
+        = f.input :organizers, collection: Department.organizers_by_root, label_method: :name_with_depth_symbols,
+          input_html: multi, include_hidden: false
+    .row
+      .span3= f.input :gkpz_year, collection: gkpz_years_range, include_hidden: false, input_html: multi
+      .span3= f.input :gkpz_type, collection: Reports::Gkpz::Gkpz::GKPZ_TYPES, include_blank: false
+    .row
+      .span3
+        = f.input :tender_types, collection: Dictionary.tender_types, input_html: multi, include_hidden: false
+      .span3
+        = f.input :subject_type, collection: Dictionary.subject_types
+    .row
+      .span3
+        = f.input :directions, collection: Direction.invest.order(:position), input_html: multi, include_hidden: false
+      .span3
+        = f.input :financing_sources, collection: Dictionary.financing_sources_invest, input_html: multi,
+          include_hidden: false
+    .row
+      .span3= f.input :statuses, collection: Dictionary.plan_lot_statuses, input_html: multi, include_hidden: false
+      .span3= f.input :format, collection: { 'Excel' => 'xlsx', "Арм Минэнерго" => "text" }, include_blank: false
+    .row
+      .span3.user-info
+        = f.label :par55555
+        = f.text_field :par55555_name, class: 'user-name input-block-level'
+        = f.hidden_field :par55555, class: 'user-id'
+      .span3.user-info
+        = f.label :par77777
+        = f.text_field :par77777_name, class: 'user-name input-block-level'
+        = f.hidden_field :par77777, class: 'user-id'
+    .row
+      .span3
+        = f.input :consumers, collection: Department.rank_array(current_user.root_dept_id),
+          label_method: :name_with_depth_symbols, input_html: multi, include_hidden: false
+    = field_set_tag "Объем финансирования инвестиционной программы планового года" do
+      .row
+        .span3= f.input :par22222
+
+    .form-actions
+      = f.button :button, class: 'btn btn-primary', name: nil

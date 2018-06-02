@@ -1,0 +1,8 @@
+ru:
+  activerecord:
+    models:
+      tender_dates_for_type: 'Количество дней между публикацией и вскрытием конвертов для каждого типа закупки'
+    attributes:
+      tender_dates_for_type:
+        days: 'Кол-во дней'
+        tender_type_id: 'Тип закупки'

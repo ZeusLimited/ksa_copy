@@ -1,0 +1,16 @@
+h3 = t('.auction_step_increment')
+fieldset.frame
+  br
+  .row
+    table.table.table-bordered.table-hover.table-striped.span10
+      thead
+        tr
+          th = t('.num')
+          th = t('.name')
+          th = t('.step_increment')
+      tbody
+        - tender.lots.each do |lot|
+          tr
+            td = lot.nums
+            td = lot.name
+            td = lot.step_increment

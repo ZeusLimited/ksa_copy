@@ -1,0 +1,27 @@
+ruby:
+  default_values = { date_begin: Date.new(Time.now.year - 1, 1, 1),
+  date_end: Date.new(Time.now.year, 12, 31),
+  gkpz_year: [Time.now.year] }
+  param_report = ParamReport.new(default_values, current_user)
+
+= input_block_form_for param_report, url: report_path(action: 'oos', format: 'xlsx'), method: :get do |f|
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+    .row
+      .span6
+        = f.input :customer,
+            collection: Department.customers_by_root(current_user.root_dept_id),
+            label_method: :name_with_depth_symbols,
+            label_html: { class: 'select-all-clear-roots' },
+            include_hidden: false,
+            input_html: multi
+    .row
+      .span3
+        = f.input :tender_type_exclude,
+            collection: Dictionary.tender_types,
+            include_hidden: false,
+            input_html: { 'data-placeholder' => 'Нет', multiple: true }
+
+    .form-actions= f.submit "Сформировать", name: nil, class: 'btn btn-primary'

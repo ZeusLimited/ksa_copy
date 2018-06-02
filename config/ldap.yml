@@ -1,0 +1,8 @@
+---
+:host: "esv15srv031.rao-esv.ru"
+:port: 3268
+:base: "DC=rao-esv,DC=ru"
+:auth:
+  :method: :simple
+  :username: "<%= ENV['SMTP_USER_NAME'] %>@rao-esv.ru"
+  :password: "<%= ENV['SMTP_PASSWORD'] %>"

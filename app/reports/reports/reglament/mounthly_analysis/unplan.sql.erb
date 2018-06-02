@@ -1,0 +1,122 @@
+-- sql_unplan
+select
+<% if detail %>
+
+num, name, sum(cost_nds<%= type %>) as gkpz_cost_nds<%= type %>, sum(cnt<%= type %>) as cnt<%= type %>
+
+<% else %>
+
+coalesce(cnt_all, 0) cnt_all,
+coalesce(cost_nds_all, 0) cost_nds_all,
+coalesce(cnt, 0) cnt,
+coalesce(cost_nds, 0) as cost_nds,
+direction_id,
+is_zzc
+
+<% end %>
+from (
+select
+<% if detail %>
+gkpz_pl.id, gkpz_pl.num_tender || '.' || gkpz_pl.num_lot as num, gkpz_pl.lot_name as name, gkpz_pl.announce_date,
+<% end %>
+case when gkpz_pl.main_direction_id = gkpz_ps.direction_id then 1 else 0 end as cnt_all,
+sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_nds_all,
+case when gkpz_pl.announce_date >= :begin_date and gkpz_pl.main_direction_id = gkpz_ps.direction_id then 1 else 0 end as cnt,
+case when gkpz_pl.announce_date >= :begin_date then sum(gkpz_ps.qty * gkpz_ps.cost_nds) else 0 end as cost_nds,
+gkpz_ps.direction_id,
+case when gkpz_pl.preselection_guid is not null then 1 else 0 end as is_zzc
+
+from
+  (select * from
+    (select
+      tpl.*, tp.date_confirm as protocol_confirm_date,
+      row_number() over (partition by tpl.guid order by tp.date_confirm desc, tpl.status_id desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::PROTOCOL_ZK_LIST.join(', ') %>)) sub
+     where rn = 1) gkpz_pl
+   inner join plan_specifications gkpz_ps on (gkpz_ps.plan_lot_id = gkpz_pl.id)
+Where gkpz_pl.announce_date <= :end_date
+  and gkpz_pl.status_id = <%= Constants::PlanLotStatus::AGREEMENT %>
+  and not exists (
+    select 'x' from plan_lots where plan_lots.guid = gkpz_pl.guid and plan_lots.status_id in (<%= Constants::PlanLotStatus::GKPZ.join(', ') %>)
+    )
+<% if gkpz_years.present? %>
+  and gkpz_pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id %>
+  and gkpz_ps.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+
+<% if customers.present? %>
+  and gkpz_ps.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and gkpz_pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+Group By gkpz_pl.main_direction_id, gkpz_pl.id, gkpz_ps.direction_id, gkpz_pl.announce_date, gkpz_pl.preselection_guid
+<% if detail %>
+, gkpz_pl.num_tender, gkpz_pl.num_lot, gkpz_pl.lot_name
+<% end %>
+
+Union All
+
+select
+<% if detail %>
+l.id, pl.num_tender || '.' || t.num || '.' || l.num as num, l.name, t.announce_date,
+<% end %>
+case when row_number() over (partition by l.frame_id
+                       order by case when t.tender_type_id = 10015 then 1 else 0 end,
+                                case when l.main_direction_id = s.direction_id then 0 else 1 end
+                      ) = 1
+    and l.main_direction_id = s.direction_id then 1 else 0 end as cnt_all,
+0 as cost_nds_all,
+case when t.announce_date >= :begin_date and row_number() over (partition by l.frame_id
+                       order by case when t.tender_type_id = 10015 then 1 else 0 end,
+                                case when l.main_direction_id = s.direction_id then 0 else 1 end
+                      ) = 1
+    and l.main_direction_id = s.direction_id then 1 else 0 end as cnt,
+0 as cost_nds,
+s.direction_id,
+1
+from tenders t
+  inner join lots l on t.id = l.tender_id
+  inner join specifications s on l.id = s.lot_id
+  inner join lots fr on fr.id = l.frame_id
+  inner join plan_lots pl on pl.id = fr.plan_lot_id
+where l.plan_lot_id is null
+  and t.announce_date <= :end_date
+<% if gkpz_years.present? %>
+  and l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id %>
+  and s.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+Group By l.frame_id, s.direction_id, l.main_direction_id, t.announce_date, t.tender_type_id
+<% if detail %>
+, l.id, pl.num_tender, t.num, l.num, l.name
+<% end %>
+) sub
+<% if type == "" %>
+  Where announce_date >= :begin_date
+<% end %>
+<% if detail %>
+  Group By id, num, name
+  Order by num, name
+<% end %>

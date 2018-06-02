@@ -1,0 +1,28 @@
+ru:
+  activerecord:
+    models:
+      order: 'Поручение'
+    attributes:
+      order:
+        num: "Номер поручения"
+        receiving_date: "Дата получения поручения"
+        agreement_date: "Дата согласования поручения"
+        received_from_user: "Кем составлено"
+        received_from: "Кем составлено"
+        received_from_fio_full: "Кем составлено"
+        received_from_user_id: "Кем составлено"
+        agreed_by_user: "Кем согласовано"
+        agreed_by: "Кем согласовано"
+        agreed_by_fio_full: "Кем согласовано"
+        approval: 'СОГЛАСОВАНО'
+        root_customer_names: 'Заказчик'
+    errors:
+      models:
+        order:
+          attributes:
+            agreement_date:
+              must_be_greater: "Дата согласования должна быть больше или равна дате получения поручения"
+            agreed_by:
+              must_be_agreed_user: "Необходимо указать согласовавшего сотрудника"
+            base:
+              must_be_uniq: "Такое поручение уже существует для закупок: %{lots}"

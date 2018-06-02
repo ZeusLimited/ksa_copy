@@ -1,0 +1,55 @@
+.page-header
+  h1 Инвестиционные проекты
+
+= form_tag invest_projects_path, method: 'get' do
+
+  .row
+    .span1
+      = label_tag 'year', 'Год'
+      = select_tag 'year', options_for_select(@years, params[:year]), class: 'input-block-level'
+
+    .span6
+      = label_tag 'department', 'Потребитель'
+      = select_tag 'department',
+        options_from_collection_for_select(Department.rank_array(current_user.root_dept_id),
+          'id', 'name_with_depth_symbols', params[:department]),
+        class: 'input-block-level'
+
+    .span2
+      label &nbsp;
+      = button_tag 'Поиск', class: 'btn btn-success input-block-level', name: nil
+
+    .span3
+      label &nbsp;
+      = link_to 'Новый инвестиционный проект', new_invest_project_path, class: 'btn btn-primary pull-right'
+
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      th Номер
+      th Наименование
+      th Наименование объекта генерации / программы развития
+      th Ввод объекта в эксплуатацию / окончание работ по проекту
+      th Мощность
+      th Планируемый объём обязательств по финан. на тек. год, руб. без НДС
+      th &nbsp;
+      th &nbsp;
+      th &nbsp;
+  tbody
+    - @invest_projects.each do |invest_project|
+      tr
+        td = invest_project.num
+        td = invest_project.name
+        td = invest_project.object_name
+        td = invest_project.date_install
+        td = invest_project.power_name
+        td.right-cell = invest_project.amount_financing_money
+        td
+          = link_to content_tag(:i, '', class: 'icon-info-sign'), invest_project,
+            {'data-toggle' => 'tooltip', title: 'Просмотр'}
+        td
+          = link_to content_tag(:i, '', class: 'icon-edit'), edit_invest_project_path(invest_project),
+            {'data-toggle' => 'tooltip', title: 'Редактировать'}
+        td
+          = link_to content_tag(:i, '', class: 'icon-trash'), invest_project, method: :delete,
+            data: { confirm: 'Вы уверены?', toggle: 'tooltip' }, title: 'Удалить'

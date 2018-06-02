@@ -1,0 +1,52 @@
+@simple_sheet.add_row_title @report.row_title('partI_title1'), style: @styles[:text_center], columns_count: 8
+@simple_sheet.add_row_title @report.row_title('partI_title2'), style: @styles[:text_center], columns_count: 8
+@sheet.add_row
+
+render 'thead'
+
+@part1_1 = @report.part1_sql_rows.first
+@part1_2 = @report.part2_sql_rows.first
+
+def row1_6(suffix = "_nds")
+  @part1_2["sum_contracts_all#{suffix}"] &&
+    (@part1_2["sum_contracts#{suffix}"].to_f / @part1_2["sum_contracts_all#{suffix}"].to_f)
+end
+
+@sheet.add_row(
+  ['1', @report.row_title('row1')] + (@part1_1 ? ['-', '-', @part1_1['count_contracts'],'-', '-', @part1_1['count_contracts_amount']] : ['-', '-', 0,'-', '-','-']),
+  style: @count_styles,
+  types: @count_types
+)
+
+@sheet.add_row(
+  ['2', @report.row_title('row2')] +
+    (@part1_1 ? [to_thousand(@part1_1['sum_contracts']), to_thousand(@part1_1['sum_contracts_nds']), '-',
+      to_thousand(@part1_1['sum_contracts_amount']), to_thousand(@part1_1['sum_contracts_amount_nds']), '-'] : [0, '-', '-','-', '-','-']),
+  style: @cost_styles,
+  types: @cost_types
+)
+
+@sheet.add_row(
+  ['3', @report.row_title('row3')] + (@part1_2 ? ['-', '-', @part1_2['count_contracts'],'-', '-',@part1_2['count_contracts_amount']] : ['-', '-', 0,'-', '-','-']),
+  style: @count_styles,
+  types: @count_types
+)
+
+@sheet.add_row(
+  ['4', @report.row_title('row4')] +
+    (@part1_2 ? [to_thousand(@part1_2['sum_contracts']), to_thousand(@part1_2['sum_contracts_nds']), '-',
+      to_thousand(@part1_2['sum_contracts_amount']), to_thousand(@part1_2['sum_contracts_amount_nds']),'-'] : [0, '-', '-','-', '-','-']),
+  style: @cost_styles,
+  types: @cost_types
+)
+
+@sheet.add_row(
+  ['5', @report.row_title('row5'), "=IF(C17=0,0,(C19-C17)/C17)", "=IF(D17=0,0,(D19-D17)/D17)", '-',"=IF(F17=0,0,(F19-F17)/F17)", "=IF(G17=0,0,(G19-G17)/G17)",'-'],
+  style: @persent_styles
+)
+
+@sheet.add_row(
+  ['6', @report.row_title('row6')] + [row1_6, row1_6("_nds"), '-', row1_6("_amount"), row1_6("_amount_nds"),'-'],
+  style: @persent_styles,
+  types: @cost_types
+)

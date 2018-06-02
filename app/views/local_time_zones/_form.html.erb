@@ -1,0 +1,18 @@
+<%= simple_form_for(local_time_zone) do |f| %>
+  <%= error_messages_for local_time_zone %>
+
+  <div class="row">
+    <div class="span6">
+      <%= f.label :time_zone %>
+      <%= f.time_zone_select :time_zone, Constants::PRIORITY_TIMEZONES, {}, { class: 'input-block-level'} %>
+    </div>
+    <div class="span6">
+      <%= f.input :name, input_html: { class: 'input-block-level', placeholder: 'московское, хабаровское, якутское...', title: 'Вводить в формате: московское, хабаровское, якутское и т.п.' } %>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <%= link_to_back_or_default("Отмена", local_time_zones_path, class: 'btn btn-warning') %>
+    <%= f.button :submit, "Сохранить", class: 'btn btn-primary' %>
+  </div>
+<% end %>

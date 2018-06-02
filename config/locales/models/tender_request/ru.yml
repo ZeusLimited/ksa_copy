@@ -1,0 +1,18 @@
+ru:
+  activerecord:
+    models:
+      tender_request: 'Запрос на разъяснение'
+    attributes:
+      tender_request:
+        contractor_name_inn: 'Контрагент'
+        contractor_id: 'Контрагент'
+        contractor_text: 'Контрагент'
+        register_date: 'Дата получения запроса'
+        inbox_num: 'Номер исх. письма'
+        inbox_date: 'Дата исх. письма'
+        request: 'Краткая характеристика запроса на разъяснение'
+        user_name: 'Пользователь, подготовивший ответ'
+        user_id: 'Пользователь, подготовивший ответ'
+        outbox_num: 'Номер ответного письма'
+        outbox_date: 'Дата ответного письма'
+        tender_id: 'Закупка'

@@ -1,0 +1,8 @@
+ru:
+  contracts:
+    create:
+      notice: 'Договор успешно создан.'
+    update:
+      notice: 'Договор успешно изменен.'
+    destroy:
+      notice: 'Договор успешно удален.'

@@ -1,0 +1,23 @@
+<%= form_for(protocol_user) do |f| %>
+  <%= error_messages_for protocol_user %>
+
+  <div class="field">
+    <%= f.label :commission_id %><br />
+    <%= f.number_field :commission_id %>
+  </div>
+  <div class="field">
+    <%= f.label :user_id %><br />
+    <%= f.number_field :user_id %>
+  </div>
+  <div class="field">
+    <%= f.label :status %><br />
+    <%= f.number_field :status %>
+  </div>
+  <div class="field">
+    <%= f.label :is_veto %><br />
+    <%= f.check_box :is_veto %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

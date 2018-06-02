@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_summary_result:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/summary_result: 'Сводный отчет по исполнению ГКПЗ'
+    attributes:
+      reports/other/summary_result:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'

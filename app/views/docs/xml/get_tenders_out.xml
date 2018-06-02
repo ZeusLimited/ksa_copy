@@ -1,0 +1,26 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:WashOut">
+   <soap:Body>
+      <tns:get_tenders_response>
+         <get_tenders xsi:type="tns:get_tenders">
+            <plan_lot_guid xsi:type="xsd:string">a6c6fea0-a978-59b2-c1c7-744b283eb7cc</plan_lot_guid>
+            <offer_id xsi:type="xsd:int">132539</offer_id>
+            <year xsi:type="xsd:int">2016</year>
+            <num xsi:type="xsd:string">8.1</num>
+            <name xsi:type="xsd:string">Уничтожение документов</name>
+            <customer xsi:type="xsd:string">РАО ЭС Востока</customer>
+            <organizer xsi:type="xsd:string">РАО ЭС Востока</organizer>
+            <is_additional xsi:type="xsd:boolean">false</is_additional>
+            <financing xsi:type="xsd:string">1.1 себестоимость</financing>
+            <tender_type xsi:type="xsd:string">ОЗП</tender_type>
+            <etp xsi:type="xsd:boolean">false</etp>
+            <sme_type xsi:type="xsd:string"/>
+            <winner_name xsi:type="xsd:string">ООО Мобильный Шредер</winner_name>
+            <winner_inn xsi:type="xsd:string">7727738812</winner_inn>
+            <wp_date xsi:type="xsd:date">2015-12-11</wp_date>
+            <wp_num xsi:type="xsd:string">РАО-57/ОЗП-ВП</wp_num>
+            <oos_num xsi:type="xsd:long">31502893610</oos_num>
+            <sub_contractors xsi:type="tns:sub_contractors"></sub_contractors>
+         </get_tenders>
+      </tns:get_tenders_response>
+   </soap:Body>
+</soap:Envelope>

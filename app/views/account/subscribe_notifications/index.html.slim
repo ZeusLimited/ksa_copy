@@ -1,0 +1,8 @@
+== render 'shared/lk'
+
+#notifications
+  = render 'list', notifications: @notifications
+= paginate @notifications,
+    param_name: 'page_sel',
+    theme: 'pagination_scroll',
+    params: { controller: 'subscribe_notifications', action: 'index' }

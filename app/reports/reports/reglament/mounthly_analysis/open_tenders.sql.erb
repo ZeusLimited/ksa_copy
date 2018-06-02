@@ -1,0 +1,105 @@
+-- sql_open_tenders
+select
+  <% if detail %>
+    num, name, sum(cost_nds<%= type %>) as gkpz_cost_nds<%= type %>,
+    sum(cnt<%= type %>) as cnt<%= type %>
+  <% else %>
+    coalesce(sum(cnt_all), 0) as cnt_all,
+    coalesce(sum(cost_nds_all), 0) as cost_nds_all,
+    coalesce(sum(cnt), 0) as cnt,
+    coalesce(sum(cost_nds), 0) as cost_nds
+  <% end %>
+from
+(
+select
+  l.id, fr_pl.num_tender || (case when fr.id is not null then '.' || t.num else '' end) || '.' || (case when fr.id is not null then l.num else fr_pl.num_lot end) as num,
+  l.name, t.bid_date,
+  case when
+    row_number() over (partition by nvl(l.frame_id,l.id),l.plan_lot_id
+                       order by case when t.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %> then 1 else 0 end,
+                                case when l.main_direction_id = s.direction_id then 0 else 1 end
+                      ) = 1
+    and l.main_direction_id = s.direction_id
+    then 1
+    else 0 end as cnt_all,
+  sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_nds_all,
+  case when trunc(t.bid_date) >= :begin_date
+  and row_number() over (partition by nvl(l.frame_id,l.id),l.plan_lot_id
+                       order by case when t.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %> then 1 else 0 end,
+                                case when l.main_direction_id = s.direction_id then 0 else 1 end
+                      ) = 1
+  and l.main_direction_id = s.direction_id then 1 else 0 end as cnt,
+  case when trunc(t.bid_date) >= :begin_date then sum(gkpz_ps.qty * gkpz_ps.cost_nds) else 0 end as cost_nds
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  left join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join plan_lots pl on (pl.id = l.plan_lot_id)
+  left join plan_specifications ps on(ps.id = s.plan_specification_id and pl.id = ps.plan_lot_id)
+  left join (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on pl.guid = can.guid
+  left join (
+    select * from (
+      select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+        inner join protocols tp on tpl.protocol_id = tp.id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+    ) sub
+    Where rn = 1
+  ) gkpz_pl on (gkpz_pl.guid = pl.guid)
+  left join plan_specifications gkpz_ps on (gkpz_pl.id = gkpz_ps.plan_lot_id and gkpz_ps.guid = ps.guid)
+
+left join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::GKPZ.join(', ') %>)) sub
+     where rn = 1) on_sd on (gkpz_pl.guid = on_sd.guid)
+
+  inner join
+    (select pl1.guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+      from tenders t1
+      inner join lots l1 on (t1.id = l1.tender_id)
+      left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+      where t1.announce_date <= :end_date
+      group by pl1.guid, l1.frame_id
+    ) vi on (vi.guid = pl.guid or l.frame_id = vi.frame_id) and vi.max_announce_date = t.announce_date
+
+  left join lots fr on l.frame_id = fr.id
+  inner join plan_lots fr_pl on fr_pl.id = nvl(l.plan_lot_id, fr.plan_lot_id)
+where
+  ((wp.confirm_date > :end_date or l.status_id in (<%= Constants::LotStatus::NOT_HELD.join(', ') %>) ) and trunc(t.bid_date) <= :end_date)
+<% if gkpz_years.present? %>
+  and l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id %>
+  and s.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+group by l.frame_id, l.id, l.plan_lot_id, s.direction_id, l.main_direction_id, t.tender_type_id, t.bid_date,
+fr_pl.num_tender, fr.id, t.num, l.num, fr_pl.num_lot, l.name
+) sub
+<% if type == "" %>
+  Where trunc(bid_date) >= :begin_date
+<% end %>
+<% if detail %>
+  Group By id, num, name
+<% end %>

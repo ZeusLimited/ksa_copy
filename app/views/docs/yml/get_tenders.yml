@@ -1,0 +1,118 @@
+name: 'get_tenders'
+desc: 'Метод предназначен для получения расширенной информации о закупках по идентификаторам'
+request_params:
+  -
+    name: 'plan_lot_guid'
+    data_type: 'Guid'
+    desc: 'Guid лота в планировании'
+    required: true
+    example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+  -
+    name: 'offer_id'
+    data_type: 'Integer'
+    desc: 'ИД победившей оферты'
+    required: false
+    example: '128902'
+response_params:
+  -
+    name: 'plan_lot_guid'
+    data_type: 'String'
+    desc: 'Guid лота в планировании'
+    required: true
+    example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+  -
+    name: 'offer_id'
+    data_type: 'Integer'
+    desc: 'ИД победившей оферты'
+    required: true
+    example: '128902'
+  -
+    name: 'year'
+    data_type: 'Integer'
+    desc: 'Год ГКПЗ'
+    required: true
+    example: '2016'
+  -
+    name: 'num'
+    data_type: 'String'
+    desc: 'Номер по ГКПЗ'
+    required: true
+    example: '124.2'
+  -
+    name: 'name'
+    data_type: 'String'
+    desc: 'Наименование лота'
+    required: true
+    example: 'Изоляторы'
+  -
+    name: 'customer'
+    data_type: 'String'
+    desc: 'Заказчик'
+    required: true
+    example: 'ДРСК'
+  -
+    name: 'organizer'
+    data_type: 'String'
+    desc: 'Организатор'
+    required: true
+    example: 'РАО ЭС Востока'
+  -
+    name: 'is_additional'
+    data_type: 'Boolean'
+    desc: 'Признак, это доп. соглашение?'
+    required: true
+    example: 'true'
+  -
+    name: 'financing'
+    data_type: 'String'
+    desc: 'Источник финансирования'
+    required: true
+    example: '1.1 себестоимость'
+  -
+    name: 'tender_type'
+    data_type: 'String'
+    desc: 'Способ закупки'
+    required: true
+    example: 'ОЗП'
+  -
+    name: 'etp'
+    data_type: 'Boolean'
+    desc: 'Признак ЭТП'
+    required: true
+    example: 'true'
+  -
+    name: 'sme_type'
+    data_type: 'String'
+    desc: 'Отношение к участию субъектов малого и среднего предпринимательства'
+    required: false
+    example: 'МСП'
+  -
+    name: 'winner_name'
+    data_type: 'String'
+    desc: 'Наименование победителя'
+    required: true
+    example: 'ООО «Ромашка»'
+  -
+    name: 'winner_inn'
+    data_type: 'String'
+    desc: 'ИНН победителя'
+    required: true
+    example: '2725060434'
+  -
+    name: 'wp_date'
+    data_type: 'Date'
+    desc: 'Дата протокола ВП'
+    required: true
+    example: '2015-12-11'
+  -
+    name: 'wp_num'
+    data_type: 'String'
+    desc: 'Дата вступления в силу протокола выбора победителя'
+    required: true
+    example: 'РАО-57/ОЗП-ВП'
+  -
+    name: 'oos_num'
+    data_type: 'Long'
+    desc: 'Номер на ЕИС'
+    required: false
+    example: '31502893610'

@@ -1,0 +1,14 @@
+row_begin = @sheet.rows.size
+
+@report.filter_rows(customer_rows, tender_type_id: tender_types).each do |row|
+
+  if row['rn_lot'] == 1
+    title_values = @lot_title_columns.values.map { |value| value[:value].call(row) }
+    @style = @report.divide_by_customers.to_b && @report.show_color.to_b ? @column_styles[row['style']] : @lot_title_column_styles
+    @sheet.add_row title_values, style: @style, types: @lot_title_column_types
+  end
+end
+
+row_end = @sheet.rows.size
+
+@outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }

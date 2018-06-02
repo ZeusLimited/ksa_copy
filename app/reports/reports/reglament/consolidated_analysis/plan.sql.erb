@@ -1,0 +1,83 @@
+--plan
+select
+tt.fullname as ttype1,
+CASE
+  WHEN
+    plan_lots.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+    and (<%= filter_pp.html_safe %>)
+  THEN '<%= Reports::Reglament::ConsolidatedAnalysis::EI_PP %>'
+  ELSE tt.fullname
+END as ttype2,
+count(*) as sum_cnt,
+round(sum(sum_specs.sum_cost_nds) / 1000) as sum_cost_nds
+
+from (
+  SELECT
+    tpl.*,
+    row_number() OVER (PARTITION BY tpl.guid ORDER BY tp.date_confirm DESC) AS ag_rn
+  FROM plan_lots tpl
+  INNER JOIN protocols tp ON tp.id = tpl.protocol_id
+  WHERE tpl.status_id IN (<%= Constants::PlanLotStatus::GKPZ.join(', ') %>)
+) plan_lots
+
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+  group by tpl.guid
+) can on plan_lots.guid = can.guid
+
+left join (
+  select max(tp.date_confirm) as sd_date, tc.department_id, tp.gkpz_year
+  from protocols tp
+  inner join commissions tc on tp.commission_id = tc.id
+  where tc.commission_type_id = <%= Constants::CommissionType::SD %>
+  group by tc.department_id, tp.gkpz_year
+) sd on plan_lots.root_customer_id = sd.department_id and plan_lots.gkpz_year = sd.gkpz_year
+
+INNER JOIN (
+  SELECT
+    tps.plan_lot_id,
+    sum(tps.qty * tps.cost) AS sum_cost,
+    sum(tps.qty * tps.cost_nds) AS sum_cost_nds
+  FROM plan_specifications tps
+  GROUP BY tps.plan_lot_id
+) sum_specs ON sum_specs.plan_lot_id = plan_lots.id
+
+INNER JOIN dictionaries tt on plan_lots.tender_type_id = tt.ref_id
+LEFT JOIN regulation_items ri on ri.id = plan_lots.regulation_item_id
+
+where plan_lots.ag_rn = 1
+and :begin_date <= :end_date
+and plan_lots.status_id != <%= Constants::PlanLotStatus::EXCLUDED_SD %>
+and (can_date is null or (sd_date is not null and can_date is not null and can_date > sd_date))
+
+<% if gkpz_years.present? %>
+  and plan_lots.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id.present? %>
+  and plan_lots.root_customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+
+<% if customers.present? %>
+  and plan_lots.root_customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and plan_lots.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+group by
+tt.fullname,
+CASE
+  WHEN
+    plan_lots.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+    and (<%= filter_pp.html_safe %>)
+  THEN '<%= Reports::Reglament::ConsolidatedAnalysis::EI_PP %>'
+  ELSE tt.fullname
+END

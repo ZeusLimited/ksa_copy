@@ -1,0 +1,23 @@
+ru:
+  orders:
+    default: &def
+      files: 'Прикрепленные файлы'
+      lots: 'Лоты'
+    index:
+      header: 'Список поручений'
+      gkpz: 'ГКПЗ'
+      all: 'Все'
+      confirm: 'Вы уверены?'
+      count: 'Количество:'
+    show:
+      <<: *def
+      header: 'Поручение № %{num}'
+    new:
+      header: 'Создание поручения'
+    edit:
+      header: 'Редактирование поручения'
+      back: 'Назад'
+    form:
+      <<: *def
+      status: 'Статус'
+      state: 'Состояние в ГКПЗ'

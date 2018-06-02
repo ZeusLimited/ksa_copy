@@ -1,0 +1,6 @@
+--- # Типы закупочных комиссий
+- { ref_id: 28001, position: 01, name: "1 уровень КК" }
+- { ref_id: 28002, position: 02, name: "2 уровень КК" }
+- { ref_id: 28003, position: 03, name: "СЗК" }
+- { ref_id: 28004, position: 04, name: "ЦЗК" }
+- { ref_id: 28005, position: 05, name: "СД" }

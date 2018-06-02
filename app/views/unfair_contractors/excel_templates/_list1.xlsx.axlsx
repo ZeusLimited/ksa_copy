@@ -1,0 +1,13 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 4)
+@outlines = []
+
+@columns = UnfairContractor::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+
+render 'unfair_contractors/excel_templates/thead'
+render 'unfair_contractors/excel_templates/main_table'
+
+@simple_sheet.change_column_widths(@widths)

@@ -1,0 +1,94 @@
+ru:
+  tenders:
+    index:
+      additional_search: 'Расширенный поиск'
+    tender_files: &files
+      executes: "Исполнение"
+      gkpz: "ГКПЗ"
+      bidders: "Участники"
+      contracts: "Договоры"
+      edit: 'Редактировать'
+      close: 'Закрыть'
+      table_files:
+        file: 'Файл'
+        size: 'Размер'
+        view: 'Вид документа'
+        note: 'Примечание'
+        loaded: 'Загружен'
+        owner: 'Владелец'
+    form: &form
+      e_documents: "Электронные документы"
+      submit: 'Сохранить'
+      cancel: "Отмена"
+      date: "Дата"
+      place: "Место"
+      public: "Публикация"
+      open: "Вскрытие конвертов"
+      review: "Рассмотрение заявок/предложений"
+      summary: "Подведение итогов"
+      contract_period: "Срок заключения договора (дней)"
+      profitable: 'Закупка в счет доходных договоров'
+      tender_name_placeholder: 'Право заключения договора ... для нужд ...'
+      working_days: 'Рабочих'
+      calendar_days: 'Календарных'
+      <<: *files
+    show_lot:
+      title: 'Основные сведения'
+      actions: 'Действия'
+      copy: 'Создать копию'
+      show_notification: 'Сформировать извещение'
+      add_zzc: 'Добавить ЗЗЦ'
+      publish: 'Опубликовать'
+      additional: "Дополнительные свойства"
+      specs:
+        name: 'Наименование'
+        customer: 'Заказчик'
+        qty: 'Кол-во'
+        cost: 'Цена без НДС'
+        nds: 'НДС'
+        cost_nds: 'Цена с НДС'
+      <<: *form
+    show:
+      title: 'Основные сведения'
+      actions: 'Действия'
+      copy: 'Создать копию'
+      show_notification: 'Сформировать извещение'
+      add_zzc: 'Добавить ЗЗЦ'
+      add_b2b_tender: 'Создать закупку на B2B'
+      publish: 'Опубликовать'
+      additional: "Дополнительные свойства"
+      fetch_open_protocol_b2b: 'Получить протокол вскрытия с B2B'
+      specs:
+        name: 'Наименование'
+        customer: 'Заказчик'
+        qty: 'Кол-во'
+        cost: 'Цена без НДС'
+        nds: 'НДС'
+        cost_nds: 'Цена с НДС'
+      <<: *form
+    show_unregulated:
+      e_documents: "Электронные документы"
+      header: 'Нерегламентированная закупка'
+      lots: 'Лоты'
+      files: "Электронные документы"
+      lot: "Лот № %{num}"
+      bidders: 'Участники'
+      offer: "Оферта на лот № %{lot_num}"
+      work_date: 'Дата проведения процедуры'
+      close: 'Закрыть'
+      table:
+        specification: 'Спецификация'
+        public_cost: 'Цена по извещению'
+        bid_cost: 'Цена предложения'
+        with_nds: 'без НДС'
+        without_nds: 'с НДС'
+      contract_info: 'Информация о договоре'
+    tender_header:
+      num_tender: 'Номер закупки'
+      tender_type: 'Способ закупки'
+      tender_on_eis: 'Закупка на ЕИС'
+      tender_on_etp: 'Закупка на ЭТП'
+      organizer: 'Организатор'
+      comission: 'Закупочная комиссия'
+      executive_user: 'Ответственный пользователь'
+      time: 'Время'

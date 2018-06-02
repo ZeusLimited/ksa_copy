@@ -1,0 +1,5 @@
+h3 = t('.b2b_classifiers')
+fieldset.frame
+  - B2bClassifier.by_b2b_classifier_ids(tender.b2b_classifiers).each do |b2b_classifier|
+    .row
+      = view_text_field('span11', b2b_classifier, :name)

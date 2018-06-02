@@ -1,0 +1,31 @@
+= simple_form_for(department) do |f|
+  = f.error_notification
+
+  = f.hidden_field :parent_dept_id, value: nil
+
+  .row
+    .span2 = f.input :inn, input_html: { class: "input-block-level text-right" }
+    .span2 = f.input :kpp, input_html: { class: "input-block-level text-right" }
+  .row
+    .span2
+      = f.input :ownership_id, collection: Ownership.order(:shortname),
+        label_method: :shortname,
+        input_html: { class: 'input-block-level', data: { placeholder: 'Нет' } }
+    .span3 = f.input :name, input_html: { class: 'input-block-level' }
+    .span6 = f.input :fullname, input_html: { class: 'input-block-level' }
+
+  .row
+    .span3= f.input :shortname, input_html: { class: 'input-block-level' }
+    .span1= f.input :is_customer, input_html: { class: 'input-block-level' }
+    .span1= f.input :is_organizer, input_html: { class: 'input-block-level' }
+    .span3= f.input :tender_cost_limit_money, input_html: { class: 'text-right money input-block-level' }
+    .span3 = f.input :eis223_limit_money, input_html: { class: 'input-block-level money text-right' }
+
+  = f.simple_fields_for :contact, @department.contact || @department.build_contact do |builder|
+    = render 'contact', f: builder
+
+  .actions
+    .pull-right
+      => link_to t('cancel'), departments_url, class: 'btn btn-warning'
+      => link_to t('.move_to_child'), edit_child_department_url(department.id), class: 'btn btn-success' if department.id
+      = f.submit t('save'), :class => 'btn btn-primary'

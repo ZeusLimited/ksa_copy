@@ -1,0 +1,49 @@
+<%= form_for(unit) do |f| %>
+  <% if unit.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(unit.errors.count, "error") %> prohibited this unit from being saved:</h2>
+
+      <ul>
+      <% unit.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :code %><br />
+    <%= f.text_field :code %>
+  </div>
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :symbol_n %><br />
+    <%= f.text_field :symbol_n %>
+  </div>
+  <div class="field">
+    <%= f.label :symbol_i %><br />
+    <%= f.text_field :symbol_i %>
+  </div>
+  <div class="field">
+    <%= f.label :letter_n %><br />
+    <%= f.text_field :letter_n %>
+  </div>
+  <div class="field">
+    <%= f.label :letter_i %><br />
+    <%= f.text_field :letter_i %>
+  </div>
+  <div class="field">
+    <%= f.label :unit_title_id %><br />
+    <%= f.number_field :unit_title_id %>
+  </div>
+  <div class="field">
+    <%= f.label :unit_subtitle_id %><br />
+    <%= f.number_field :unit_subtitle_id %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,42 @@
+<%= simple_form_for page, :html => { :class => 'form-horizontal' } do |f| %>
+  <%= f.input :name, input_html: {class: 'input-xxlarge'} %>
+  <%= f.input :permalink, input_html: {class: 'input-large'} %>
+  <%= f.input :content, input_html: {class: 'markitup'} %>
+  <div class="form-actions">
+    <%= f.button :submit, :class => 'btn-primary' %>
+    <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
+                pages_path, :class => 'btn' %>
+  </div>
+
+  <legend>Файлы</legend>
+  <ul id="page_files">
+    <%= render page.page_files %>
+  </ul>
+<% end %>
+
+<% unless supported_browser? %>
+  <p class="text-error">Ваш браузер не поддерживается.</p>
+  <p>Для прикрепления файлов используйте один из следующих браузеров:</p>
+  <ul>
+    <li>Google Chrome</li>
+    <li>Apple Safari 6.0+</li>
+    <li>Mozilla Firefox 4.0+</li>
+    <li>Opera 12.0+</li>
+    <li>Microsoft Internet Explorer 10.0+</li>
+  </ul>
+<% else %>
+  <%= form_for PageFile.new(page_id: page.id), :html => {multipart: true} do |f| %>
+    <p>
+      <%= f.label :wikifile, "Загрузка файлов:" %>
+      <%= f.file_field :wikifile, multiple: true, name: 'page_file[wikifile]' %>
+      <%= f.hidden_field :page_id %>
+    </p>
+  <% end %>
+<% end %>
+
+<script id="template-upload" type="text/x-tmpl">
+  <div class="upload">
+    {%=o.name%}
+    <div class="progress progress-striped"><div class="bar" style="width: 0%"></div></div>
+  </div>
+</script>

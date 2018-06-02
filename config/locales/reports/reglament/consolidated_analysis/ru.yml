@@ -1,0 +1,16 @@
+ru:
+  helpers:
+    submit:
+      reports_reglament_consolidated_analysis:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/consolidated_analysis: 'Сводный анализ исполнения ГКПЗ'
+    attributes:
+      reports/reglament/consolidated_analysis:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        gkpz_years: 'Годы ГКПЗ'
+        customers: 'Заказчики'
+        organizers: 'Организаторы'
+        format: 'Формат'

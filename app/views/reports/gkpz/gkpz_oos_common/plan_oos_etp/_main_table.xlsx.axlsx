@@ -1,0 +1,6 @@
+render 'reports/gkpz/gkpz_oos_common/plan_oos_etp/thead'
+
+@report.result_rows.each do |result_row|
+  values = @columns.values.map { |v| v[:value].call(result_row) }
+  @sheet.add_row values, style: @column_styles, types: @column_types
+end

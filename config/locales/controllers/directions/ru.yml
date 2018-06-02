@@ -1,0 +1,8 @@
+ru:
+  directions:
+    create:
+      notice: 'Направление успешно создано'
+    update:
+      notice: 'Ноправление успешно изменено'
+    destroy:
+      notice: 'Направление успешно удалено'

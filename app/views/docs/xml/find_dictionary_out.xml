@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:WashOut">
+  <soap:Body>
+    <tns:find_dictionary_response>
+      <dictionary xsi:type="tns:dictionary">
+        <ref_id xsi:type="xsd:int">15001</ref_id>
+        <ref_type xsi:type="xsd:string">PlanLotStatus</ref_type>
+        <name xsi:type="xsd:string">Новый</name>
+        <fullname xsi:type="xsd:string">Новый</fullname>
+        <is_actual xsi:type="xsd:boolean">true</is_actual>
+      </dictionary>
+      <dictionary xsi:type="tns:dictionary">
+        <ref_id xsi:type="xsd:int">15003</ref_id>
+        <ref_type xsi:type="xsd:string">PlanLotStatus</ref_type>
+        <name xsi:type="xsd:string">Согласован</name>
+        <fullname xsi:type="xsd:string">Согласован</fullname>
+        <is_actual xsi:type="xsd:boolean">true</is_actual>
+      </dictionary>
+    </tns:find_dictionary_response>
+  </soap:Body>
+</soap:Envelope>

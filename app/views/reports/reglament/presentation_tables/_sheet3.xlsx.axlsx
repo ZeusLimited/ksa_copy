@@ -1,0 +1,25 @@
+render 'thead', sheet_name: 'sheet2', sheet: sheet
+
+def table_row(result, field)
+  [t(".#{field}"), to_thousand(result["cost_nds"].try(:to_f)), result["cnt"].try(:to_i)]
+end
+
+styles = [@styles[:td], @styles[:td_money], @styles[:td]]
+types = [:string, :float, :integer]
+
+@report.slide3_structure.each do |line|
+  result = @report.send(line[:method]).first
+  sheet.add_row table_row(result, line[:name]), style: styles, types: types
+end
+
+total = @report.slide3_total
+
+sheet.add_row ["проведено закупок, план", to_thousand(total['cost_nds']), total['cnt']], style: styles, types: types
+sheet.add_row ["проведено закупок, факт", to_thousand(total['winner_cost_nds']), total['cnt']], style: styles, types: types
+
+@report.slide3_sql_rows.each do |result|
+  sheet.add_row [result['title'] + ", план", to_thousand(result['cost_nds']), result['cnt']], style: styles, types: types
+  sheet.add_row [result['title'] + ", факт", to_thousand(result['winner_cost_nds']), result['cnt']], style: styles, types: types
+end
+
+sheet.column_widths 40, 20, 15

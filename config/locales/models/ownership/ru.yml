@@ -1,0 +1,8 @@
+ru:
+  activerecord:
+    models:
+      ownership: 'Форма собственности'
+    attributes:
+      ownership:
+        shortname: 'Краткое наименование'
+        fullname: 'Полное наименование'

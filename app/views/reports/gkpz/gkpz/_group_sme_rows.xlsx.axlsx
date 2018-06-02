@@ -1,0 +1,24 @@
+row_begin = @sheet.rows.size
+styles = @sum_styles
+
+if group['persent_rows'].present?
+  row_numerator = @sheet.rows[row_begin + group['persent_rows']['numerator']]
+  row_denomenator = @sheet.rows[row_begin + group['persent_rows']['denomenator']]
+
+  values = @columns.each_with_index.map do |col, index|
+    "=#{row_numerator.cells[index].r} / #{row_denomenator.cells[index].r}" if row_denomenator.cells[index].value
+  end
+  styles = @sum_styles.map { |s| s == @styles[:sum_money] ? @styles[:sum_percent] : s }
+else
+  c = @columns.select { |k, v| v[:sum] }
+  sum_row = @report.result_rows(group['filter']).select { |r| r['rn'] == 1 }.inject do |sum, el|
+    sum.merge(el) { |k, old_val, new_val| (old_val || 0) + (new_val || 0) if c.keys.include?(k.to_sym) }
+  end
+
+  values = @columns.values.map do |value|
+    (sum_row.nil? ? 0 : value[:value].call(sum_row)) if value[:sum]
+  end
+end
+
+values[0] = group['sum_name']
+@sheet.add_row values, style: styles

@@ -1,0 +1,20 @@
+.page-header
+  h1 = Reports::Other::SuccessStory.model_name.human
+
+- head_rows = CSV.read('app/views/reports/other/success_story/csv/head.csv')
+table.table.table-bordered.table-center
+  thead
+    - head_rows.each do |row|
+      tr
+        - row.each do |cell|
+          th = cell
+  tbody
+    - @report.success_sql_rows.each do |result_row|
+      tr
+        - Reports::Other::SuccessStory::COLUMNS.values.map do |val|
+          - if val[:detail]
+            td = success_story_detail(@success_params, val[:value].call(result_row), result_row['lot_id'])
+          - elsif val[:value]
+            td = val[:value].call(result_row)
+          - else
+            td = ""

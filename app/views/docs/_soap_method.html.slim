@@ -1,0 +1,21 @@
+.blog-post
+  h2.blog-post-title id=soap_method['name'] = soap_method['name']
+  p.blog-post-meta = soap_method['desc']
+
+  ul.nav.nav-tabs role="tablist"
+    li.nav-item
+      a.nav-link.active data-toggle="tab" href="#request_#{soap_method['name']}" role="tab" Request
+    li.nav-item
+      a.nav-link data-toggle="tab" href="#response_#{soap_method['name']}" role="tab" Response
+
+  .tab-content
+    .tab-pane.active role="tabpanel" id="request_#{soap_method['name']}"
+      h3 Параметры
+      = render 'pars', pars: soap_method['request_params']
+      h3 Пример
+      = code_highlight_file("docs/xml/#{soap_method['name']}_in.xml", :xml)
+    .tab-pane role="tabpanel" id="response_#{soap_method['name']}"
+      h3 Параметры
+      = render 'response', structure: soap_method['response_params']
+      h3 Пример
+      = code_highlight_file("docs/xml/#{soap_method['name']}_out.xml", :xml)

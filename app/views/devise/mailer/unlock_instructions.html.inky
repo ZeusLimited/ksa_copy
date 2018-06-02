@@ -1,0 +1,23 @@
+doctype strict
+html
+  head
+    meta http-equiv="Content-Type" content="text/html; charset=utf-8"
+    meta name="viewport" content="width=device-width"
+    = stylesheet_link_tag "foundation_emails"
+  body
+    table.body data-made-with-foundation=""
+      tr
+        td.center align="center" valign="top"
+          center
+            wrapper class="header" bgcolor="#E6F4FC"
+              container bgcolor="#E6F4FC"
+                = email_image_tag("#{Setting.company}.png")
+                p class="text-center" = t('.hello', fio: @resource.email)
+                p class="text-left" = t('.receive', app_name: Setting.app_name)
+                p class="text-left" = t('.press_button')
+                p
+                button href=unlock_url(@resource, :unlock_token => @resource.unlock_token) class="success expanded" = t('.change_password')
+                br
+                br
+                h6
+                  small = t('.robot')

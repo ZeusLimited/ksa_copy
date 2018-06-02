@@ -1,0 +1,41 @@
+- enable_select = params[:action] == 'index'
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      - if enable_select
+        th
+          = check_box_tag 'selected_all_subscribes',
+            '1',
+            false,
+            title: 'Выбрать все',
+            data: { push_url: push_to_session_account_subscribes_path,
+                    pop_url: pop_from_session_account_subscribes_path,
+                    toggle: 'tooltip' }
+
+      = render 'table_plan_lots/center_head'
+      th
+      - if enable_select
+        th
+  tbody
+    - subscribes.each do |subscribe|
+     - if subscribe.plan_lot_exists?
+        tr data-subscribe-id=subscribe.id
+          - if enable_select
+            td
+              = check_box_tag "selected_ids[#{subscribe.id}]",
+                subscribe.id,
+                session[:subscribe_ids].include?(subscribe.id.to_s),
+                data: { push_url: push_to_session_account_subscribes_path,
+                        pop_url: pop_from_session_account_subscribes_path }
+          = render 'table_plan_lots/center_body', plan_lot: subscribe.plan_lot.decorate
+          td
+            = link_icon_title_if subscribe.lot_tender, 'icon-info-sign', 'Просмотр в исполнении', subscribe.lot_tender
+          - if enable_select
+            td
+              = link_icon_title('icon-circle-arrow-left', "<h4>#{subscribe.theme}</h4>".html_safe,
+                '#',
+                class: 'popover-subscribe_actions',
+                data: { placement: :left,
+                        toggle: :popover,
+                        content: render('account/subscribes/actions_info', subscribe: subscribe).to_str,
+                        html: true })

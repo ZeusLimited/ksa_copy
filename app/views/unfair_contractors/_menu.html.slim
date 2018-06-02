@@ -1,0 +1,9 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to t('return_to_list'), url_from_session_or_default(:unfair_contractor, unfair_contractors_path)
+      li= link_to t('edit'), edit_unfair_contractor_path(@unfair_contractor)
+      li = link_to t('icon-delete'), unfair_contractor_path(@unfair_contractor), method: :delete
+
+.page-header
+  h1 = t('.show')

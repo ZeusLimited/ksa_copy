@@ -1,0 +1,6 @@
+ru:
+  web_service:
+    create_contract:
+      offer_not_found: 'Не найдена оферта.'
+      offer_more_one: 'Найдено больше одной оферты.'
+      contract_not_saved: "Договор не удалось сохранить из-за следующих ошибок: %{errors}"

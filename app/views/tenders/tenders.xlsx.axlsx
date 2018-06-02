@@ -1,0 +1,6 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+wb.add_worksheet(name: "Закупки") do |sheet|
+  render 'tenders/excel_templates/list1', sheet: sheet
+end

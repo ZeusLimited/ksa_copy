@@ -1,0 +1,6 @@
+<%= fields_for :contract do |fo| %>
+  <%= fo.fields_for :contract_files_attributes, tender_file.contract_files.build, index: gen_index do |builder| %>
+    $('#tender_files').append("<%= j render 'contracts/contract_file_fields', f: builder %>");
+    $('#<%= dom_id(tender_file) %> select').select2();
+  <% end %>
+<% end %>

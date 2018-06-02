@@ -1,0 +1,60 @@
+<%= form_tag dictionaries_path, :method => 'get' do %>
+
+  <div class="row">
+    <div class="span4">
+      <div class="control-group">
+        <%= label_tag 'ref_type', 'Вид справочника', class: 'control-label' %>
+        <div class="controls">
+          <%= select_tag 'ref_type', options_for_select(@types, params[:ref_type]), class: 'input-block-level' %>
+        </div>
+      </div>
+    </div>
+
+    <div class="span2">
+      <div class="control-group">
+        <label>&nbsp;</label>
+        <div class="controls">
+          <%= button_tag 'Фильтр', class: 'btn btn-success input-block-level', name: nil %>
+        </div>
+      </div>
+    </div>
+
+    <div class="span2 offset4">
+      <div class="control-group">
+        <label>&nbsp;</label>
+        <div class="controls">
+          <%= link_to 'Добавить', new_dictionary_path(ref_type: params[:ref_type]), class: "btn btn-info input-block-level" %>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<% end %>
+
+<table class="table table-bordered table-striped table-hover">
+  <thead>
+    <th>Сокращённое наименование</th>
+    <th>Полное наименование</th>
+    <th>Порядок сортировки</th>
+    <th>Стиль HTML</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </thead>
+  <tbody>
+  <% @dictionaries.each do |dic| %>
+    <tr>
+      <td><%= dic.name %></td>
+      <td><%= dic.fullname %></td>
+      <td><%= dic.position %></td>
+      <%= content_tag :td, 'пример', style: dic.stylename_html %>
+      <td><%= link_to_declension(dic) %></td>
+      <td><%= link_to content_tag(:i, '', class: 'icon-edit'), edit_dictionary_path(dic), {'data-toggle' => 'tooltip', title: 'Редактировать'} %></td>
+      <td><%= link_to content_tag(:i, '', class: 'icon-trash'), dic, method: :delete, data: { confirm: 'Вы уверены?' }, 'data-toggle' => 'tooltip', title: 'Удалить' %></td>
+    </tr>
+  <% end%>
+  </tbody>
+</table>
+
+<%= render "/shared/declension" %>

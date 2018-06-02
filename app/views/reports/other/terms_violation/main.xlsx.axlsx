@@ -1,0 +1,10 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+wb.add_worksheet(name: "Свод") do |sheet|
+  render 'list0', sheet: sheet
+end
+
+wb.add_worksheet(name: "Лоты") do |sheet|
+  render 'list1', sheet: sheet
+end

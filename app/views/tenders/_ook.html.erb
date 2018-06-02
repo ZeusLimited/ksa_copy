@@ -1,0 +1,29 @@
+<div class="row">
+  <%= render "tender_partials/copies", f: f %>
+  <%= render "tender_partials/explanation_period", f: f %>
+  <%= render "tender_partials/failure_period", f: f %>
+  <%= render "tender_partials/other_terms", f: f %>
+  <%= render "tender_partials/confirm_place", f: f %>
+</div>
+
+<legend>Лоты</legend>
+<%= f.simple_fields_for :lots do |builder| %>
+  <%= render 'tender_partials/lots', f: builder %>
+<% end %>
+
+<%= render "tender_partials/review_and_summarizing", f: f %>
+
+<!--
+<legend>Требования к заявкам</legend>
+<div class="row">
+  <%#= render "tender_partials/prepare_offer", f: f %>
+</div>
+<div class="row">
+  <%#= render "tender_partials/reception", f: f %>
+</div>
+
+<legend>Требования к составу заявок</legend>
+<div class="row">
+  <%#= render "tender_partials/prepare_offer", f: f %>
+</div>
+ -->

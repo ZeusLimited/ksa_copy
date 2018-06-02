@@ -1,0 +1,5 @@
+sheet.add_row [fullname], style: style_title
+sheet.add_row ["Период: #{time}"]
+sheet.add_row ["Количество договоров: #{total['cnt']}"]
+sheet.add_row ["Сумма договоров: #{xlsx_money total['contract_cost_nds']}"]
+sheet.add_row []

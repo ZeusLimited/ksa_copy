@@ -1,0 +1,6 @@
+head_rows = CSV.parse(bind_erb_file('app/views/reports/reglament/hundred_millions_tenders/csv/head.csv',holding: @report.holding_name))
+
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 80
+AxlsxExt::AutoMergeNil.merge_rows(rows)

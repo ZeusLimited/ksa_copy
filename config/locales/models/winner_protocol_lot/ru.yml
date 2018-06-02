@@ -1,0 +1,9 @@
+ru:
+  activerecord:
+    models:
+      winner_protocol_lot: 'Лот'
+    attributes:
+      winner_protocol_lot:
+        lot_id: 'Лот'
+        winner_protocol_id: 'Протокол ВП'
+        solution_type_id: 'Решение'

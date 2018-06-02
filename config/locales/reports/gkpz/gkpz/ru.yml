@@ -1,0 +1,45 @@
+ru:
+  reports:
+    gkpz:
+      gkpz:
+        list1:
+          title: "Годовая  комплексная программа закупок %{customer} на %{year}г."
+          nz_caption: 'Нерегламентированные закупки'
+          summary_caption: 'Общий свод по ГКПЗ:'
+        list2:
+          title: "Годовая  комплексная программа закупок %{customer} на %{year}г."
+          caption: 'Закупки'
+          nz_caption: 'Нерегламентированные закупки'
+        lots:
+          title: "Годовая  комплексная программа закупок %{customer} на %{year}г."
+          caption: 'Закупки'
+          nz_caption: 'Нерегламентированные закупки'
+
+  helpers:
+    submit:
+      reports_gkpz_gkpz:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/gkpz/gkpz: "ГКПЗ/Внеплановые закупки - новая форма"
+    attributes:
+      reports/gkpz/gkpz:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        date_gkpz_on_state: 'Состояние ГКПЗ на'
+        gkpz_years: 'Год ГКПЗ'
+        gkpz_type: 'ГКПЗ / Внеплановые закупки'
+        customers: 'Заказчик'
+        organizers: 'Организатор'
+        etp_addresses: 'Адрес ЭТП'
+        tender_types: 'Способ закупки'
+        directions: 'Направление закупки'
+        subject_types: 'Предмет закупки'
+        statuses: 'Статус закупки'
+        show_status: 'Показывать статус закупки'
+        show_root: 'Показывать заказчика ДЗО'
+        show_cust: 'Показывать потребителя филиал'
+        status_tender: 'Статус закупки в Исполнении'
+        show_color: 'Использовать цветовую дифференциацию'
+        gkpz_state: 'Состояние в ГКПЗ'
+        divide_by_customers: 'Разделение по ДО/ВО'

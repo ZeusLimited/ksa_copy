@@ -1,0 +1,13 @@
+= simple_form_for @tender_dates_for_type do |f|
+  = error_messages_for @tender_dates_for_type
+
+  .row
+    .span2
+      = f.input :days, as: :integer, input_html: { class: 'input-block-level' }
+    .span2
+      = f.input :tender_type_id, collection: Dictionary.where(ref_type: 'Tender_Types'), value_method: 'ref_id', include_blank: false,
+        input_html: { class: 'input-block-level' }
+
+  .form-actions.text-right
+    => f.submit t('save'), class: 'btn btn-primary'
+    = link_to t('cancel'), url_from_session_or_default(:tender_dates_for_types, tender_dates_for_types_path), class: 'btn input-small btn-warning'

@@ -1,0 +1,4 @@
+--- # Адреса ЭТП
+- { ref_id: 12001, position: 01, name: "Вне ЭТП", fullname: "Вне ЭТП" }
+- { ref_id: 12002, position: 02, name: "B2B-Center", fullname: "http://www.b2b-center.ru" }
+- { ref_id: 12004, position: 04, name: "ЕЭТП", fullname: 'https://www.roseltorg.ru/' }

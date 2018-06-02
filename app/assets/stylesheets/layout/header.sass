@@ -1,0 +1,45 @@
+.page-header
+  z-index: 1
+  flex-shrink: 0
+  display: flex
+  margin-bottom: 10px
+  box-shadow: 0 0 8px $box-shadow-color
+  height: $modal-header-height-mobile
+  background-color: $navbar-background-color
+
+  @media (min-width: $menu-breakpoint)
+    height: $block-header-height
+
+  .left-section,
+  .main-section
+    align-items: center
+
+  .main-section
+    display: flex
+
+  .logo
+    height: 20px
+
+.menu-toggle
+  display: flex
+  justify-content: center
+  width: 64px
+
+.menu-toggle-mobile
+
+  width: 72px
+  padding-left: $block-spacing
+
+  @media (min-width: $menu-breakpoint)
+    display: none
+
+.main-section-content
+  flex-grow: 1
+
+.page-header-title
+  font-size: 20px
+  font-weight: 500
+  color: $color-white
+
+  @media (min-width: $menu-breakpoint)
+    display: none

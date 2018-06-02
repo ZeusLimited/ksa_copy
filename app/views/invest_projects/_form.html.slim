@@ -1,0 +1,51 @@
+= simple_form_for invest_project, html: { class: 'form-horizontal' } do |f|
+  = error_messages_for invest_project
+
+  = f.association :department,
+    collection: Department.rank_array(current_user.root_dept_id),
+    label_method: :name_with_depth_symbols,
+    value_method: :id,
+    include_blank: false,
+    input_html: { class: 'span8' }
+  = f.input :invest_project_name_id do
+    = f.hidden_field :invest_project_name_id, class: 'span10',
+      data: { url: filter_invest_names_invest_projects_path,
+        name: f.object.invest_project_name_name,
+        aqua_id: f.object.invest_project_name_aqua_id }
+  = f.input :gkpz_year, input_html: { class: 'text-right span1' }
+  = f.input :num, input_html: { class: 'span1 text-right' }
+  = f.input :name, as: :text, input_html: { class: 'span8', rows: 2 }
+  = f.input :object_name, as: :text, hint: 'Наименование объекта генерации / программы развития',
+    input_html: { class: 'span8', rows: 2 }
+  = f.input :date_install, :as => :string, hint: 'Ввод объекта в эксплуатацию/окончание работ по проекту',
+    input_html: { value: f.object.date_install, class: 'datepicker span2 text-right' }
+
+
+
+  = f.input :power_elec_gen, wrapper: :append do
+    = f.input_field :power_elec_gen, class: 'text-right span2'
+    span.add-on МВт
+  = f.input :power_thermal_gen, wrapper: :append do
+    = f.input_field :power_thermal_gen, class: 'text-right span2'
+    span.add-on ГКал/ч
+  = f.input :power_elec_net, :wrapper => :append do
+    = f.input_field :power_elec_net, class: 'text-right span2'
+    span.add-on км
+  = f.input :power_thermal_net, :wrapper => :append do
+    = f.input_field :power_thermal_net, class: 'text-right span2'
+    span.add-on км
+  = f.input :power_substation, :wrapper => :append do
+    = f.input_field :power_substation, class: 'text-right span2'
+    span.add-on МВА
+
+  = f.input :amount_financing_money,
+    hint: 'Планируемый объём обязательств по финансированию на текущий год, руб. без НДС',
+    input_html: { value: f.object.amount_financing_money, class: 'text-right money span2' }
+
+
+  = f.association :project_type, collection: Dictionary.invest_project_types, include_blank: false,
+    input_html: { class: '' }
+
+  .form-actions
+    => f.button :submit, 'Сохранить', class: 'btn-primary'
+    = link_to_session_or_default 'Отмена', :filter_invest_path, invest_projects_path, class: 'btn'

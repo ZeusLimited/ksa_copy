@@ -1,0 +1,26 @@
+== render '/contractors/menu'
+
+= simple_form_for @contractor, url: update_all_contractor_documents_path(@contractor) do |f|
+  = error_messages_for @contractor
+  = f.hidden_field :id
+
+  = render "tender_files/field", area_id: Constants::TenderFileArea::CONTRACTOR, year: Time.now.year
+  table.table.table-hover.table-striped
+    thead
+      tr
+        th
+        th = t('modal_files.file')
+        th = t('modal_files.size')
+        th = t('modal_files.type')
+        th = t('modal_files.note')
+        th = t('modal_files.loaded')
+        th = t('modal_files.owner')
+    tbody#contractor_files
+      = f.simple_fields_for :files,
+        f.object.files.includes(:file_type, tender_file: :user) do |builder|
+        = render 'tender_files/file_fields', f: builder, file_types: Dictionary.contractor_file_types
+
+  .form-actions
+    p.text-right
+      => link_to_back_or_default t('cancel'), contractor_documents_path(@contractor), class: 'btn btn-warning'
+      = f.submit t('save'), class: 'btn btn-primary'

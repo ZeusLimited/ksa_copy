@@ -1,0 +1,4 @@
+- :name: 'gkpz'
+  :method: 'slide2_gkpz_sql_rows'
+- :name: 'czk'
+  :method: 'slide2_plan_rows_all'

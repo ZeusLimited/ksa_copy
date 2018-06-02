@@ -1,0 +1,24 @@
+ru:
+  reports:
+    other:
+      expected_economic_effect:
+        total:
+          title: 'Отчет об ожидаемом экономическом эффекте от проведенных закупок _________ за период с %{db} по %{de}'
+        general:
+          title: 'Отчет об ожидаемом экономическом эффекте от проведенных закупок _________ за период с %{db} по %{de}'
+  helpers:
+    submit:
+      reports_other_expected_economic_effect:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/expected_economic_effect: 'Отчёт об ожидаемом экономическом эффекте от проводимых закупок'
+    attributes:
+      reports/other/expected_economic_effect:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        gkpz_year: 'Год ГКПЗ'
+        customers: 'Заказчик'
+        organizers: 'Организатор'
+        directions: 'Направление'
+        format: 'Формат'

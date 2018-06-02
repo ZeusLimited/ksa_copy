@@ -1,0 +1,30 @@
+ru:
+  helpers:
+    submit:
+      reports_minenergo_arm51632:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/minenergo/arm51632: 'Отчет об исполнении ГКПЗ (Макет 51632 Минэнерго)'
+    attributes:
+      reports/minenergo/arm51632:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customer: 'Заказчик'
+        gkpz_years: 'Годы ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'
+        par22222: "тыс. руб. с НДС"
+        par22222_ps: "% от общего объема ИП текущего года"
+        par33333: "тыс. руб. с НДС"
+        par33333_ps: "% от общего объема ИП текущего года"
+        par44444: "тыс. руб. с НДС"
+        par44444_ps: "% от общего объема ИП текущего года"
+        par55555: "Руководитель организации"
+        par77777: "Ответственный за исполнение макета"
+        winners: "Победитель закупки"
+        consumers: "Потребитель"

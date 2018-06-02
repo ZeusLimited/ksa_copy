@@ -1,0 +1,37 @@
+= tender.integration_status
+
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 = t('.header')
+
+= render 'tenders/tender_header', tender: tender
+
+p.text-right
+  = link_to t('add'), new_tender_bidder_path(@tender), class: 'btn btn-primary'
+
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      th = t('.bidder')
+      th.column-icon
+      th.column-icon
+      th.column-icon
+      th.column-icon
+  tbody
+  - @bidders.decorate.each do |bidder|
+    tr
+      td *unfair_contractor_html_attributes(bidder.contractor)
+        => bidder.contractor_name_inn
+        = bidder.wrench
+      td = link_icon_title 'icon-info-sign', t('icon-show'), tender_bidder_path(@tender, bidder)
+      td
+        = link_icon_title_if can?(:update, bidder.object), 'icon-edit', t('edit'),
+            edit_tender_bidder_path(@tender, bidder)
+
+      td
+        = link_icon_title 'icon-briefcase', t('.offers'),
+            tender_bidder_offers_path(@tender, bidder)
+      td
+        = link_icon_title_if can?(:destroy, bidder.object), 'icon-trash', t('icon-delete'),
+            tender_bidder_path(@tender, bidder), method: :delete, data: { confirm: t('confirm') }

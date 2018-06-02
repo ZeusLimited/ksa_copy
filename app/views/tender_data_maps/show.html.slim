@@ -1,0 +1,20 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 = t('.title')
+
+= render 'tenders/tender_header', tender: tender
+
+p.text-right
+  = link_to t('.edit'), edit_tender_tender_data_map_path(@tender), class: 'btn btn-warning'
+
+= render "offer_reception", tender: tender
+- if tender.b2b_center?
+  = render "b2b_classifiers", tender: tender
+- if tender.offer_guarantie?
+  = render "offer_guarantie", tender: tender
+- if tender.alternate_offers?
+  = render "alternate_offers", tender: tender
+- if tender.auction?
+  = render 'auction_step_increment', tender: tender
+= render "additional", tender: tender

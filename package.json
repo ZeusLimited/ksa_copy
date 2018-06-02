@@ -1,0 +1,27 @@
+{
+  "name": "ksazd",
+  "private": true,
+  "dependencies": {},
+  "scripts": {
+    "postinstall": "cd client && yarn install",
+    "test": "bundle exec rake && yarn run test:client && yarn run lint",
+    "test:client": "(cd client && yarn run --silent test)",
+    "lint": "(cd client && yarn run --silent lint)",
+    "build:clean": "rm app/assets/webpack/*",
+    "build:production:client": "(cd client && yarn run --silent build:production:client)",
+    "build:production:server": "(cd client && yarn run --silent build:production:server)",
+    "build:client": "(cd client && yarn run build:client)",
+    "build:server": "(cd client && yarn run build:server)",
+    "build:static": "yarn run build:client && yarn run build:server",
+    "build:test": "(cd client && yarn run build:test)",
+    "build:dev:client": "(cd client && yarn run --silent build:dev:client)",
+    "build:dev:server": "(cd client && yarn run --silent build:dev:server)",
+    "hot-assets": "(cd client && yarn run hot-assets)",
+    "start": "(cd client && yarn run --silent start)"
+  },
+  "devDependencies": {
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.5.0",
+    "eslint-plugin-react": "^7.3.0"
+  }
+}

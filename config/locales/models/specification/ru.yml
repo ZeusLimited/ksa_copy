@@ -1,0 +1,55 @@
+ru:
+  activerecord: &spec_ar
+    models:
+      specification: 'Спецификация'
+    attributes:
+      specification: &spec
+        num: 'Номер'
+        name: 'Наименование'
+        qty: 'Кол-во'
+        cost: 'Цена без НДС'
+        cost_nds: 'Цена с НДС'
+        cost_money: 'Цена без НДС'
+        cost_nds_money: 'Цена с НДС'
+        is_public_cost: 'Цена опубликована'
+        unit_id: 'Код ОКЕИ'
+        lot_id: 'Ссылка на лот'
+        plan_specification_id: 'Ссылка на спецификацию в планировании'
+        direction_id: 'Направление закупки'
+        financing_id: 'Источник финансирования'
+        product_type_id: 'Вид закупаемой продукции'
+        customer_id: 'Заказчик'
+        consumer_id: 'Потребитель'
+        invest_project_id: 'Инвестиционный проект'
+        monitor_service_id: 'Курирующее подразделение'
+        delivery_date_begin: 'Период поставки с'
+        delivery_date_end: 'Период поставки по'
+        financing: 'Источник финансирования'
+      specifications:
+        <<: *spec
+        base: "Спецификация: "
+      lots/specifications:
+        base: "Спецификация"
+    errors:
+      models:
+        specification:
+          attributes:
+            base:
+              okdp_type: 'Код ОКПД по лоту №%{num}(в планировании) не соответствует выбранному году публикации'
+              okved_type: 'Код ОКВЭД по лоту №%{num}(в планировании) не соответствует выбранному году публикации'
+            qty:
+              eq_0: 'не может быть 0'
+            cost_money:
+              less_then_plan: "не может быть больше планируемой суммы без НДС"
+              eq_0: "не может быть 0"
+              eq_non_0: 'должна равняться 0'
+            cost_nds_money:
+              less_then_plan: "не может быть больше планируемой суммы с НДС"
+              eq_0: "не может быть 0"
+              eq_non_0: 'должна равняться 0'
+              not_less_cost: "не может быть меньше цены без НДС"
+            financing_id:
+              must_one: "должен быть из 1-го раздела"
+              must_two: "должен быть из 2-го раздела"
+  activemodel:
+    <<: *spec_ar

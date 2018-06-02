@@ -1,0 +1,21 @@
+ru:
+  helpers:
+    submit:
+      reports_reglament_current_result:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/current_result: 'Отчет об итогах закупочной деятельности по текущей деятельности'
+    attributes:
+      reports/reglament/current_result:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customer: 'Заказчик'
+        consumers: 'Потребитель'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'

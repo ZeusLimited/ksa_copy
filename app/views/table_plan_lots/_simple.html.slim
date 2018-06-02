@@ -1,0 +1,8 @@
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      = render 'table_plan_lots/center_head'
+  tbody
+    - plan_lots.eager_load(PlanFilter::REQUIRED_ASSOCIATIONS).decorate.each do |plan_lot|
+      tr data-plan-lot-id=plan_lot.id
+        = render 'table_plan_lots/center_body', plan_lot: plan_lot

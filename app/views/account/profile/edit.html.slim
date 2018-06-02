@@ -1,0 +1,26 @@
+.page-header
+  h1 = t('.header')
+
+= simple_form_for current_user, url: account_profile_path, html: { class: "form-horizontal" } do |f|
+  = error_messages_for current_user
+
+  = f.input :email, input_html: { class: 'span3' } do
+    .input-append
+      = f.text_field :email
+      = button_tag class: 'btn btn-success', id: 'user_ldap', data: { url: from_ldap_account_profile_path } do
+        =< t('.ldap')
+  = f.input :login, input_html: { class: 'span3' }
+  = f.input :surname, input_html: { class: 'span3' }
+  = f.input :name, input_html: { class: 'span3' }
+  = f.input :patronymic, input_html: { class: 'span3' }
+  = f.association :department, collection: Department.rank_array, label_method: :name_with_depth_symbols,
+    input_html: { class: 'span3' }, include_blank: false
+  = f.input :user_job, input_html: { class: 'span3' }
+  = f.input :phone_public, input_html: { class: 'span3' }
+  = f.input :phone_cell, input_html: { class: 'span3' }
+  = f.input :phone_office, input_html: { class: 'span3' }
+  = f.input :fax, input_html: { class: 'span3' }
+
+  .form-actions
+    => link_to t('cancel'), account_profile_path, class: 'btn btn-inverse btn-large'
+    = f.button :submit, t('save'), class: 'btn btn-primary btn-large'

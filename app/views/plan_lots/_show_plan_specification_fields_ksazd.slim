@@ -1,0 +1,26 @@
+.row
+  = view_text_field('span1', plan_specification, :num_spec)
+  = view_text_field('span1', plan_specification, :qty)
+  = view_text_field('span2', plan_specification, :cost_money, plan_specification.cost_money, class: 'text-right')
+  = view_text_field('span2 offset2', plan_specification, :cost_nds_money, plan_specification.cost_nds_money, class: 'text-right')
+  = view_text_field('span2', plan_specification, :unit_name)
+  = view_text_field('span2', plan_specification, :product_type_id, plan_specification.product_type_name)
+.row
+  = view_text_field('span4', plan_specification, :cost_doc)
+  = view_text_field('span4', plan_specification, :direction_id, plan_specification.direction_name)
+  = view_text_field('span4', plan_specification, :financing, plan_specification.financing_name)
+.row
+  = view_text_area('span4', plan_specification, :name)
+  = view_text_area('span4', plan_specification, :requirements)
+  = view_text_area('span4', plan_specification, :bp_item)
+.row
+  = view_text_field('span4', plan_specification, :customer, plan_specification.customer_name)
+  = view_text_field('span4', plan_specification, :consumer_name)
+  = view_text_field('span2', plan_specification, :delivery_date_begin)
+  = view_text_field('span2', plan_specification, :delivery_date_end)
+.row
+  = view_text_field('span4', plan_specification, :monitor_service, plan_specification.monitor_service_name)
+  = view_text_field('span4', plan_specification, :curator)
+  = view_text_field('span4', plan_specification, :tech_curator)
+.row
+  = view_text_area('span8', plan_specification, :note)

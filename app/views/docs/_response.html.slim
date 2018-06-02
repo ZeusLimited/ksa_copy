@@ -1,0 +1,17 @@
+table.table.table-bordered.table-striped.small-font
+  thead
+    tr
+      th Имя параметра
+      th Тип данных
+      th Описание
+      th Обязательность
+      th Пример заполнения
+  tbody.structure
+    - structure.each do |p|
+      tr
+        td
+          code = p['name']
+        td = p['data_type']
+        td == p['desc']
+        td = p['required'] ? 'Да' : 'Нет'
+        td = p['example']

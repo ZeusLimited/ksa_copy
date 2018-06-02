@@ -1,0 +1,19 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 9)
+@outlines = []
+
+@columns = Reports::Other::TendersEfficiency::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+
+report_parts = @report.report_parts.first
+
+title_column = [report_parts['report_name'], nil]
+@sheet.add_row title_column, style: @styles[:title_left]
+
+report_parts['children'].each do |period|
+  render 'main_table', report: period
+end
+
+@simple_sheet.change_column_widths(@widths)

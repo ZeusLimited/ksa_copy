@@ -1,0 +1,4 @@
+ru:
+  user_plan_lots:
+    select_list:
+      notice: 'Лот успешно добавлен в выбранные!'

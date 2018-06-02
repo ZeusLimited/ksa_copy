@@ -1,0 +1,43 @@
+sum_group = {}
+@columns.each_pair do |ckey, cvalue|
+  sum_group["#{ckey}_total"] = 0 if cvalue[:sum]
+end
+
+render 'reports/gkpz/gkpz_oos_common/gkpz_oos_new/thead'
+
+row_number = 0
+
+@report.structure.each do |group|
+  results = @report.result(filter.merge(group['filters']))
+
+  row_begin = @sheet.rows.size
+  row_end = row_begin + results.count
+
+  values = Array.new(@columns.size)
+  values[0] = group['name']
+  values[10] = results.count > 0 ? AxlsxExt::Formula.sum_by_column('K', row_begin + 2, row_end + 1) : 0
+  values[11] = results.count > 0 ? AxlsxExt::Formula.sum_by_column('L', row_begin + 2, row_end + 1) : 0
+  @sheet.add_row values, style: @sum_quarter_styles
+
+  results.each do |result|
+    @columns.each_pair do |ckey, cvalue|
+      sum_group["#{ckey}_total"] += cvalue[:value].call(result) || 0 if cvalue[:sum]
+    end
+    values = @columns.map do |k, v|
+      v[:value].call(result)
+    end
+    @sheet.add_row values, style: @column_styles, types: @column_types
+  end
+
+  @outlines << { start_index: row_begin + 1, end_index: row_end, level: 1 }
+end
+
+values = @columns.map do |k, v|
+  if k == :c0
+    'Итого'
+  else
+    v[:sum] ? sum_group["#{k}_total"] : nil
+  end
+end
+
+@sheet.add_row values, style: @sum_styles

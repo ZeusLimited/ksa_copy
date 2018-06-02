@@ -1,0 +1,49 @@
+--- # разделы
+- name: I. СОСТОЯВШИЕСЯ ЗАКУПКИ С ПОДВЕДЕННЫМИ ИТОГАМИ
+  children:
+  - name: 1. Энергоремонтное производство
+    children:
+    - name: Раздел 1.1. Закупка услуг под программу энергоремонтного производства
+      filter: { direction_id: <%= yaml_directions['erp'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг под программу энергоремонтного производства:'
+    - name: Раздел 1.2 Закупка оборудования и материалов под программу энергоремонтного производства
+      filter: { direction_id: <%= yaml_directions['erp'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого оборудования и материалов под программу энергоремонтного производства:'
+    sum_name: ! 'Итого под программу энергоремонтного производства:'
+  - name: 3. Закупки в области информационных технологий (прочие)
+    children:
+    - name: Раздел 3.1 Закупки услуг в области информационных технологий (прочие)
+      filter: { direction_id: <%= yaml_directions['it'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг в области информационных технологий (прочие):'
+    - name: Раздел 3.2 Закупки материалов в области информационных технологий (прочие)
+      filter: { direction_id: <%= yaml_directions['it'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов в области информационных технологий (прочие):'
+    sum_name: ! 'Итого в области информационных технологий (прочие):'
+  - name: 4. Эксплуатационные расходы
+    children:
+    - name: Раздел 4.1 Закупки услуг на эксплуатационные расходы
+      filter: { direction_id: <%= yaml_directions['er'] %>, subject_type_id: <%= Constants::SubjectType::SERVICES %> }
+      sum_name: ! 'Итого услуг на эксплуатационные расходы:'
+    - name: Раздел 4.2 Закупки материалов и оборудования на эксплуатационные расходы
+      filter: { direction_id: <%= yaml_directions['er'] %>, subject_type_id: <%= Constants::SubjectType::MATERIALS %> }
+      sum_name: ! 'Итого материалов на эксплуатационные расходы:'
+    sum_name: ! 'Итого в области эксплуатационных расходов:'
+  - name: 5. Закупка топлива
+    filter: { direction_id: <%= yaml_directions['fuel'] %> }
+    sum_name: ! 'Итого топливо:'
+  - name: 6. НИОКР и прочие консультативные услуги
+    filter: { direction_id: <%= yaml_directions['niokr'] %> }
+    sum_name: ! 'Итого НИОКР и прочие консультативные услуги:'
+  - name: 7. Иннвационная и высокотехнологичная продукция (прочие)
+    filter: { direction_id: <%= yaml_directions['inivp'] %> }
+    sum_name: ! 'Итого ИНиВП (прочие):'
+  - name: 8. Продукция административно-хозяйственного назначения
+    filter: { direction_id: <%= yaml_directions['ahn'] %> }
+    sum_name: ! 'Итого Продукция административно-хозяйственного назначения:'
+  - name: 9. Общесистемные закупки
+    filter: { direction_id: <%= yaml_directions['osu'] %> }
+    sum_name: ! 'Итого Общесистемные закупки:'
+  - name: 10. Прочие закупки
+    filter: { direction_id: <%= yaml_directions['other'] %> }
+    sum_name: ! 'Итого Прочие закупки:'
+  sum_name: ! 'Итого по разделу I:'

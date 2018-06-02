@@ -1,0 +1,11 @@
+--- # Роли системы
+- { id: 06, position: 9, name: Admin, name_ru: "Администратор" }
+- { id: 07, position: 3, name: Moderator, name_ru: "Модератор" }
+- { id: 08, position: 2, name: UserBoss, name_ru: "Пользователь (Главный)" }
+- { id: 09, position: 1, name: User, name_ru: "Пользователь" }
+- { id: 10, position: 0, name: View, name_ru: "Просмотр всего" }
+- { id: 11, position: 5, name: CorrectLot, name_ru: "Корректировка лота" }
+- { id: 12, position: 5, name: ManageWiki, name_ru: "Редактирование wiki" }
+- { id: 13, position: 5, name: ContractorBoss, name_ru: "Главный по контрагентам" }
+- { id: 14, position: 10,name: ContractorCreator, name_ru: "Создатель контрагентов"}
+- { id: 15, position: 11,name: ViewPlan, name_ru: "Просмотр плана"}

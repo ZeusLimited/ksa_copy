@@ -1,0 +1,54 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 7)
+@outlines = []
+
+@holding_name = @report.holding_name
+@columns = Reports::Gkpz::Checklist::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@sum_styles = @columns.values.map do |c|
+  if c[:sum]
+    c[:sum_style] ? @styles[c[:sum_style]] : @styles[:sum_money]
+  else
+    @styles[:sum]
+  end
+end
+
+suffix = @report.customer.to_i == Constants::Departments::RAO ? '_main_org' : ''
+
+
+prefix = "reports/gkpz/checklist.header#{suffix}"
+@sheet.add_row [nil, t("#{prefix}.gkpz"), nil, nil, nil, nil, t("#{prefix}.application")]
+@sheet.add_row [nil, nil, nil, nil, nil, nil, t("#{prefix}.note", holding: @holding_name)], style: @styles[:plain]
+
+@sheet.add_row
+@simple_sheet.add_row_title(t("#{prefix}.title",
+                              year: @report.gkpz_year,
+                              holding: @holding_name,
+                              dzo: Department.find(@report.customer.to_i).try(:name)),
+                            style: @styles[:title],
+                            columns_count: 7)
+@sheet.add_row
+
+render 'main_table', tender_types: Constants::TenderTypes::REGULATED
+
+summary1 = @sheet.rows.size
+
+@sheet.add_row
+@simple_sheet.add_row_title 'Нерегламентированные закупки', style: @styles[:title], columns_count: @columns.count
+@sheet.add_row
+
+render 'main_table', tender_types: Constants::TenderTypes::UNREGULATED
+
+summary2 = @sheet.rows.size
+
+@sheet.add_row ['ВСЕГО (регламентированные + не регламентированные)',
+                "=B#{summary1}+B#{summary2}", "=C#{summary1}+C#{summary2}", "=D#{summary1}+D#{summary2}",
+                "=E#{summary1}+E#{summary2}", "=F#{summary1}+F#{summary2}", "=G#{summary1}+G#{summary2}"],
+               style: @sum_styles
+
+render "footer#{suffix}"
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

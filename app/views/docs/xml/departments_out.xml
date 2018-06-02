@@ -1,0 +1,14 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:WashOut">
+   <soap:Body>
+      <tns:departments_response>
+         <departments xsi:type="tns:departments">
+            <id xsi:type="xsd:int">701000</id>
+            <parent_dept_id xsi:type="xsd:int"/>
+            <name xsi:type="xsd:string">Сахаэнерго</name>
+            <ownership xsi:type="xsd:string">АО</ownership>
+            <inn xsi:type="xsd:string">1435117944</inn>
+            <kpp xsi:type="xsd:string">143501001</kpp>
+         </departments>
+      </tns:departments_response>
+   </soap:Body>
+</soap:Envelope>

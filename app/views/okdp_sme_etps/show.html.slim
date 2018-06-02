@@ -1,0 +1,12 @@
+p#notice = notice
+
+p
+  strong Code:
+  = @okdp_sme_etp.code
+p
+  strong Type:
+  = @okdp_sme_etp.type
+
+= link_to 'Edit', edit_okdp_sme_etp_path(@okdp_sme_etp)
+'|
+= link_to 'Back', okdp_sme_etps_path

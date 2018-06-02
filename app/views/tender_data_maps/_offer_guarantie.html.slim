@@ -1,0 +1,26 @@
+h3 = t('.offer_guarantie')
+fieldset.frame
+  .row
+    = view_text_field('span4', tender, :is_guarantie, tbool(tender.is_guarantie))
+  .row
+    = view_text_area('span10', tender, :guarantie_offer)
+  .row
+    = view_text_area('span10', tender, :guarant_criterions)
+  .row
+    = view_text_area('span10', tender, :guarantie_recvisits)
+  .row
+    = view_text_area('span10', tender, :guarantie_making_money)
+  br
+  .row
+    table.table.table-bordered.table-hover.table-striped.span10
+      thead
+        tr
+          th = t('.num')
+          th = t('.name')
+          th = t('.guarantie_cost')
+      tbody
+        - tender.lots.each do |lot|
+          tr
+            td = lot.nums
+            td = lot.name
+            td = lot.guarantie_cost

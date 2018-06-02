@@ -1,0 +1,15 @@
+{
+  "presets": ["es2015", "stage-0", "react"],
+  "env": {
+    "test": {
+      "plugins": ["__coverage__"]
+    },
+    "production": {
+      "plugins": [
+        "add-react-displayname",
+        "transform-react-inline-elements",
+        "transform-react-constant-elements"
+      ]
+    }
+  }
+}

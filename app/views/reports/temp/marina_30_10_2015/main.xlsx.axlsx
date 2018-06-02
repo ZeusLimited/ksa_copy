@@ -1,0 +1,104 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+def dir_sql(min_price, max_price, custs_id)
+  filters = []
+  filters << "#{min_price} * 1000000 <= ps.cost_nds" if min_price
+  filters << "ps.cost_nds < #{max_price} * 1000000" if max_price
+  filter_sql = filters.empty? ? '' : "AND (#{filters.join(' AND ')})"
+
+  <<-SQL
+  select * from (
+  select
+    dir.name as dir_name,
+    count(pl.id) as cnt,
+    sum(ps.cost_nds) as sum_cost
+
+    #{format(@from_sum, customers: custs_id.is_a?(Array) ? custs_id.join(', ') : custs_id)}
+
+    #{filter_sql}
+
+    group by
+    dir.name
+
+  union all
+
+  select
+    dir.name || ' в т.ч. ЕИ' as dir_name,
+    count(pl.id) as cnt,
+    sum(ps.cost_nds) as sum_cost
+
+    #{format(@from_sum, customers: custs_id.is_a?(Array) ? custs_id.join(', ') : custs_id)}
+    and pl.tender_type_id = 10015
+
+    #{filter_sql}
+
+    group by
+    dir.name || ' в т.ч. ЕИ'
+  )
+    order by 1
+  SQL
+end
+
+def add_list(wb, custs_id, name_list = nil)
+  name_list = Department.find(custs_id).name unless name_list
+
+  wb.add_worksheet(name: name_list) do |sheet|
+    sheet.add_row [
+      'Порог плановой стоимости, млн. руб. с НДС (минимум)',
+      'Порог плановой стоимости, млн. руб. с НДС (максимум)',
+      'Количество закупок',
+      'Плановая стоимость, руб. с НДС'
+    ], style: @styles[:th]
+
+    sql = <<-SQL
+    select
+      porog.min_price,
+      porog.max_price,
+      (
+        #{@select_cnt}
+        #{format(@from_sum + @porog_price, customers: custs_id.is_a?(Array) ? custs_id.join(', ') : custs_id)}
+      ) as cnt,
+      (
+        #{@select_sum}
+        #{format(@from_sum + @porog_price, customers: custs_id.is_a?(Array) ? custs_id.join(', ') : custs_id)}
+      ) as cost_nds
+      #{@from_porog}
+    SQL
+
+    rows = ActiveRecord::Base.connection.select_all(sql)
+
+    rows.each do |r|
+      sheet.add_row [
+        r['min_price'],
+        r['max_price'],
+        r['cnt'],
+        r['cost_nds']
+      ], style: @styles[:td]
+
+      next unless r['min_price'] && r['min_price'] >= 50 && r['cnt'] > 0
+
+      sub_sql = dir_sql(r['min_price'], r['max_price'], custs_id)
+      dir_rows = ActiveRecord::Base.connection.select_all(sub_sql)
+      dir_rows.each do |dr|
+        sheet.add_row [
+          dr['dir_name'],
+          nil,
+          dr['cnt'],
+          dr['sum_cost']
+        ], style: @styles[:td]
+      end
+    end
+
+    sheet.add_row [
+      'Итого',
+      nil,
+      "=SUM(C2:C#{sheet.rows.size})",
+      "=SUM(D2:D#{sheet.rows.size})"
+    ], style: @styles[:td_title]
+  end
+end
+
+# @deps.each { |dep_id| add_list(wb, dep_id) }
+
+add_list(wb, @deps, 'Общий лист')

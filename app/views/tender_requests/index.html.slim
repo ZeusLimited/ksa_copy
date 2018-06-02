@@ -1,0 +1,48 @@
+= render 'shared/submenu_tender', tender: @tender
+
+.page-header
+  h1 Журнал разъяснений
+
+= render 'tenders/tender_header', tender: tender
+
+.row
+  = link_to 'Добавить', new_tender_tender_request_path(@tender), class: 'btn btn-primary pull-right'
+
+table.table.table-hover.table-bordered.table-striped
+  thead
+    tr
+      th №
+      th Дата получения запроса
+      th Номер и дата исх. письма
+      th Участник, подавший запрос
+      th Краткое содержание запроса
+      th Пользователь, подготовивший ответ
+      th Номер и дата ответного письма
+      th.column-icon
+      th.column-icon
+      th.column-icon
+      th.column-icon
+  tbody
+    - @tender_requests.each_with_index do |tender_request, index|
+      tr
+        td= index+1
+        td= tender_request.register_date.strftime('%d.%m.%Y')
+        td= tender_request.inbox
+        td= tender_request.contractor_text
+        td= tender_request.request
+        td= tender_request.user_name
+        td= tender_request.outbox
+        td
+          = link_to content_tag(:i, '', class: 'icon-info-sign'),
+            tender_tender_request_path(@tender, tender_request),
+            {'data-toggle' => 'tooltip', title: 'Просмотр'}
+        td
+          = link_to_if can?(:update, tender_request), content_tag(:i, '', class: 'icon-edit'),
+            edit_tender_tender_request_path(@tender, tender_request),
+            {'data-toggle' => 'tooltip', title: 'Редактировать'}
+        td
+          = link_to_if can?(:destroy, tender_request), content_tag(:i, '', class: 'icon-trash'),
+            tender_tender_request_path(@tender, tender_request), method: :delete,
+            data: { confirm: 'Вы уверены?', 'data-toggle' => 'tooltip', title: 'Удалить' }
+        td
+          = link_to_history_icon(tender_request)

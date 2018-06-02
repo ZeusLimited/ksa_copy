@@ -1,0 +1,6 @@
+ru:
+  user_mailer:
+    subscribe:
+      gkpz_plan: ' (ГКПЗ %{year} %{customer})'
+      gkpz_fact: ' (ГКПЗ %{year})'
+      gkpz_deleted: ' (ГКПЗ %{year} %{num} %{department})'

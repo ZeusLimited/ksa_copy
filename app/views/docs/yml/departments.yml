@@ -1,0 +1,40 @@
+name: 'departments'
+desc: 'Метод предназначен для получения информации из справочника предприятий'
+request_params:
+  -
+    name: 'id'
+    data_type: 'Integer'
+    desc: 'Идентификатор записи (возможно передавать несколько значений)'
+    required: false
+    example: '701000'
+  -
+    name: 'parent_dept_id'
+    data_type: 'Integer'
+    desc: 'Идентификатор родительской записи (возможно передавать несколько значений)'
+    required: false
+    example: '7'
+  -
+    name: 'name'
+    data_type: 'String'
+    desc: 'Наименование краткое'
+    required: false
+    example: 'Сахаэнерго'
+  -
+    name: 'inn'
+    data_type: 'String'
+    desc: 'ИНН'
+    required: false
+    example: '1435117944'
+  -
+    name: 'kpp'
+    data_type: 'String'
+    desc: 'КПП'
+    required: false
+    example: '143501001'
+response_params:
+  -
+    name: 'departments'
+    data_type: 'Array'
+    desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=department'>department</a>]"
+    required: false
+    structure: true

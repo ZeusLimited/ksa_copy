@@ -1,0 +1,61 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to 'К офертам участника', tender_bidder_offers_path(@tender, @bidder, anchor: dom_id(@offer.lot))
+      li = link_to 'К карте предложений', map_by_lot_tender_bidders_path(@tender)
+      li = link_to 'Редактировать', edit_tender_bidder_offer_path(@tender, @bidder, @offer)
+
+.page-header
+  h1 Просмотр оферты
+
+h3 = @bidder.contractor_name_short
+h4
+  = @offer.lot_name_with_cust
+  = link_to_history_icon(@offer)
+hr
+
+.row
+  = view_text_field('span2', @offer, :status_name)
+  = view_text_field('span2', @offer, :num_text)
+.row
+  = view_text_area('span4', @offer, :conditions)
+  = view_text_area('span4', @offer, :note)
+  = view_text_area('span4', @offer, :change_descriptions)
+
+.row
+  = view_text_field('span4', @offer, :rebidded, tbool(@offer.rebidded))
+  = view_text_field('span4', @offer, :maker, tbool(@offer.maker))
+  = view_text_field('span4', @offer, :absent_auction, tbool(@offer.absent_auction)) if @tender.auction?
+
+.row
+  = view_text_area('span4', @offer, :final_conditions) if @offer.win?
+
+= field_set_tag "Спецификации оферты" do
+  table.table.table-bordered
+    thead
+      tr
+        th.center-cell rowspan='2' Спецификация
+        th.center-cell rowspan='2' Кол-во
+        th.center-cell colspan='2' Цена
+        th.column-icon rowspan='2'
+      tr
+        th.center-cell Предварительная
+        th.center-cell Окончательная
+    tbody
+      - @offer.offer_specifications.each do |offer_specification|
+        tr
+          td = offer_specification.specification_fullname
+          td = "#{offer_specification.specification.try(:qty)} × #{offer_specification.specification.try(:unit_name)}"
+          td.no-wrap.right-cell
+            = "<b>#{p_money(offer_specification.cost)}</b> руб. без НДС".html_safe
+            br
+            = "<b>#{p_money(offer_specification.cost_nds)}</b> руб. c НДС".html_safe
+            br
+            = "НДС: <b>#{p_money((offer_specification.cost_nds / offer_specification.cost - 1) * 100)}%</b>".html_safe
+          td.no-wrap.right-cell
+            = "<b>#{p_money(offer_specification.final_cost)}</b> руб. без НДС".html_safe
+            br
+            = "<b>#{p_money(offer_specification.final_cost_nds)}</b> руб. c НДС".html_safe
+            br
+            = "НДС: <b>#{p_money((offer_specification.final_cost_nds / offer_specification.final_cost - 1) * 100)}</b>%".html_safe
+          td = link_to_history_icon(offer_specification)

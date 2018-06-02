@@ -1,0 +1,5 @@
+<% if @page_file.new_record? %>
+  alert("Ошибка при закачке файла: <%= j @page_file.errors.full_messages.join(', ').html_safe %>");
+<% else %>
+  $('#page_files').append("<%= j render(@page_file) %>");
+<% end %>

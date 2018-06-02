@@ -1,0 +1,6 @@
+<%= fields_for :tender do |pl| %>
+  <%= pl.fields_for :link_tender_files_attributes, tender_file.link_tender_files.build, index: gen_index do |builder| %>
+    $('#tender_files').append("<%= j render 'tenders/link_tender_file', f: builder %>");
+    $('#<%= dom_id(tender_file) %> select').select2();
+  <% end %>
+<% end %>

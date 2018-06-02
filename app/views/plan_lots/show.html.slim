@@ -1,0 +1,138 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to_session_or_default t('return_to_list'), :filter_path, plan_lots_path
+      = content_tag :li, link_to(t('edit'), edit_plan_lot_path(@plan_lot)) if can?(:update, @plan_lot)
+      = content_tag :li, link_to(t('.copy'), new_plan_lot_path(clone: @plan_lot.id)) if can?(:create, PlanLot)
+      li = link_to t('.history'), history_plan_lot_path(@plan_lot.guid_hex)
+      - if @plan_lot.contract?
+        li = link_to t('.create_additional'), new_plan_lot_path(additional: @plan_lot.guid_hex)
+      = content_tag :li, link_to(t('.non_public_reason'), plan_lot_non_execution_path(@plan_lot.guid_hex))
+      - if current_user.can?(:update, @plan_lot.eis)
+        = content_tag :li, link_to(t('.eis_num'), '#eis_num_modal', "data-toggle" => "modal")
+
+.page-header
+  h1 = t('.header')
+  h4 = @plan_lot.non_eis ? t('.header4_non_eis') : t('.header4_num_eis', num: plan_lot.eis.num)
+
+.row
+  = control_notify(@plan_lot.control)
+
+.row
+  .span6
+    - if @plan_lot.additional_plan_lot
+      label = t('.additional_to')
+      = link_to truncate(@plan_lot.additional_plan_lot.title, length: 135, separator: ' '),
+                @plan_lot.additional_plan_lot, title: @plan_lot.additional_plan_lot.title
+  .span2
+    - if @plan_lot.additional_plan_lot
+      = view_text_field(nil, @plan_lot, :additional_num)
+  = view_text_field('span2', @plan_lot, :state, t("plan_lot_state.#{@plan_lot.state}"))
+  = view_text_field('span2', @plan_lot, :gkpz_year)
+
+.row
+  = view_text_field('span1', @plan_lot, :num_tender)
+  = view_text_field('span1', @plan_lot, :num_lot)
+  = view_text_field('span2', @plan_lot, :announce_date)
+  = view_text_field('span2', @plan_lot, :subject_type, @plan_lot.subject_type_name)
+  = view_text_field('span2', @plan_lot, :tender_type_id, @plan_lot.tender_type_name)
+  = view_text_field('span2', @plan_lot, :etp_address, @plan_lot.etp_address_name)
+  = view_text_field('span2', @plan_lot, :regulation_item_id, @plan_lot.regulation_item_num || @plan_lot.point_clause)
+
+- if @plan_lot.preselection_plan_lot
+  .row
+    = view_text_field('span10', @plan_lot, :preselection_guid_hex, @plan_lot.preselection_plan_lot_title)
+    .span1
+      label &nbsp;
+      = link_to t('icon-show'), @plan_lot.preselection_plan_lot
+
+.row
+  = view_text_area('span4', @plan_lot, :tender_type_explanations)
+  = view_text_area('span4', @plan_lot, :explanations_doc)
+  = view_text_area('span4', @plan_lot, :lot_name)
+
+.row
+  = view_text_field('span4', @plan_lot, :department, @plan_lot.department_name)
+  = view_text_field('span4', @plan_lot, :commission, @plan_lot.commission.try(:commission_type_name))
+  = view_text_field('span4', @plan_lot, :sme_type_name)
+
+.row
+  = view_text_area('span12', @plan_lot, :order1352_fullname)
+
+.row
+  = view_text_field('span4', @plan_lot, :status, @plan_lot.status.try(:name))
+  .span4
+    label Протокол
+    = link_to_protocol(@plan_lot)
+
+/- if plan_lot.rgs?
+  .row
+    = view_text_field('span2', @plan_lot, :charge_date)
+    = view_text_field('span2', plan_lot, :deadline_charge_date)
+
+
+p.text-right
+  - if @plan_lot.preselection?
+    => link_to t('.annual_limits'), '#annual_limits', "data-toggle" => 'modal', class: "btn btn-success input-medium"
+  = link_to t('.files'), "#assign_files", "data-toggle" => "modal", class: 'btn btn-warning input-medium'
+
+= field_set_tag t('.potential_participants') do
+  - @plan_lot.plan_lot_contractors.each do |plc|
+    .row = view_text_field('span8', plc, :contractor_name_long, plc.contractor_name_long, unfair_contractor_html_attributes(plc.contractor))
+- @plan_lot.plan_specifications.order(:num_spec).decorate.each do |plan_specification|
+  = field_set_tag t('.specification'), class: "coloring" do
+
+    = render "show_plan_specification_fields_ksazd", plan_specification: plan_specification
+
+    = field_set_tag t('.addresses') do
+      - plan_specification.fias_plan_specifications.each do |fias_specification|
+        .row
+          = view_text_field('span9', fias_specification, :fias_name)
+
+    = field_set_tag t('.invest_project') do
+      .row
+        .span9
+          = text_field_tag nil, plan_specification.invest_project.try(:fullname), readonly: true, id: nil, class: 'input-block-level'
+        .span1= link_to t('show'), plan_specification.invest_project if plan_specification.invest_project
+
+    = field_set_tag t('.economic_activities') do
+      .row
+        = view_text_field('span6', plan_specification, :okdp_id, plan_specification.okdp.try(:fullname))
+        = view_text_field('span6', plan_specification, :okved_id, plan_specification.okved.try(:fullname))
+
+    = field_set_tag t('.planned_amount') do
+      - plan_specification.plan_spec_amounts.each do |psa|
+        .row
+          = view_text_field('span1', psa, :year)
+          = view_text_field('span2', psa, :amount_mastery_money, psa.amount_mastery_money, class: 'text-right money')
+          = view_text_field('span2', psa, :amount_mastery_nds_money, psa.amount_mastery_nds_money, class: 'text-right money')
+          = view_text_field('span2', psa, :amount_finance_money, psa.amount_finance_money, class: 'text-right money')
+          = view_text_field('span2', psa, :amount_finance_nds_money, psa.amount_finance_nds_money, class: 'text-right money')
+
+== react_component 'EisNumModalForm'
+
+#assign_files.modal.hide.fade
+  .modal-header
+    button.close data-dismiss="modal" &times;
+    h3 = t('.files')
+  .modal-body
+    ul.nav.nav-tabs
+      li.active = link_to t('.gkpz'), '#gkpz', data: { toggle: "tab" }
+      li = link_to t('.protocols'), '#protocols', data: { toggle: "tab" }
+    .tab-content
+      #gkpz.tab-pane.active
+        = render 'shared/table_files', files: @plan_lot.plan_lots_files, type: true
+      #protocols.tab-pane
+        = render 'shared/table_files', files: ProtocolFile.for_lot(@plan_lot.guid_hex), type: false
+
+- if @plan_lot.preselection?
+  #annual_limits.modal.hide.fade
+    .modal-header
+      button.close data-dismiss="modal" &times;
+      h3 = t('.annual_limits')
+    .modal-body
+      - @plan_lot.plan_annual_limits.each do |pal|
+        .row
+          = view_text_field('span1', pal, :year)
+          = view_text_field('span2', pal, :cost_money)
+          = view_text_field('span2', pal, :cost_nds_money)

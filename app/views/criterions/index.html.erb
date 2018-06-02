@@ -1,0 +1,27 @@
+<h1>Listing criterions</h1>
+
+<table>
+  <tr>
+    <th>Type criterion</th>
+    <th>Name</th>
+    <th>Parent</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @criterions.each do |criterion| %>
+  <tr>
+    <td><%= criterion.type_criterion %></td>
+    <td><%= criterion.name %></td>
+    <td><%= criterion.parent_id %></td>
+    <td><%= link_to 'Show', criterion %></td>
+    <td><%= link_to 'Edit', edit_criterion_path(criterion) %></td>
+    <td><%= link_to 'Destroy', criterion, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Criterion', new_criterion_path %>

@@ -1,0 +1,36 @@
+<%= render "/shared/submenu_tender", tender: @tender %>
+
+<div class="page-header">
+  <ul class="tender-actions">
+    <%= content_tag(:li, link_to('Редактировать', edit_bidder_requirements_tender_path, class: 'btn btn-warning')) if can?(:edit_bidder_requirements, @tender) %>
+  </ul>
+
+  <h1>Требования к участникам</h1>
+</div>
+
+<%= render 'tender_header', tender: @tender %>
+
+<div class="row">
+  <%= view_text_area('span6', @tender, :provide_offer) %>
+  <%= view_text_area('span6', @tender, :preferences) %>
+</div>
+
+<div class="row">
+  <%= view_text_field('span4', @tender, :is_sertification, @tender.is_sertification ? 'учитывается' : 'не учитывается') %>
+</div>
+
+<legend>Отборочные критерии</legend>
+<% @tender.tender_draft_criterions.each do |tdc| %>
+  <div class="row">
+    <%= view_text_field('span1', tdc, :num) %>
+    <%= view_text_area('span5', tdc, :name) %>
+    <div class="span3">
+      <label>Направления оценки предложения:</label>
+      <ul>
+        <% tdc.destinations.each do |destination| %>
+        <%= content_tag :li, destination.name %>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+<% end %>

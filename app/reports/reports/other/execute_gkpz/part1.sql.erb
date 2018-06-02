@@ -1,0 +1,259 @@
+select
+<% if single_year? %>
+  coalesce(root.name, 'ИТОГО:') as name,
+  'sum'
+<% else %>
+  case when root.name is null then 'Итого:'
+    when table2.gkpz_year is null then root.name
+    else cast(table2.gkpz_year as varchar2(4))
+  end as name,
+  case
+    when table2.gkpz_year is null
+      then 'sum'
+    else 'legal'
+  end
+<% end %>
+  as style,
+  coalesce(sum(table1.cost_gr_1),0) as cost_gr_1,
+  coalesce(sum(table1.cost_gr_1_ei),0) as cost_gr_1_ei,
+  coalesce(sum(table2.cost_gr_2),0) as cost_gr_2,
+  coalesce(sum(table2.cost_gr_2_ei),0) as cost_gr_2_ei,
+  coalesce(sum(table3.cost_gr_3),0) as cost_gr_3,
+  coalesce(sum(table3.cost_gr_3_ei),0) as cost_gr_3_ei,
+  coalesce(sum(table3.cost_gr_4),0) as cost_gr_4,
+  coalesce(sum(table3.cost_gr_4_ei),0) as cost_gr_4_ei
+from
+(
+--part1
+  select
+    root_customer_id, gkpz_year,
+    sum(cost_gr_1)/1000 as cost_gr_1,
+    sum(cost_gr_1_ei)/1000 as cost_gr_1_ei
+    from
+      (SELECT
+        pl.root_customer_id, pl.gkpz_year,
+        case
+          when pl.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %>
+            then ps.qty*ps.cost_nds
+          else 0
+        end as cost_gr_1,
+        case
+          when pl.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %>
+            and pl.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+            then ps.qty*ps.cost_nds
+          else 0
+        end as cost_gr_1_ei
+        FROM plan_specifications ps
+        inner join plan_lots pl on pl.id = ps.plan_lot_id
+        left join commissions pg on (pg.id = pl.commission_id)
+        inner join protocols p on (pl.protocol_id = p.id)
+        inner join commissions c on (p.commission_id = c.id)
+        inner join (
+            select l.guid, max(p1.date_confirm) as date_confirm
+            from plan_lots l
+              inner join protocols p1 on (p1.id = l.protocol_id)
+              inner join commissions c1 on (p1.commission_id = c1.id)
+            where c1.commission_type_id = <%= Constants::CommissionType::SD %>
+            Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+
+        WHERE pl.announce_date between :begin_date and :end_date
+        <% if gkpz_years.present? %>
+          And pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+        <% end %>
+        <% if organizers.present? %>
+          And pl.department_id in
+            (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+        <% end %>
+
+        <% if current_user_root_dept_id.present? %>
+          and pl.root_customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+        <% end %>
+
+        <% if customers.present? %>
+          and pl.root_customer_id in
+            (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+        <% end %>
+
+       ) t1
+    group by gkpz_year,root_customer_id
+    order by root_customer_id
+) table1
+full join
+(
+--part2
+  select
+    root_customer_id,
+    sum(cost_gr_2) as cost_gr_2,
+    sum(cost_gr_2_ei) as cost_gr_2_ei,
+    gkpz_year
+    from
+      (
+        SELECT
+          (ps.qty*ps.cost_nds)/1000 as cost_gr_2,
+          pl.root_customer_id, pl.gkpz_year,
+          case
+            when pl.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+              then (ps.qty*ps.cost_nds)/1000
+            else 0
+          end as cost_gr_2_ei
+        FROM plan_specifications ps
+        inner join plan_lots pl on pl.id = ps.plan_lot_id
+        left join commissions pg on (pg.id = pl.commission_id)
+        inner join protocols p on (pl.protocol_id = p.id)
+        inner join commissions c on (p.commission_id = c.id)
+        inner join (
+            select l.guid, max(p1.date_confirm) as date_confirm
+            from plan_lots l
+              inner join protocols p1 on (p1.id = l.protocol_id)
+              inner join commissions c1 on (p1.commission_id = c1.id)
+            Group By l.guid) vi on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+
+        WHERE pl.announce_date between :begin_date and :end_date
+          And pl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+          <% if gkpz_years.present? %>
+            And pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+          <% end %>
+
+          <% if organizers.present? %>
+            And pl.department_id in
+              (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+          <% end %>
+
+          <% if current_user_root_dept_id.present? %>
+            and pl.root_customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+          <% end %>
+
+          <% if customers.present? %>
+            and pl.root_customer_id in
+              (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+          <% end %>
+      ) t2
+     group by gkpz_year,root_customer_id
+     order by root_customer_id
+) table2
+on table1.root_customer_id = table2.root_customer_id
+and table1.gkpz_year = table2.gkpz_year
+
+full join
+(
+--part3
+  select
+    root_customer_id,
+    cost_gr_3,
+    cost_gr_3_ei,
+    cost_gr_4,
+    cost_gr_4_ei,
+    gkpz_year
+    from
+     (
+      select root_customer_id, sum(cost_gr_3)/1000 as cost_gr_3, sum(cost_gr_4)/1000 as cost_gr_4, gkpz_year,
+      sum(cost_gr_3_ei)/1000 as cost_gr_3_ei, sum(cost_gr_4_ei)/1000 as cost_gr_4_ei
+      from (
+      select
+
+      pl.root_customer_id, l.gkpz_year,
+      s.qty * s.cost_nds as cost_gr_3,
+      case
+        when t.tender_type_id not in (<%= Constants::TenderTypes::NONCOMPETITIVE.join(', ') %>)
+        then s.qty * os.final_cost_nds
+        else s.qty * contract_spec.cost_nds
+      end as cost_gr_4,
+      case
+        when pl.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+          then s.qty * s.cost_nds
+        else 0
+      end as cost_gr_3_ei,
+      case
+        when pl.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+          and t.tender_type_id not in (<%= Constants::TenderTypes::NONCOMPETITIVE.join(', ') %>)
+          then s.qty * os.final_cost_nds
+        when pl.tender_type_id = <%= Constants::TenderTypes::ONLY_SOURCE %>
+          and t.tender_type_id in (<%= Constants::TenderTypes::NONCOMPETITIVE.join(', ') %>)
+          then s.qty * contract_spec.cost_nds
+        else 0
+      end cost_gr_4_ei
+
+      from tenders t
+
+      inner join lots l on l.tender_id = t.id
+      inner join specifications s on s.lot_id = l.id
+      left join plan_lots pl on l.plan_lot_id = pl.id
+      left join plan_specifications ps on s.plan_specification_id = ps.id
+
+      left join
+        (select * from
+          (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+            from plan_lots tpl
+            inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_gkpz_on_state
+            where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+           where rn = 1) gkpz_pl on (pl.guid = gkpz_pl.guid)
+
+      left join (
+        select tpl.guid, max(tp.date_confirm) as can_date
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_gkpz_on_state
+        inner join commissions tc on tp.commission_id = tc.id
+        where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+        group by tpl.guid
+      ) can on gkpz_pl.guid = can.guid
+
+      left join open_protocols op on op.tender_id = t.id
+      left join winner_protocols wp on wp.id = l.winner_protocol_id
+      left join winner_protocol_lots wpl on (wpl.winner_protocol_id = wp.id and wpl.lot_id = l.id)
+
+      inner join offer_specifications os on os.specification_id = s.id
+      inner join offers o on o.id = os.offer_id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>
+      inner join bidders b on b.id = o.bidder_id
+      inner join contractors c on c.id = b.contractor_id
+
+      left join contracts on o.id = contracts.offer_id and contracts.type_id = <%= Constants::ContractTypes::BASIC %> and contracts.confirm_date <= :end_date
+      left join contract_specifications contract_spec on
+        (contract_spec.specification_id = s.id and contracts.id = contract_spec.contract_id)
+
+      where
+        wp.confirm_date between :begin_date and :end_date
+        and can.guid is null -- неотмененная
+        and
+        (
+          (t.tender_type_id not in (<%= Constants::TenderTypes::NONCOMPETITIVE.join(', ') %>)
+            and l.status_id in (<%= Constants::LotStatus::WINNER %>,<%= Constants::LotStatus::RP_SIGN %>,
+              <%= Constants::LotStatus::CONTRACT %>)
+          )
+          or
+            (t.tender_type_id in (<%= Constants::TenderTypes::NONCOMPETITIVE.join(', ') %>)
+              and l.status_id in (<%= Constants::LotStatus::CONTRACT %>))
+        )
+
+        <% if gkpz_years.present? %>
+          and l.gkpz_year in (<%= gkpz_years.join(', ') %>) -- год ГКПЗ
+        <% end %>
+
+        <% if customers.present? %>
+          and s.customer_id in
+            (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+        <% end %>
+
+        <% if organizers.present? %>
+          and t.department_id in
+            (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+        <% end %>
+
+      ) t3
+      group by root_customer_id, gkpz_year
+      order by root_customer_id
+
+      ) t4
+  ) table3
+on table2.root_customer_id = table3.root_customer_id
+and table3.gkpz_year = table2.gkpz_year
+
+inner join departments root on coalesce(table1.root_customer_id,table2.root_customer_id,table3.root_customer_id) = root.id
+
+
+<% if single_year? %>
+  group by rollup((root.name,table2.gkpz_year))
+<% else %>
+  group by rollup(root.name,table2.gkpz_year)
+<% end %>
+
+order by root.name asc, table2.gkpz_year desc

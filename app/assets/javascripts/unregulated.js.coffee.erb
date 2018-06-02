@@ -1,0 +1,23 @@
+@toggle_contract_info = (element) ->
+  offer_status =
+    if $(element).is 'select'
+      $(element)
+    else
+      $(element).find('select.offer-status')
+
+  contract_info = offer_status.closest('.offers').find('fieldset.contract-info')
+
+  if offer_status.val() == '<%= Constants::OfferStatuses::WIN %>'
+    contract_info.children("input:hidden[id$='_destroy']").val('0')
+    contract_info.show 'blind', coloring
+  else
+    contract_info.children("input:hidden[id$='_destroy']").val('1')
+    contract_info.hide 'blind', coloring
+
+$(document).on 'change', 'form .offer-status', (event) ->
+  toggle_contract_info(event.target)
+
+
+document.addEventListener "turbolinks:load", ->
+  $('.offer-status').each ->
+    toggle_contract_info(this)

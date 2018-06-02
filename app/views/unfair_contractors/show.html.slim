@@ -1,0 +1,18 @@
+== render 'menu'
+
+
+.row
+  = view_text_field('span2', @unfair_contractor, :num)
+  = view_text_field('span2', @unfair_contractor, :date_in)
+  = view_text_field('span2', @unfair_contractor, :date_out)
+  = view_text_field('span2', @unfair_contractor, :contractor_reg_date)
+.row
+  = view_text_area('span4', @unfair_contractor, :contractor_fullname)
+  = view_text_area('span4', @unfair_contractor, :contractor_legal_addr)
+  = view_text_area('span4', unfair_contractor, :inn_ogrn)
+.row
+  = view_text_area('span6', @unfair_contractor, :contract_info)
+  = view_text_area('span6', @unfair_contractor, :unfair_info)
+.row
+  == view_text_area('span6', @unfair_contractor, :lots, @unfair_contractor.lots.map(&:fullname).join("\n"))
+  = view_text_area('span6', @unfair_contractor, :note)

@@ -1,0 +1,22 @@
+ru:
+  helpers:
+    submit:
+      reports_other_economic_result:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/economic_result: 'Отчет об экономии по результатам закупок ПАО "Квадра"'
+    attributes:
+      reports/other/economic_result:
+        customers: 'Заказчики'
+        consumers: 'Потребители'
+        date_begin: 'Дата начала'
+        date_end: 'Дата окончания'
+        gkpz_year: 'Год ГКПЗ'
+        directions: 'Направление'
+        state: 'Состояние в ПЗ'
+        format: 'Формат'
+        subject_type: 'Предмет'
+  reports/other/economic_result:
+    row_titles:
+      report_title1: 'Отчет об экономии по результатам закупок'

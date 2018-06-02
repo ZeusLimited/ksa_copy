@@ -1,0 +1,13 @@
+-- sql_all_tenders
+<%= render_sql '_base.sql.erb' %>
+<%= render_sql '_group_by.sql.erb' %>
+<% if type == "" %>
+  Where confirm_date >= :begin_date
+<% end %>
+<% if detail %>
+  Group By id, num, name, tender_type_id,
+    regulation_item_num,
+    etp_address_id,
+    sme_type_id,
+    is_profitable
+<% end %>

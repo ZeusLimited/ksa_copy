@@ -1,0 +1,27 @@
+--- # Направления закупок
+# - { id: 21001, position: 07, name: "Топливо", fullname: "Топливо для электростанций", yaml_key: 'fuel', type_id: 'routine', is_longterm: false }
+# - { id: 21002, position: 03, name: "ТПиР", fullname: "Техническое перевооружение и реконструкция", yaml_key: 'tpir', type_id: 'invest', is_longterm: false }
+# - { id: 21003, position: 02, name: "КС", fullname: "Капитальное строительство", yaml_key: 'ks', type_id: 'invest', is_longterm: false }
+# - { id: 21004, position: 01, name: "ЭРП", fullname: "Энергоремонтное производство", yaml_key: 'erp', type_id: 'routine', is_longterm: false }
+# - { id: 21005, position: 10, name: "ОСУ", fullname: "Общесистемные услуги", yaml_key: 'osu', type_id: 'routine', is_longterm: false }
+# - { id: 21006, position: 05, name: "Закупки ИТ - прочие", fullname: "Закупки в области ИТ (прочие)", yaml_key: 'it', type_id: 'routine', is_longterm: false }
+# - { id: 21007, position: 08, name: "НИОКР - инвестиции", fullname: "НИОКР - инвестиции", yaml_key: 'niokr_invest', type_id: 'invest', is_longterm: false }
+# - { id: 21008, position: 09, name: "АХН", fullname: "Продукция административно-хозяйственного назначения", yaml_key: 'ahn', type_id: 'routine', is_longterm: false }
+# - { id: 21009, position: 06, name: "ЭР", fullname: "Эксплуатационные расходы", yaml_key: 'er', type_id: 'routine', is_longterm: false  }
+# - { id: 21010, position: 11, name: "Прочие", fullname: "Прочие закупки", yaml_key: 'other', type_id: 'routine', is_longterm: false }
+# - { id: 21011, position: 04, name: "Закупки ИТ - инвестиции", fullname: "Закупки в области ИТ (инвестиции)", yaml_key: 'it_invest', type_id: 'invest', is_longterm: false }
+# - { id: 21012, position: 12, name: "НИОКР - прочие", fullname: "НИОКР - прочие", yaml_key: 'niokr', type_id: 'routine', is_longterm: false }
+# - { id: 21013, position: 13, name: "ИНиВП - инвестиции", fullname: "Инновационная продукция и (или) высокотехнологическая продукция (инвестиции)", yaml_key: 'inivp_invest', type_id: 'invest', is_longterm: true }
+# - { id: 21014, position: 14, name: "ИНиВП - прочие", fullname: "Инновационная продукция и (или) высокотехнологическая продукция (прочие)", yaml_key: 'inivp', type_id: 'routine', is_longterm: true }
+
+- { id: 21001, position: 07, type_id: 'routine', name: 'Топливо', fullname: 'Прочие виды топливо (уголь, мазут и т.д.)', yaml_key: 'fuel', is_longterm: false }
+- { id: 21002, position: 03, type_id: 'invest', name: "ТПиР", fullname: "Техническое перевооружение и реконструкция", yaml_key: 'tpir', is_longterm: true }
+- { id: 21003, position: 02, type_id: 'invest', name: "КС", fullname: "Капитальное строительство", yaml_key: 'ks', is_longterm: true }
+- { id: 21004, position: 01, type_id: 'routine', name: "ЭРП", fullname: "Энергоремонтное производство", yaml_key: 'erp', is_longterm: false }
+- { id: 21005, position: 05, type_id: 'routine', name: 'Газ', fullname: 'Газ', yaml_key: 'gas', is_longterm: false }
+- { id: 21006, position: 06, type_id: 'routine', name: "Вода", fullname: "Вода на тех нужды", yaml_key: 'aqua', is_longterm: false }
+- { id: 21007, position: 08, type_id: 'routine', name: 'Аренда', fullname: 'Арендная плата за прочие имущество', yaml_key: 'rent', is_longterm: false }
+- { id: 21008, position: 09, type_id: 'routine', name: 'ПЭП', fullname: 'Покупная электроэнергия и ее передача', yaml_key: 'pet', is_longterm: false }
+- { id: 21009, position: 04, type_id: 'routine', name: "ЭР", fullname: "Эксплуатационные и прочие нужды", yaml_key: 'er', is_longterm: false }
+- { id: 21010, position: 10, type_id: 'routine', name: 'Сбор', fullname: 'Сбор и взыскание д/с за т/э энергию', yaml_key: 'collect', is_longterm: false }
+

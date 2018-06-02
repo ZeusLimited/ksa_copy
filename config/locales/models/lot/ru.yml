@@ -1,0 +1,72 @@
+ru:
+  activerecord: &lot_form
+    models:
+      lot: 'Лот'
+    attributes:
+      lot: &lot
+        num: 'Номер лота'
+        name: 'Наименование'
+        tender_id: 'Ссылка на закупку'
+        rebid_type_id: 'Тип переторжки'
+        plan_lot_id: 'Ссылка на лот в планировании'
+        status_id: 'Статус лота'
+        subject_type_id: 'Предмет закупки'
+        guarantie_cost: 'Размер обеспечения, руб.'
+        guarantie_cost_money: 'Размер обеспечения'
+        gkpz_year: 'Год ГКПЗ'
+        # activity: 'Направление деятельности'
+        # activity_name: 'Направление деятельности'
+        # object_stage: 'Стадия объекта'
+        # object_stage_name: 'Стадия объекта'
+        # buisness_type: 'Вид деятельности'
+        # buisness_type_id: 'Вид деятельности'
+        # buisness_type_name: 'Вид деятельности'
+        privacy: 'Секретность'
+        privacy_name: 'Секретность'
+        # is_adjustable_rate: 'Регулируемый тариф?'
+        # is_ensure_tenders: 'Закупка в целях обеспечения проведения закупок?'
+        non_public_reason: 'Причина невыполнения сроков публикации'
+        boss_note_ksazd: "Замечания РАО"
+        boss_note_torg: 'Замечания ИА'
+        note: 'Примечания'
+        num_plan_eis: 'Номер позиции плана на ЕИС'
+        id_eis: 'Уникальный номер на ЕИС'
+        # not_lead_contract: 'Не привела к заключению договора'
+        # no_contract_next_bidder: 'Договор со вторым участником не заключался'
+        fas_appeal: 'По закупке подана жалоба в ФАС, признанная обоснованной'
+        registred_bidders_count: 'Кол-во зарегистрированных участников'
+        life_cycle: 'Применение критерия "Стоимость договора жизненного цикла"'
+        plan_lot_full_num: 'Номер ГКПЗ'
+        plan_lot_gkpz_year: 'Год ГКПЗ'
+        non_contract_reason: 'Причины невыполнения срока на заключение договора'
+        rebid_protocol_id: 'Протокол переторжки'
+        main_direction_id: 'Главное направление'
+        root_customer_id: 'Головное предприятие заказчик'
+        sme_type_id: 'Отношение к участию МСП'
+        sme_type: 'Отношение к участию МСП'
+        sme_type_name: 'Отношение к участию МСП'
+        order_num: 'Номер поручения'
+        order_agreement_date: 'Дата согласования'
+      lots:
+        <<: *lot
+        base: "Лот: "
+    errors:
+      models:
+        lot:
+          attributes:
+            base:
+              announce_date_less_then_confirm_date: "Лот №%{num} - дата согласования в плане не может быть позже даты публикации"
+            sme_type_id:
+                sme: 'должно быть МСП'
+                non_sme: 'не может быть МСП'
+            non_contract_reason:
+              non_contract: "не может быть пустым, т.к. дата подписания договора превышает дату проведения процедуры более чем на 20 дней"
+            non_public_reason:
+              non_public: "не может быть пустым, т.к. дата публикации превышает планируемую дату публикации больше чем на месяц"
+  activemodel:
+    <<: *lot_form
+    attributes:
+      lot:
+        summary_date: "Дата вступления в силу"
+        winner_name: "Победитель"
+        violation_reason: 'Причина неисполнения срока подведения итогов'

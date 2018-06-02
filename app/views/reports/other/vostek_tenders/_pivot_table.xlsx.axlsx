@@ -1,0 +1,10 @@
+def pivot_value(attribute)
+  @report.tenders_sql_rows.map { |r| r[attribute.to_s] }.sum
+end
+
+render 'phead', sheet: sheet
+
+@rows.each do |key, value|
+  result = value[:parent].present? ? [nil, nil] : [pivot_value(key), pivot_value("all_#{key}")]
+  sheet.add_row [@report.l(key, "num"), @report.l(key, "name")] + result, style: @styles[:td]
+end

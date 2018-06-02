@@ -1,0 +1,32 @@
+select
+  gkpz_num,
+  lot_name,
+  customer,
+  contract_num,
+  contract_date,
+  contractor,
+  sum(contract_sum) as contract_sum
+from
+(
+  select (pl.num_tender || '.' || pl.num_lot) as gkpz_num,
+         pl.lot_name as lot_name,
+         (cust.ownership || ' ' || cust.name) as customer,
+         c.num as contract_num,
+         c.confirm_date as contract_date,
+         (contr.ownership || ' ' || contr.name) as contractor,
+         (cspec.cost * spec.qty) as contract_sum,
+         l.id as lot_id
+  from
+  lots l
+  inner join tenders t on l.tender_id = t.id
+  inner join plan_lots pl on l.plan_lot_id = pl.id
+  inner join departments cust on cust.id = l.root_customer_id
+  inner join contracts c on l.id = c.lot_id
+  inner join offers o on o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>
+  inner join bidders b on b.id = o.bidder_id
+  inner join contractors contr on contr.id = b.contractor_id and cast(contr.is_sme as integer) = 1
+  inner join contract_specifications cspec on cspec.contract_id = c.id
+  inner join specifications spec on cspec.specification_id = spec.id and l.id = spec.lot_id
+) sub
+where lot_id = :lot_id
+group by gkpz_num, lot_name, customer, contract_num, contract_date, contractor

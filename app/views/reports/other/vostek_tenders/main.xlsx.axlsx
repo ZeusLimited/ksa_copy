@@ -1,0 +1,17 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+@rows = Reports::Other::VostekTenders::ROWS
+
+wb.add_worksheet(name: "Cвод") do |sheet|
+  render 'list0', sheet: sheet
+end
+
+@margins = { left: 0.3937, right: 0.3937, top: 0.3937, bottom: 0.3937 }
+# paper size 9 = A4 size. https://github.com/randym/axlsx/blob/master/lib/axlsx/workbook/worksheet/page_setup.rb
+@setup = { paper_size: 9, orientation: :landscape }
+@options = { horizontal_centered: true }
+
+wb.add_worksheet(name: "По закупкам", page_margins: @margins, page_setup: @setup, print_options: @options) do |sheet|
+  render 'list1', sheet: sheet
+end

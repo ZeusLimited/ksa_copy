@@ -1,0 +1,53 @@
+ru:
+  reports/gkpz/explanation_single_source:
+    header_main_org:
+      title: 'Обоснование закупок способом "у единственного источника" по ГКПЗ на %{year} год Структурного подразделения %{holding} ______________________'
+      application: 'Приложение №6'
+      note: 'к регламенту формирования годовой комплексной программы закупок и отчетности для нужд %{holding}'
+      gkpz: 'Годовая комплексная программа закупок'
+    header:
+      title: 'Обоснование закупок способом "у единственного источника" по ГКПЗ на %{year} год ДЗО %{holding} - %{dzo}'
+      application: 'Приложение №3'
+      note: 'к регламенту формирования годовой комплексной программы закупок и отчетности для нужд ДЗО/ВЗО %{holding}'
+      gkpz: 'Годовая комплексная программа закупок'
+    footer_main_org:
+      fb_curator: 'Ответственный за функциональный бюджет %{holding}'
+      approval: 'СОГЛАСОВАНО'
+      tender_boss: 'Начальлник департамента закупок'
+      invest_boss: 'Начальник Департамента инвестиций'
+      sign: '______________________ (Фамилия И.О.)'
+      sign_date: '___ ______________ 201__ г.'
+      curator: 'исп.'
+      phone_number: 'телефон'
+    footer:
+      boss_main_org: 'Заместитель Генерального директора %{holding}'
+      approval: 'СОГЛАСОВАНО'
+      boss: 'Руководитель ДЗО'
+      tender_boss: 'Начальлник отдела закупок ДЗО'
+      invest_boss_main_org: 'Департамент инвестиций %{holding}'
+      tender_boss_main_org: 'Начальник департамента закупок %{holding}'
+      sign: '______________________ (Фамилия И.О.)'
+      sign_date: '___ ______________ 201__ г.'
+      curator: 'исп.'
+      phone_number: 'телефон'
+  helpers:
+    submit:
+      reports_gkpz_explanation_single_source:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/gkpz/explanation_single_source: 'Обоснование закупок способом "у единственного источника"'
+    attributes:
+      reports/gkpz/explanation_single_source:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        date_gkpz_on_state: 'Состояние ГКПЗ на'
+        gkpz_year: 'Год ГКПЗ'
+        gkpz_type: 'ГКПЗ / Внеплановые закупки'
+        customer: 'Заказчик'
+        organizers: 'Организаторы'
+        directions: 'Направления закупки'
+        subject_type: 'Предмет закупки'
+        financing_sources: 'Источники финансирования'
+        statuses: 'Статусы закупки'
+        gkpz_state: 'Состояние в ГКПЗ'

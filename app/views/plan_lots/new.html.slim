@@ -1,0 +1,9 @@
+.page-header
+  .row
+    .span10
+      h1 Новый лот
+    .span2
+      label &nbsp;
+      = link_to "Очистить данные", reset_plan_lots_path, class: 'btn btn-warning input-block-level'
+
+= render 'form', url: nil, http_method: nil, plan_lot: @plan_lot

@@ -1,0 +1,6 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+%w(2 3 4 5).each do |index|
+  wb.add_worksheet(name: "Слайд#{index}") { |sheet| render "sheet#{index}", sheet: sheet }
+end

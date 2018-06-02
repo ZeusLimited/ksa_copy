@@ -1,0 +1,19 @@
+== render 'menu'
+
+== paginate @tenders
+
+table.table.table-bordered.tenders_list
+  thead
+    tr
+      = render 'tender_partials/center_head'
+  - @tenders.decorate.each do |tender|
+    tbody
+      tr *tender.title_row_class
+        = render 'tender_partials/center_caption', tender: tender
+      - tender.lots.select { |l| current_user.can?(:read, l) }.sort_by { |l| [l.num, l.sublot_num] }.each_with_index do |lot, index|
+        = render 'tender_partials/control_row', colspan: "10" if index == 5
+          
+        tr class=(index >= 5 ? "hidden_row" : "")
+          = render 'tender_partials/center_body', tender: tender, lot: lot
+
+== paginate @tenders

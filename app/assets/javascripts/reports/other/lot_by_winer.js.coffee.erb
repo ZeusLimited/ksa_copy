@@ -1,0 +1,32 @@
+lotWinnerFormatResult = (c) ->
+  # "<h4 class=\"text-success\">#{c.label}</h4>"
+  "#{c.label}"
+
+lotWinnerFormatSelection = (c) ->
+  "#{c.label}"
+
+lot_winner_contractor_search_path = "/contractors/search.json"
+lot_winner_contractor_info_path = "/contractors/info.json"
+
+@multi_for_lot_by_winners = ->
+  $('.autocomplete-winners-select').select2
+    placeholder: "Все"
+    minimumInputLength: 1
+    multiple: true
+    allowClear: true
+    ajax:
+      url: lot_winner_contractor_search_path
+      dataType: 'json'
+      data: (term, page) ->
+        term: term
+      results: (data, page) -> { results: data }
+    initSelection: (element, callback) ->
+      id = $(element).val()
+      if id isnt ""
+        $.ajax
+          url: lot_winner_contractor_info_path
+          data: { id: id }
+          dataType: 'json'
+        .done (data) -> callback(data)
+    formatResult: lotWinnerFormatResult
+    formatSelection: lotWinnerFormatSelection

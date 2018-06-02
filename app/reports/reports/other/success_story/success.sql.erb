@@ -1,0 +1,50 @@
+select
+  row_number() over (order by contractor) as rn,
+  gkpz_num,
+  customer,
+  contractor,
+  lot_name,
+  lot_id,
+  contact_person
+from
+(
+  select
+  pl.num_tender || '.' || pl.num_lot as gkpz_num,
+  coalesce(cust.ownership, '') || '"' || cust.name || '"' as customer,
+  coalesce(c.ownership, '') || ' ' || c.name || ' / ' || c.inn as contractor,
+  rtrim(l.name, chr(10) || chr(13) || ' ') || ' (ЕИС ' || coalesce(cast(t.oos_num as varchar2), '') || ')' as lot_name,
+  case when cast(o.maker as integer) = 1 then 'Производитель' end as maker,
+  first_value(wp.confirm_date) over (partition by c.id order by wp.confirm_date) as first_wp_date,
+  wp.confirm_date as wp_date,
+  l.status_id,
+  t.tender_type_id,
+  t.department_id,
+  s.customer_id,
+  l.id as lot_id,
+  ct.contact_person as contact_person
+  from tenders t
+    inner join lots l on t.id = l.tender_id
+    inner join departments cust on cust.id = l.root_customer_id
+    inner join offers o on o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>
+    inner join bidders b on b.id = o.bidder_id
+    inner join contractors c on c.id = b.contractor_id and cast(c.is_sme as integer) = 1
+    inner join winner_protocols wp on wp.id = l.winner_protocol_id
+    inner join
+    (
+      select lot_id, customer_id
+      from specifications
+      group by lot_id, customer_id
+    ) s on (l.id = s.lot_id)
+    left join plan_lots pl on pl.id = l.plan_lot_id
+    left join contacts ct on ct.department_id = cust.id
+) sub
+where first_wp_date between :begin_date and :end_date
+  And status_id = <%= Constants::LotStatus::CONTRACT %>
+  And tender_type_id not in (<%= Constants::TenderTypes::ONLY_SOURCE %>, <%= Constants::TenderTypes::UNREGULATED %>, <%= Constants::TenderTypes::PO %>)
+    <% if customers.present? %>
+      And customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+    <% end %>
+    <% if organizers.present? %>
+      And department_id in (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+    <% end %>
+order by rn

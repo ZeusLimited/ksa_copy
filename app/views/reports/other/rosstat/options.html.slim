@@ -1,0 +1,16 @@
+= input_block_form_for @options, url: reports_other_rosstat_show_path,
+  method: :get, html: { target: '_blank' } do |f|
+
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+    .row
+      .span6
+        = f.input :customer, collection: Department.roots_customers(current_user.root_dept),
+          label_method: :name_with_depth_symbols, include_blank: false
+    .row
+      .span2= f.input :format, collection: { 'Excel' => 'xlsx', 'HTML' => 'html' }, include_blank: false
+
+    .form-actions
+      = f.button :button, class: 'btn btn-primary', name: nil

@@ -1,0 +1,17 @@
+styles = Array.new(7) { @styles[:td] }
+styles[0] = styles[1] = nil
+
+rows = []
+rows << @sheet.add_row([nil, nil, nil, "Реквезиты заказчика", nil, nil, nil], style: styles)
+rows << @sheet.add_row([nil, nil, "1", "Наименование заказчика", nil, @customer.name, nil], style: styles)
+rows << @sheet.add_row([nil, nil, "2", "Адрес местонахождения заказчика", nil, @customer.contact_legal_fias_name, nil], style: styles)
+rows << @sheet.add_row([nil, nil, "3", "Телефон заказчика", nil, @customer.contact_phone, nil], style: styles)
+rows << @sheet.add_row([nil, nil, "4", "Электронная почта заказчика", nil, @customer.contact_email, nil], style: styles)
+rows << @sheet.add_row([nil, nil, "5", "ИНН", nil, @customer.inn, nil], style: styles)
+rows << @sheet.add_row([nil, nil, "6", "КПП", nil, @customer.kpp, nil], style: styles)
+rows << @sheet.add_row([nil, nil, "7", "ОКАТО", nil, @customer.contact_legal_fias_okato, nil], style: styles)
+
+rows.each do |row|
+  @sheet.merge_cells row.cells[3..4]
+  @sheet.merge_cells row.cells[5..6]
+end

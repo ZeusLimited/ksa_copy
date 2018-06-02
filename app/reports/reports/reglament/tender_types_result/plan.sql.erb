@@ -1,0 +1,77 @@
+-- plan.sql.erb
+select
+  coalesce(sum(cost), 0) as plan_cost,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::OK.join(', ') %>) then cost else 0 end), 0) as plan_cost_ok,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::ZK.join(', ') %>) then cost else 0 end), 0) as plan_cost_zk,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::PO %> then cost else 0 end), 0) as plan_cost_po,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OZC %> then cost else 0 end), 0) as plan_cost_ozc,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZZC %> then cost else 0 end), 0) as plan_cost_zzc,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OZP %> then cost else 0 end), 0) as plan_cost_ozp,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZZP %> then cost else 0 end), 0) as plan_cost_zzp,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OKP %> then cost else 0 end), 0) as plan_cost_okp,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZKP %> then cost else 0 end), 0) as plan_cost_zkp,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::EI.join(', ') %>) then cost else 0 end), 0) as plan_cost_ei,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::UNREGULATED %> then cost else 0 end), 0) as plan_cost_nz,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::SIMPLE %> then cost else 0 end), 0) as plan_cost_u,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::AUCTIONS.join(', ') %>) then cost else 0 end), 0) as plan_cost_a
+  From
+  (
+  select
+    pl.tender_type_id,
+    ps.qty*ps.cost_nds as cost
+    from plan_lots pl
+    inner join plan_specifications ps on (pl.id = ps.plan_lot_id)
+    inner join protocols p on (p.id = pl.protocol_id)
+    inner join
+    (select l.guid, max(pp.date_confirm) as date_confirm
+      from plan_lots l
+      inner join protocols pp on (l.protocol_id = pp.id)
+      inner join commissions cc on (pp.commission_id = cc.id)
+      left join (
+        select gkpz_year, department_id, commission_type_id
+        from protocols p
+          inner join commissions c on (p.commission_id = c.id)
+        where c.commission_type_id = <%= Constants::CommissionType::SD %>
+          and p.date_confirm <= :end_date
+        Group By gkpz_year, department_id, commission_type_id
+      ) sd on (sd.gkpz_year = l.gkpz_year and sd.department_id = l.root_customer_id)
+
+      Where pp.date_confirm <= :end_date
+        And l.gkpz_year = :gkpz_year
+        And case when sd.commission_type_id is null
+            then <%= Constants::CommissionType::SD %>
+            else cc.commission_type_id
+            end = <%= Constants::CommissionType::SD %>
+      Group by l.guid
+    ) vi
+    on (vi.guid = pl.guid and p.date_confirm = vi.date_confirm)
+    Where pl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+    and pl.gkpz_year = :gkpz_year
+
+    <% if customer.present? %>
+      and ps.customer_id in
+        (<%= Department.subtree_ids_for(customer).join(', ') %>) -- заказчик
+    <% end %>
+
+    <% if organizers.present? %>
+      and pl.department_id in
+        (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+    <% end %>
+
+    <% if tender_types.present? %>
+      and pl.tender_type_id in (<%= tender_types.join(', ') %>)
+    <% end %>
+
+    <% if directions.present? %>
+      and ps.direction_id in (<%= directions.join(', ') %>)
+    <% end %>
+
+    <% if financing_sources.present? %>
+      and ps.financing_id in (<%= financing_sources.join(', ') %>)
+    <% end %>
+
+    <% if subject_type.present? %>
+      and pl.subject_type_id = <%= subject_type %>
+    <% end %>
+
+  ) sub

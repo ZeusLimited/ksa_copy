@@ -1,0 +1,42 @@
+.page-header
+  h1 = t('.head')
+
+p.muted = t('.search_hint')
+
+= form_tag contractors_path, method: :get do
+  .input-append
+    = text_field_tag 'q', params[:q], class: "span3"
+    = button_tag t('.search'), class: 'btn', name: nil
+
+  .pull-right
+    = link_to 'Создать контрагента', new_contractor_path, class: "btn btn-primary"
+
+- unless params[:q].nil?
+  = paginate @contractors
+
+  table.table.table-bordered
+    thead
+      tr
+        th = t('.table.name')
+        th = t('.table.address')
+        th = t('.table.inn')
+        th = t('.table.kpp')
+        th
+        th
+        th
+    tbody
+    - @contractors.each do |contractor|
+      tr
+        td *unfair_contractor_html_attributes(contractor)
+          = contractor.name_short
+        td = contractor.legal_addr
+        - if contractor.active?
+          td.right-cell = contractor.inn
+        - else
+          td.right-cell class=contractor.status title=t("contractor_status.#{contractor.status}") = contractor.inn
+        td.right-cell= contractor.kpp
+        td = link_icon_title 'icon-info-sign', t('.show'), contractor
+        td = link_icon_title 'icon-edit', t('.edit'), edit_contractor_path(contractor)
+        td = link_icon_title 'icon-trash', t('.destroy'), contractor, method: :delete, data: { confirm: 'Вы уверены?' }
+
+  = paginate @contractors

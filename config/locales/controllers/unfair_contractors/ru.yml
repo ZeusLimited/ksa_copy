@@ -1,0 +1,6 @@
+ru:
+  contractors:
+    create:
+      notice: 'Контрагент успешно создан.'
+    update:
+      notice: 'Контрагент успешно изменён.'

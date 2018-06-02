@@ -1,0 +1,24 @@
+<%= field_set_tag nil, class: "coloring tender_eval_criterions" do %>
+  <%= f.hidden_field :_destroy %>
+
+  <div class="row">
+    <div class="span1">
+      <%= f.input :num, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span7">
+      <%= f.input :name, as: :text, input_html: {rows: 2, class: 'eval_name input-block-level'} %>
+    </div>
+    <div class="span1">
+      <label>&nbsp;</label>
+      <%= content_tag :a, "Справочник", href: "#", class: 'btn select_eval', data: {toggle: 'modal'} %>
+    </div>
+    <div class="span1">
+      <%= f.input :value, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span2">
+      <label>&nbsp;</label>
+      <%= link_to content_tag(:i, '', class: 'icon-minus') + " Удалить", '#', class: "remove_eval_criterion pull-right btn btn-danger" %>
+    </div>
+  </div>
+
+<% end %>

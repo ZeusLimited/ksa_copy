@@ -1,0 +1,8 @@
+.page-header
+  h1 = t('.header')
+
+= render 'form', show_lots: false, protocol: @protocol, commissions: @commissions
+
+= render 'table_plan_lots/simple', plan_lots: @protocol.plan_lots
+
+= link_to t('.back'), :back

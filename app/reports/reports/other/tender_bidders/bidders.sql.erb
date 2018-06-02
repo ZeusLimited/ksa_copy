@@ -1,0 +1,88 @@
+select
+ row_number() over (partition by c.name, coalesce(ow.shortname, '') order by l.id nulls first) as break_point,
+ c.name || ' (' || coalesce(ow.shortname, '') || ')' as contractor_name,
+ rc.name as customer_name,
+ pl.num_tender || (case when fr.id is not null then  '.' || t.num else '' end) || '.' || nvl2(fr.id, l.num, pl.num_lot) as lot_num,
+ wp.confirm_date,
+ l.name as lot_name,
+ decode(o.status_id, <%= Constants::OfferStatuses::WIN %>, 'Да', '') as is_winner,
+ sum(s.qty * os.final_cost) as final_cost,
+ sum(s.qty * wos.final_cost) as winner_cost,
+ tt.name ||
+  decode(wpl.solution_type_id, <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>, ' ЕИ', '') ||
+  (case
+    when t.etp_address_id in (<%=  Constants::EtpAddress::ETP.join(', ') %>)
+    then ' (ЭТП)'
+    else ''
+  end) as tender_type_name,
+ org.name as organizer_name
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join offers o on (o.lot_id = l.id and o.version = 0)
+  inner join bidders b on (b.tender_id = t.id and b.id = o.bidder_id)
+  inner join contractors c on (c.id = b.contractor_id)
+  left join ownerships ow on ow.id = c.ownership_id
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id and wp.tender_id = t.id)
+  inner join winner_protocol_lots wpl on (wpl.lot_id = l.id and wpl.winner_protocol_id = wp.id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join offer_specifications os on (os.specification_id = s.id and os.offer_id = o.id)
+  left join offers wo on (wo.lot_id = l.id and wo.version = 0 and wo.status_id = <%= Constants::OfferStatuses::WIN %>)
+  left join offer_specifications wos on (wos.specification_id = s.id and wos.offer_id = wo.id)
+  inner join dictionaries tt on (tt.ref_id = t.tender_type_id)
+  inner join departments rc on (rc.id = l.root_customer_id)
+  inner join departments org on (org.id = t.department_id)
+  left join lots fr on (fr.id = l.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+Where t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And wp.confirm_date between :begin_date and :end_date
+
+<% if etp_addresses.present? %>
+  And t.etp_address_id = (<%= etp_addresses.join(', ') %>)
+<% end %>
+
+<% if tender_types.present? %>
+  And t.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if gkpz_years.present? %>
+  And l.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id %>
+  And
+    (t.department_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+     Or
+     s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+    )
+<% end %>
+
+<% if customers.present? %>
+  And s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- организатор
+<% end %>
+
+<% if organizers.present? %>
+  And t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if contractors.present? %>
+  And c.id in (
+    select
+      con.id
+    from contractors con where con.guid in (select guid from contractors where id in (<%= contractors %>))
+  )
+<% end %>
+
+<% if directions.present? %>
+  And s.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+Group By Rollup ((c.name, coalesce(ow.shortname, '')),
+                 (l.id, rc.name, pl.num_tender, fr.id, t.num, l.num, pl.num_lot, c.ownership_id,
+                  decode(wpl.solution_type_id, <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>, ' ЕИ', ''),
+                  wp.confirm_date, l.name, o.status_id, tt.name, t.etp_address_id, org.name))
+Order By c.name, coalesce(ow.shortname, ''), l.id nulls first

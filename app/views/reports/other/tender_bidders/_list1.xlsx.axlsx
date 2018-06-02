@@ -1,0 +1,17 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 9)
+@outlines = []
+
+@columns = Reports::Other::TenderBidders::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+
+@sheet.add_row
+@simple_sheet.add_row_title(Reports::Other::TenderBidders.model_name.human,
+                            style: @styles[:title], columns_count: 9)
+@sheet.add_row
+
+render 'main_table'
+
+@simple_sheet.change_column_widths(@widths)

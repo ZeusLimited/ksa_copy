@@ -1,0 +1,6 @@
+<%= fields_for :plan_lot do |pl| %>
+  <%= pl.fields_for :plan_lots_files_attributes, tender_file.plan_lots_files.build, index: gen_index do |builder| %>
+    $('#tender_files').append("<%= j render 'plan_lots/plan_lots_file_fields', f: builder %>");
+    $('tr[data-tender-file-id=<%= tender_file.id %>] select').select2();
+  <% end %>
+<% end %>

@@ -1,0 +1,21 @@
+- :name: 'gkpz'
+  :method: 'slide2_gkpz_sql_rows'
+- :name: 'czk'
+  :method: 'slide2_plan_rows_all'
+- :name: 'czk_on_date'
+  :method: 'slide2_plan_rows_period'
+  :l: { months: <%= date_end.to_date.month %> }
+- :name: 'unpublic'
+  :method: 'slide2_unpublic_sql_rows'
+- :name: 'public'
+  :method: 'slide2_public_sql_rows'
+- :name: 'held'
+  :method: 'slide2_confirm_rows'
+- :name: 'unplan'
+  :method: 'slide2_confirm_rows'
+  :filters: { state_in_plan: 0, tender_type_id: <%= Constants::TenderTypes::REGULATED %> }
+- :name: 'cancelled'
+  :method: 'slide2_cancelled_sql_rows'
+- :name: 'unregulated'
+  :method: 'slide2_confirm_rows'
+  :filters: { tender_type_id: <%= Constants::TenderTypes::UNREGULATED %> }

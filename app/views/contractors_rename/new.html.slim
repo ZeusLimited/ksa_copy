@@ -1,0 +1,5 @@
+.page-header
+  h1 Переименование контрагента
+
+= render 'contractors/form', contractor: @contractor,
+  form_options: { url: contractor_rename_path(@contractor_prev), method: :post }

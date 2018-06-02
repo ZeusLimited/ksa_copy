@@ -1,0 +1,6 @@
+CREATE OR REPLACE FUNCTION public.to_char(text) RETURNS text AS
+$BODY$
+BEGIN
+  RETURN $1;
+END;
+$BODY$ LANGUAGE plpgsql VOLATILE

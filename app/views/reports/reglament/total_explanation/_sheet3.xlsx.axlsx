@@ -1,0 +1,80 @@
+@sheet = sheet
+@col_count = 8
+
+def print_group(name, options = {})
+  values = Array.new(@col_count)
+  values[0] = name
+  group_row = @sheet.add_row values, options
+  @sheet.merge_cells group_row.cells[0..(@col_count - 1)]
+  group_row
+end
+
+months = "#{@report.months} #{t(:month, count: @report.months)}"
+
+print_group(t('.text0', months: months, year: @report.gkpz_year), style: @styles[:text_left_bold])
+print_group(t('.text1'), style: @styles[:text_left_bold])
+
+@report.sheet3_1_rows.each do |row|
+  print_group(
+    t('.text',
+      title: row['title'],
+      count: "#{row['cnt']} #{t(:thing, count: row['cnt'])}",
+      sum: to_money_str(to_thousand(row['fact_cost_nds']))), style: @styles[:text_left])
+end
+
+count = @report.sheet3_2_rows.sum { |n| n['cnt'] }
+sum = @report.sheet3_2_rows.sum { |n| n['winner_cost_nds'] }
+final_cost_nds = @report.sheet2_fact_row['final_cost_nds']
+
+percent = begin (sum / final_cost_nds * 100).round(2) rescue 0 end
+
+print_group(
+  t('.text2',
+    months: months,
+    year: @report.gkpz_year,
+    count: "#{count} #{t(:thing, count: count)}",
+    sum: to_money_str(sum),
+    percent: number_to_percentage(percent, precision: 2)), style: @styles[:text_left_bold], height: 30)
+
+sheet.add_row
+
+@head_rows = CSV.read('app/views/reports/reglament/total_explanation/csv/head_3_2.csv', col_sep: ';')
+
+rows = []
+@head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 70
+rows[1].height = 15
+
+index = 0
+@report.sheet3_2_rows.each do |row|
+  sheet.add_row [
+    index += row['cnt'],
+    row['lot_num'],
+    row['lot_name'],
+    row['gkpz_cost_nds'],
+    row['winner_cost_nds'],
+    row['winner'],
+    row['point_clause'],
+    row['tender_type_explanations']
+  ], style: [
+    @styles[:td], @styles[:td], @styles[:td], @styles[:td],
+    @styles[:td_money], @styles[:td_money], @styles[:td], @styles[:td]
+  ]
+end
+
+sheet.add_row
+
+print_group(t('.text3'), style: @styles[:text_left_bold])
+
+r = @report.sheet3_3_row
+
+percent = begin (r['fact_cost_etp'] / r['fact_cost'] * 100).round(2) rescue 0 end
+
+print_group(
+  t('.text4',
+    count: "#{r['cnt']} #{t(:thing, count: r['cnt'])}",
+    sum: to_money_str((r['fact_cost_etp'] || 0) / 1000.0),
+    percent: number_to_percentage(percent, precision: 2)), style: @styles[:text_left_bold])
+print_group(t('.text5', months: months, year: @report.gkpz_year), style: @styles[:text_left])
+
+sheet.column_widths 5, 10, 40, 15, 15, 30, 12, 50

@@ -1,0 +1,16 @@
+fieldset.annual-limit
+  = f.hidden_field :_destroy
+
+  .row.calc-cost-nds
+    .span1
+      = f.input :year, input_html: { value: f.object.year, class: 'input-block-level limit-year' }
+    .span2
+      = f.input :cost do
+        = f.text_field :cost_money, class: 'cost input-block-level text-right money'
+    .span2
+      = f.input :cost_nds do
+        = f.text_field :cost_nds_money, class: 'cost_nds input-block-level text-right money'
+    .span3.offset4
+      label &nbsp;
+      = link_to content_tag(:i, '', class: 'icon-minus') + t('.remove_year'), '#',
+        class: "remove-annual-fields btn btn-danger pull-right input-large"

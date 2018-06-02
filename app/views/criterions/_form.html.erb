@@ -1,0 +1,13 @@
+<%= simple_form_for(criterion) do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <%= f.input :type_criterion %>
+    <%= f.input :name %>
+    <%= f.input :parent_id %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit %>
+  </div>
+<% end %>

@@ -1,0 +1,19 @@
+ru:
+  helpers:
+    submit:
+      reports_other_lot_by_winer:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/lot_by_winer: 'Победители торгов по подразделениям'
+    attributes:
+      reports/other/lot_by_winer:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчик'
+        gkpz_years: 'Год ГКПЗ'
+        organizers: 'Организатор'
+        directions: 'Направление закупки'
+        winners: 'Победители'
+        users: 'Пользователи'
+        format: 'Формат'

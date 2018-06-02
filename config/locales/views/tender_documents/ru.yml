@@ -1,0 +1,23 @@
+ru:
+  tender_documents:
+    default: &def
+      submit: 'Сохранить'
+      cancel: "Отмена"
+      e_documents: "Электронные документы"
+      executes: "Исполнение"
+      gkpz: "ГКПЗ"
+      bidders: "Участники"
+      contracts: "Договоры"
+      edit: 'Редактировать'
+      close: 'Закрыть'
+      table_files:
+        file: 'Файл'
+        size: 'Размер'
+        view: 'Вид документа'
+        note: 'Примечание'
+        loaded: 'Загружен'
+        owner: 'Владелец'
+    index:
+      <<: *def
+    edit_all:
+      <<: *def

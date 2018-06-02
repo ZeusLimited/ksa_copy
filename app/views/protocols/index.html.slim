@@ -1,0 +1,61 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li = link_to_session_or_default t('.gkpz'), :filter_path, plan_lots_path
+
+.page-header
+  h1 = t('.header')
+
+= input_block_form_for @protocol_filter, url: protocols_path, method: :get do |f|
+  .row
+    .span1 = f.input :year, collection: 2010..(Time.now.year + 1), include_blank: false
+    .span3
+      = f.input :department,
+          collection: Department.roots_customers(current_user.root_dept).order(:position),
+          include_blank: false
+    .span2
+      = f.input :commission_type,
+        collection: Dictionary.commission_types,
+        input_html: { data: { placeholder: t('.all') } }
+    .span2
+      label &nbsp;
+      = f.button :button, class: 'btn-success input-block-level', name: nil
+
+
+= form_tag merge_new_protocols_path, method: :get, id: 'form_merge_protocols' do
+  - if can?(:merge_new, Protocol)
+    p.pull-right= button_tag t('.concatinate_selected'), class: 'btn btn-warning', name: nil
+  p
+    => t('.count')
+    span.label= @protocols.size
+
+  table.table.table-hover.table-bordered.table-striped
+    thead
+      tr
+        - if can?(:merge_new, Protocol)
+          th
+        th = Protocol.human_attribute_name(:num)
+        th = Protocol.human_attribute_name(:date_confirm)
+        th = Protocol.human_attribute_name(:format)
+        th = Protocol.human_attribute_name(:commission)
+        th = t('lot_count_short')
+        th
+        th
+        th
+    tbody
+      - @protocols.each do |protocol|
+        tr
+          - if can?(:merge_new, Protocol)
+            td= check_box_tag 'pids[]', protocol.id, false, id: nil, class: 'pids'
+          td = protocol.num
+          td = protocol.date_confirm
+          td = protocol.name_format
+          td = protocol.name_commission
+          td = protocol.plan_lots_count
+          td
+            = link_icon_title 'icon-info-sign', t('icon-show'), protocol
+          td
+            = link_icon_title_if can?(:update, Protocol), 'icon-edit', t('edit'), edit_protocol_path(protocol)
+          td
+            = link_icon_title_if can?(:destroy, Protocol), 'icon-trash', t('icon-delete'), protocol, method: :delete,
+              data: { confirm: t('.confirm') }

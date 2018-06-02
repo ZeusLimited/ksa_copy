@@ -1,0 +1,160 @@
+-- sql_part3
+select
+
+gkpz_pl.id as gkpz_pl_id,
+gkpz_pl.tender_type_id,
+root_cust.fullname as root_customer_name,
+
+
+row_number() over (order by gkpz_pl.num_tender, gkpz_pl.num_lot) as sort_order,
+
+case
+  when row_number() over (partition by gkpz_pl.id order by decode(gkpz_pl.main_direction_id, gkpz_ps.direction_id, 0, 1)) = 1
+  then decode(gkpz_pl.main_direction_id, gkpz_ps.direction_id, 1, 0)
+  else 0
+end as lot_count,
+
+case
+  when row_number() over (partition by gkpz_pl.id order by decode(gkpz_pl.main_direction_id, gkpz_ps.direction_id, 0, 1)) = 1
+  then decode(gkpz_pl.main_direction_id, gkpz_ps.direction_id, 1, 0)
+  else 0
+end as fact_lot_count,
+
+1 as spec_count,
+
+--2
+gkpz_pl.num_tender || '.' || gkpz_pl.num_lot as lot_num,
+--3
+decode(last_con.lot_name, gkpz_pl.lot_name, last_con.lot_name, last_con.lot_name || ' (' || gkpz_pl.lot_name || ')') as lot_name,
+--4
+decode(gkpz_pl.state, 0, 'внеплан', 1, 'план') as lot_state,
+--5
+decode(last_con_org.name, gkpz_org.name, last_con_org.name, last_con_org.name || ' (' || gkpz_org.name || ')') as org_name,
+--6
+gkpz_ct.name as ctype_name,
+--7
+gkpz_ps.qty * gkpz_ps.cost_nds as gkpz_cost_nds,
+--7.1
+sme_type.name as sme_type_name,
+--9
+gkpz_ttype.name || decode(gkpz_pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, '', null, '', ' ЭТП') as gkpz_ttype_name,
+--12
+gkpz_pl.announce_date as gkpz_announce_date,
+--29
+coalesce(last_non_exec.reason, '') || case when last_non_exec.reason is not null then chr(13) else '' end ||
+coalesce((select 'Отменен, протокол от ' || to_char(pp.date_confirm,'dd.mm.yyyy') || ' №' || pp.num
+  from protocols pp
+    inner join plan_lots tpl on (pp.id = tpl.protocol_id and pp.date_confirm <= :end_date)
+  Where tpl.guid = gkpz_pl.guid
+    and tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    and tpl.version < gkpz_pl.version), '') as contract_status,
+last_con.announce_date as last_con_announce_date,
+last_con.state as state_in_plan,
+sd.sd_date,
+gkpz_pl.guid
+
+from
+  (select * from
+    (select
+      tpl.*,
+      row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= (Constants::PlanLotStatus::GKPZ + [Constants::PlanLotStatus::AGREEMENT]).join(', ') %>)) sub
+     where rn = 1) gkpz_pl
+
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+  group by tpl.guid
+) can on gkpz_pl.guid = can.guid
+
+
+left join (
+  select max(tp.date_confirm) as sd_date, tc.department_id, tp.gkpz_year
+  from protocols tp
+  inner join commissions tc on tp.commission_id = tc.id
+  where tc.commission_type_id = <%= Constants::CommissionType::SD %>
+  and tp.date_confirm <= :end_date
+  group by tc.department_id, tp.gkpz_year
+) sd on gkpz_pl.root_customer_id = sd.department_id and gkpz_pl.gkpz_year = sd.gkpz_year
+
+left join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date) sub
+     where rn = 1) last_con on (gkpz_pl.guid = last_con.guid)
+
+left join (
+  select * from (
+    select
+      plne.*,
+      row_number() over (partition by plne.plan_lot_guid order by plne.created_at desc) rn
+    from plan_lot_non_executions plne
+    where plne.created_at <= :end_date
+  ) sub where rn = 1
+) last_non_exec on last_non_exec.plan_lot_guid = gkpz_pl.guid
+
+inner join plan_specifications gkpz_ps on gkpz_pl.id = gkpz_ps.plan_lot_id
+
+inner join departments gkpz_org on gkpz_org.id = gkpz_pl.department_id
+
+inner join departments last_con_org on last_con_org.id = last_con.department_id
+
+left join commissions gkpz_c on gkpz_pl.commission_id = gkpz_c.id
+left join dictionaries gkpz_ct on gkpz_c.commission_type_id = gkpz_ct.ref_id
+
+inner join dictionaries gkpz_ttype on gkpz_pl.tender_type_id = gkpz_ttype.ref_id
+
+left join dictionaries sme_type on last_con.sme_type_id = sme_type.ref_id
+
+left join departments root_cust on root_cust.id = gkpz_pl.root_customer_id
+
+where gkpz_pl.announce_date between :begin_date and :end_date
+  and gkpz_pl.status_id != <%= Constants::PlanLotStatus::EXCLUDED_SD %>
+  and gkpz_pl.gkpz_year = :gkpz_year -- год ГКПЗ
+and (can_date is null or (can_date is not null and gkpz_pl.status_id != <%= Constants::PlanLotStatus::AGREEMENT %>))
+  and gkpz_pl.guid not in (
+    select pl.guid
+    from tenders t
+    inner join lots l on t.id = l.tender_id
+    inner join plan_lots pl on l.plan_lot_id = pl.id
+    where t.announce_date between :begin_date and :end_date
+      And l.status_id > <%= Constants::LotStatus::NEW %>
+    group by pl.guid
+  )
+
+<% if current_user_root_dept_id %>
+  and gkpz_ps.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customers.present? %>
+  and gkpz_ps.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and gkpz_pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  and gkpz_pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  and gkpz_ps.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  and gkpz_ps.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  and gkpz_pl.subject_type_id = <%= subject_type %>
+<% end %>

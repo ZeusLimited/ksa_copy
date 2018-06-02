@@ -1,0 +1,13 @@
+.page-header
+  h1 = @page.name
+
+.markdown
+  = markdown @page.content
+
+.form-actions
+  = link_to 'К списку', pages_path, class: 'btn'
+  - if can?(:manage, Page)
+    = link_to t('.edit', default: t("helpers.links.edit")), edit_page_path(@page), class: 'btn'
+    = link_to t('.destroy', default: t("helpers.links.destroy")), page_path(@page), method: 'delete',
+      data: { confirm: t('.confirm', default: t("helpers.links.confirm", default: 'Are you sure?')) },
+      class: 'btn btn-danger'

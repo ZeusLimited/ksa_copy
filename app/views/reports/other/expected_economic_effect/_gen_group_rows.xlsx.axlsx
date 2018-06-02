@@ -1,0 +1,31 @@
+group[:children_sum] = []
+
+@simple_sheet.add_row_title group['name'], style: @styles["group_row_h#{nesting_level}".to_sym] if group['name']
+
+if group.key?('children')
+  group['children'].each do |child|
+    render 'gen_group_rows', group: child, nesting_level: nesting_level + 1
+    row_end = @sheet.rows.size
+    group[:children_sum] << (row_end - 1)
+  end
+end
+
+if group.key?('filter')
+  row_begin = @sheet.rows.size
+
+  @report.result_rows(group['filter']).each do |row|
+    values = @columns.values.map do |value|
+      value[:value] ? value[:value].call(row) : value[:formula].call(@sheet.rows.size + 1)
+    end
+
+    @sheet.add_row values, style: @column_styles, types: @column_types
+  end
+
+  row_end = @sheet.rows.size
+
+  group[:filter_sum] = { start_index: row_begin + 1, end_index: row_end } if row_begin != row_end
+
+  @outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }
+end
+
+render('gen_sum_rows', sum_name: group['sum_name'], group: group) if group.key?('sum_name')

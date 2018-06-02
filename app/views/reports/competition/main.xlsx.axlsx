@@ -1,0 +1,26 @@
+wb = xlsx_package.workbook
+
+alignment_center = { horizontal: :center, vertical: :center, wrap_text: true }
+alignment_left = { horizontal: :left, vertical: :center, wrap_text: true }
+alignment_right = { horizontal: :right, vertical: :center, wrap_text: true }
+td = { sz: 9, border: Axlsx::STYLE_THIN_BORDER, alignment: { vertical: :center } }
+th = { sz: 10, bg_color: "CCFFFF", b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: alignment_center }
+money = { format_code: '#,##0.00' }
+date = { format_code: 'DD.MM.YYYY' }
+title = { sz: 12, b: true, alignment: alignment_center }
+
+@style_title = wb.styles.add_style title
+@style_th = wb.styles.add_style th
+@style_td = wb.styles.add_style td
+@style_td_title = wb.styles.add_style td.merge(b: true, alignment: alignment_center)
+@style_td_center = wb.styles.add_style td.merge(alignment: alignment_center)
+@style_td_right = wb.styles.add_style td.merge(alignment: alignment_right)
+@style_td_wrap = wb.styles.add_style td.merge(alignment: { wrap_text: true, vertical: :center })
+@style_td_money = wb.styles.add_style td.merge(money)
+@style_td_date = wb.styles.add_style td.merge(date)
+@item_style = wb.styles.add_style font_name: 'Courier', alignment: alignment_center
+@item_style_left = wb.styles.add_style font_name: 'Courier', alignment: alignment_left
+
+wb.add_worksheet(name: "Лист 1") do |sheet|
+  render 'reports/competition/list1', sheet: sheet, wb: wb, report: @report
+end

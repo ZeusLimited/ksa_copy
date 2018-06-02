@@ -1,0 +1,62 @@
+ru:
+  single_source:
+    new:
+      title: Новый договор с единственным источником
+    edit:
+      title: Редактирование договора с единственным источником
+    edit_contract:
+      title: Редактирование договора
+    edit_winners:
+      title: Редактирование итогов
+    show:
+      header: Закупка у единственного источника
+      files: 'Прикреплённые файлы'
+      lots: Информация по лотам
+      results: Итоги закупочной процедуры
+      contracts: Договоры
+    winners:
+      nds_placeholder: 'вручную'
+      offer_spec: Спецификации оферты
+      spec: Спецификация
+      cost: Цена
+      final_cost: Окончательная без НДС
+      final_cost_nds: Окончательная с НДС
+    files:
+      executes: "Исполнение"
+      gkpz: "ГКПЗ"
+      bidders: "Участники"
+      contracts: "Договоры"
+      edit: 'Редактировать'
+    contract:
+      contract: 'Сведения о договоре'
+      files: 'Прикреплённые файлы'
+      additional_contract: 'Доп соглашение к'
+    show_contracts:
+      winner: Победитель
+      num: Номер
+      date: Дата
+      cost: Стоимость
+      delivery: Период поставки
+      reasons_not_executed:  Причины невыполнения 20 дневного срока на заключение договора
+      start: Начало
+      finish: Окончание
+      fail: Признан несостоявшимся
+      create: Создать договор
+      reason: Указать причину
+    show_winners:
+      specification: Спецификация
+      winner: Победитель
+      result_date: Дата подведения итогов
+      offer_cost: Стоимость предложения
+    show_contract:
+      contract_title: Договор %{title} (поставка c %{delivery_date_begin} по %{delivery_date_end})
+      contract_information: Просмотр информации по договору
+      contract_additional: Доп. соглашение к договору
+      contract_files: Электронные документы
+      eus_information: Информация из 1С:ЕУС
+      contract_spec: Спецификация
+      contract_price: Цена договора
+      financing: Финансирование
+      cost: руб. без НДС
+      cost_nds: руб. с НДС
+      contract_files_added: Прикреплённые файлы

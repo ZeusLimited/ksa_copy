@@ -1,0 +1,39 @@
+.page-header
+  h1 = t('.header')
+
+= form_tag user_index_path, method: :get, class: 'form-search' do
+  .input-append
+    = text_field_tag 'q', params[:q], class: "span3 search-query"
+    = button_tag t('.search'), class: 'btn', name: nil
+
+- unless params[:q].nil?
+
+  .thumbnails
+    - @users.decorate.each_slice(2).to_a.each do |users|
+      .row
+        - users.each do |user|
+          .span6
+            li
+              .thumbnail
+                .caption style='min-height: 250px;'
+                  h3 = user.fio_full
+                  table.table
+                    tbody
+                      tr
+                        td.span2
+                          => user.photo
+                        td
+                          p
+                            => user.user_job
+                            = user.dept_name
+                          p
+                            | тел.
+                            i =< user.phone_public
+                          p
+                            | email:
+                            ==< mail_to user.email
+                          p
+                            == user.roles_ru
+                          p
+                            => link_to t('edit'), edit_user_path(user), class: 'btn btn-primary'
+                            = link_to t('icon-delete'), user, method: :delete, data: { confirm: t('confirm') }, class: 'btn btn-danger'

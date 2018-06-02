@@ -1,0 +1,99 @@
+--total_not_public_czk.sql
+select
+
+vz_ttype.name as fact_ttype_name,
+
+sum(vz_ps.qty * vz_ps.cost_nds) as s_cost_nds,
+0 as winner_cost_nds,
+count(distinct vz.id) as lot_count,
+count(distinct vz.id) as fact_lot_count,
+count(distinct vz_ps.id) as spec_count
+
+from
+  (select * from
+    (select
+      tpl.*,
+      row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= (Constants::PlanLotStatus::GKPZ + [Constants::PlanLotStatus::AGREEMENT]).join(', ') %>)) sub
+     where rn = 1) gkpz_pl
+
+left join (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+  inner join commissions tc on tp.commission_id = tc.id
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+  group by tpl.guid
+) can on gkpz_pl.guid = can.guid
+
+
+inner join
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+     where rn = 1) vz on (gkpz_pl.guid = vz.guid)
+
+inner join plan_specifications vz_ps on vz_ps.plan_lot_id = vz.id
+
+inner join departments gkpz_org on gkpz_org.id = gkpz_pl.department_id
+
+left join commissions gkpz_c on gkpz_pl.commission_id = gkpz_c.id
+left join dictionaries gkpz_ct on gkpz_c.commission_type_id = gkpz_ct.ref_id
+
+inner join dictionaries gkpz_ttype on gkpz_pl.tender_type_id = gkpz_ttype.ref_id
+
+left join dictionaries gkpz_sme_type on gkpz_pl.sme_type_id = gkpz_sme_type.ref_id
+
+inner join dictionaries vz_ttype on vz_ttype.ref_id = vz.tender_type_id
+
+where
+vz.announce_date  between :begin_date and :end_date
+and gkpz_pl.status_id != <%= Constants::PlanLotStatus::EXCLUDED_SD %>
+and gkpz_pl.gkpz_year = :gkpz_year -- год ГКПЗ
+and can_date is null
+and gkpz_pl.guid not in (
+  select pl.guid
+  from tenders t
+  inner join lots l on t.id = l.tender_id
+  inner join plan_lots pl on l.plan_lot_id = pl.id
+  where t.announce_date between :begin_date and :end_date
+    And l.status_id > <%= Constants::LotStatus::NEW %>
+  group by pl.guid
+)
+
+<% if current_user_root_dept_id %>
+  and vz_ps.customer_id in
+    (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+<% end %>
+
+<% if customers.present? %>
+  and vz_ps.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and gkpz_pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if tender_types.present? %>
+  and gkpz_pl.tender_type_id in (<%= tender_types.join(', ') %>)
+<% end %>
+
+<% if directions.present? %>
+  and vz_ps.direction_id in (<%= directions.join(', ') %>)
+<% end %>
+
+<% if financing_sources.present? %>
+  and vz_ps.financing_id in (<%= financing_sources.join(', ') %>)
+<% end %>
+
+<% if subject_type.present? %>
+  and gkpz_pl.subject_type_id = <%= subject_type %>
+<% end %>
+
+group by vz_ttype.name

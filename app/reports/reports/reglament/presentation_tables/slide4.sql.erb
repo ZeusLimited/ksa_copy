@@ -1,0 +1,148 @@
+-- slide4_sql
+select
+  tt.name as tender_type,
+  plan, publc, held
+from (
+  select
+  nvl(plan.tender_type_id, fact.tender_type_id) as tender_type_id,
+  plan.plan, publc, held
+  from
+  (
+    --slide4_plan
+    select
+     tender_type_id, sum(plan) as plan
+    from (
+      select
+      t.tender_type_id,
+      count(distinct l.id) as plan
+      from tenders t
+        inner join lots l on t.id = l.tender_id
+        inner join specifications s on s.lot_id = l.id
+        inner join plan_lots pl on pl.id = l.plan_lot_id
+        inner join lateral
+          (select * from
+            (select tpl.guid, tpl.status_id, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+              from plan_lots tpl
+              inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid) sub
+             where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+          ) gkpz_pl on true
+        inner join
+        (select pl1.guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+          from tenders t1
+          inner join lots l1 on (t1.id = l1.tender_id)
+          left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+          where t1.announce_date between :begin_date and :end_date
+          group by pl1.guid, l1.frame_id
+        ) vi on (vi.guid = pl.guid or l.frame_id = vi.frame_id) and vi.max_announce_date = t.announce_date
+      Where l.gkpz_year = :gkpz_year -- год ГКПЗ
+        AND t.announce_date between :begin_date and :end_date
+
+        <% if current_user_root_dept_id %>
+          and s.customer_id in
+            (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+        <% end %>
+        <% if customers.present? %>
+          and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+        <% end %>
+        <% if organizers.present? %>
+          and t.department_id in
+            (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+        <% end %>
+      Group By t.tender_type_id
+
+      UNION ALL
+      select
+        gkpz_pl.tender_type_id,
+        count(distinct gkpz_pl.id) as plan
+      from
+        (select * from
+          (select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+            from plan_lots tpl
+            inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+          ) sub
+           where rn = 1 And status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(',') %>)) gkpz_pl
+        inner join plan_specifications gkpz_ps on gkpz_ps.plan_lot_id = gkpz_pl.id
+        inner join dictionaries tt on tt.ref_id = gkpz_pl.tender_type_id
+      Where gkpz_pl.gkpz_year = :gkpz_year -- год ГКПЗ
+        and gkpz_pl.announce_date between :begin_date and :end_date
+        and gkpz_pl.guid not in (
+          select pl.guid
+          from tenders t
+          inner join lots l on t.id = l.tender_id
+          inner join plan_lots pl on l.plan_lot_id = pl.id
+          where pl.gkpz_year = :gkpz_year
+            AND t.announce_date between :begin_date and :end_date
+          group by pl.guid
+        )
+        <% if current_user_root_dept_id %>
+          and gkpz_ps.customer_id in
+            (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+        <% end %>
+        <% if customers.present? %>
+          and gkpz_ps.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+        <% end %>
+        <% if organizers.present? %>
+          and gkpz_pl.department_id in
+            (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+        <% end %>
+      Group By gkpz_pl.tender_type_id
+    ) sub
+      Group By tender_type_id
+  ) plan
+  FULL OUTER JOIN
+  (
+    -- slide4_fact
+    select
+      t.tender_type_id,
+      count(distinct l.id) as publc,
+      count(distinct
+        case when l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>) and wp.confirm_date between :begin_date and :end_date then
+          l.id
+        end) as held
+    from tenders t
+
+    inner join lots l on l.tender_id = t.id
+    inner join specifications s on s.lot_id = l.id
+    left join plan_lots pl on l.plan_lot_id = pl.id
+    left join plan_specifications ps on s.plan_specification_id = ps.id and ps.plan_lot_id = pl.id
+
+    left join offers o on o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>
+    left join offer_specifications os on os.offer_id = o.id and os.specification_id = s.id
+    left join winner_protocols wp on wp.id = l.winner_protocol_id and wp.tender_id = t.id
+
+    inner join lateral
+      (select * from
+        (select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+          from plan_lots tpl
+          inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid) sub
+         where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) gkpz_pl on true
+
+    inner join plan_specifications gkpz_ps on gkpz_pl.id = gkpz_ps.plan_lot_id and gkpz_ps.guid = ps.guid
+
+    inner join
+      (select pl1.guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+        from tenders t1
+        inner join lots l1 on (t1.id = l1.tender_id)
+        left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+        where t1.announce_date between :begin_date and :end_date
+        group by pl1.guid, l1.frame_id
+      ) vi on (vi.guid = pl.guid or l.frame_id = vi.frame_id) and vi.max_announce_date = t.announce_date
+
+    where l.gkpz_year = :gkpz_year -- год ГКПЗ
+      <% if current_user_root_dept_id %>
+        and s.customer_id in
+          (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+      <% end %>
+      <% if customers.present? %>
+        and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+      <% end %>
+      <% if organizers.present? %>
+        and t.department_id in
+          (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+      <% end %>
+
+    Group By t.tender_type_id
+  ) fact on plan.tender_type_id = fact.tender_type_id
+) t
+inner join dictionaries tt on tt.ref_id = t.tender_type_id
+order by tt.position

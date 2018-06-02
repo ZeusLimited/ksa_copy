@@ -1,0 +1,4 @@
+render 'thead'
+
+p_sum_name = 'Итого'
+render 'part_rows', rows: @report.part1_sql_rows, part_sum_name: p_sum_name

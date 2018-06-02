@@ -1,0 +1,33 @@
+<% Constants::PlanLotStatus::REQUIRED_FOR_ACTION.each do |key, value| %>
+  <% if current_user.exists_plan_lots_with_another_statuses?(value) %>
+    $('#<%= key %>').hide();
+  <% else %>
+    $('#<%= key %>').show();
+  <% end %>
+<% end %>
+
+<% if can?(:create_list, ControlPlanLot) %>
+  $('#check_to_control').show();
+<% else %>
+  $('#check_to_control').hide();
+<% end %>
+
+<% if can?(:delete_list, :control_plan_lot) %>
+  $('#uncheck_from_control').show();
+<% else %>
+  $('#uncheck_from_control').hide();
+<% end %>
+
+<% if current_user.plan_lots.regulated.exists? %>
+  $('#new_unregulated').hide();
+<% end %>
+
+<% if current_user.plan_lots.not_only_source.exists? %>
+  $('#new_single_source').hide();
+<% end %>
+
+<% if current_user.plan_lots.exists? %>
+  $('.actions').show();
+<% else %>
+  $('.actions').hide();
+<% end %>

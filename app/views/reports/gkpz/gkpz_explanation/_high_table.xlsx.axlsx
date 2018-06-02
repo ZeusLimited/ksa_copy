@@ -1,0 +1,15 @@
+@simple_sheet.add_row_title(t(".big_lots_title", years: @report.gkpz_years.try(:join, ', ')), style: @styles[:title], columns_count: 4)
+
+render 'thead', name: 'head'
+
+columns = Reports::Gkpz::GkpzExplanation::COLUMNS
+column_styles = columns.values.map { |c| @styles[c[:style]] }
+column_types = columns.values.map { |c| c[:type] }
+widths = columns.values.map { |c| c[:width] }
+
+@report.high_rows.each do |row|
+  values = columns.values.map { |v| v[:value].call(row) }
+  @sheet.add_row values, types: column_types, style: column_styles
+end
+
+@simple_sheet.change_column_widths widths

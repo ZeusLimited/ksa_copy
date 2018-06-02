@@ -1,0 +1,24 @@
+-- row 1 Состоявшиеся закупки с подведёнными итогами
+select
+  sum(decode(l.main_direction_id, s.direction_id, 1, 0)) as count_lots,
+  sum(nvl(gkpz_ps.qty * gkpz_ps.cost_nds, s.qty * s.cost)) as cost_lots
+from tenders t
+  inner join lots l on (l.tender_id = t.id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join plan_lots pl on (pl.id = l.plan_lot_id)
+  left join plan_specifications ps on (ps.plan_lot_id = pl.id and s.plan_specification_id = ps.id)
+  left join
+    (select * from
+      (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm < :end_date
+        where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>))
+       where rn = 1) gkpz_pl on (pl.guid = gkpz_pl.guid)
+  left join plan_specifications gkpz_ps on (gkpz_ps.guid = ps.guid and gkpz_ps.plan_lot_id = gkpz_pl.id)
+Where wp.confirm_date between :begin_date And :end_date
+  And l.gkpz_year in (:gkpz_years)
+  And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+  And s.customer_id in (Select Id From Departments Start With Id In (:customer) Connect By Prior Id = Parent_Dept_Id)
+  And t.tender_type_id not in (<%= [Constants::TenderTypes::FRAMES, Constants::TenderTypes::UNREGULATED].flatten.join(', ') %>)
+  And s.direction_id in (:directions)

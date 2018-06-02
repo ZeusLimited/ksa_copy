@@ -1,0 +1,12 @@
+dl
+  dt ПРЕДМЕТ ДОГОВОРА:
+  dd= lot.name
+dl
+  dt ЗАКАЗЧИК:
+  dd= lot.root_customer_name
+dl
+  dt ИСПОЛНИТЕЛЬ:
+  dd *unfair_contractor_html_attributes(offer.bidder.contractor)
+    = offer.bidder.contractor_name_inn
+
+hr

@@ -1,0 +1,10 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 = t('.e_documents')
+
+= render 'tenders/tender_header', tender: tender
+
+p.text-right
+  = link_to t('.edit'), edit_all_tender_tender_documents_path(tender), class: 'btn btn-warning'
+  = render 'tenders/tender_files'

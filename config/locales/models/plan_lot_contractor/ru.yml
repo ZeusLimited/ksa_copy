@@ -1,0 +1,16 @@
+ru:
+  activerecord:
+    models:
+      plan_lot_contractor: "Потенциальные участники"
+    attributes:
+      plan_lot_contractor: &plc
+        contractor_name_long: "Наименование участника"
+      plan_lot_contractors:
+        <<: *plc
+        base: "Потенциальные участники: "
+    errors:
+      models:
+        plan_lot_contractor:
+          attributes:
+            contractor_id:
+              non_sme: "не является субъектом МСП"

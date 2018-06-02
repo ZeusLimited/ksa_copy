@@ -1,0 +1,24 @@
+= field_set_tag "Контактные данные", class: "contact" do
+
+  = f.hidden_field :department_id
+
+  .row
+    .span2 = f.input :phone, input_html: { class: 'input-block-level' }
+    .span2 = f.input :fax, input_html: { class: 'input-block-level' }
+    .span2 = f.input :web, input_html: { class: 'input-block-level' }
+    .span2 = f.input :email, input_html: { class: 'input-block-level' }
+  .row
+    .span6
+      = f.input :contact_person, input_html: { class: 'input_block_level' }
+
+  = field_set_tag 'Юридический Адрес', class: 'fias' do
+    .row
+      .span8
+        = f.input :legal_fias_name, input_html: { value: f.object.legal_fias_name, class: 'fias-address input-block-level' }
+        = f.hidden_field :legal_fias_id, class: 'input-block-level'
+
+  = field_set_tag 'Почтовый Адрес', class: 'fias' do
+    .row
+      .span8
+        = f.input :postal_fias_name, input_html: { value: f.object.postal_fias_name, class: 'fias-address input-block-level' }
+        = f.hidden_field :postal_fias_id, class: 'input-block-level'

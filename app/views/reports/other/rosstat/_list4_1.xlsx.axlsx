@@ -1,0 +1,21 @@
+col_count = 5
+
+row_values = Array.new(col_count)
+row_values[0] =
+  "Раздел 4. Количественные и стоимостные характеристики закупок,\n" \
+  "предусмотренных статьей 15 Федерального закона от 5 апреля 2013 г.\n" \
+  "N 44-ФЗ \"О контрактной системе в сфере закупок товаров, работ,\n" \
+  "услуг для обеспечения государственных и муниципальных нужд\""
+row = sheet.add_row row_values, style: @styles[:title], height: 80
+sheet.merge_cells row.cells.first(col_count)
+
+sheet.add_row Array.new(col_count)
+
+head_rows = CSV.read('app/views/reports/other/rosstat/csv/part4_1_head.csv', col_sep: ';')
+
+rows = []
+head_rows.each { |head_row| rows << sheet.add_row(head_row, style: @styles[:th]) }
+rows[1].height = 50
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+sheet.column_widths 30, 30, 30, 30, 30

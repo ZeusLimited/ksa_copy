@@ -1,0 +1,15 @@
+ru:
+  shared:
+    lk:
+      head: 'Личный кабинет'
+      profile: 'Профиль'
+      settings: 'Настройки'
+      subscribes: 'Подписки'
+      notifications: 'Оповещения'
+    submenu_tender:
+      data_map: 'Информационная карта'
+      standard_form:
+        standard_form: 'Документация'
+        forma1: 'Извещение о закупке'
+        forma_common: 'Документация о закупке'
+        forma26: 'Извещение и документация о проведении закупки у ед.источника'

@@ -1,0 +1,6 @@
+-
+  name: 'gkpz_lots'
+  data_type: 'Array'
+  desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_lot'>plan_lot</a>]"
+  required: false
+  structure: true

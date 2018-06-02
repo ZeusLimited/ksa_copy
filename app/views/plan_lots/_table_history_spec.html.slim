@@ -1,0 +1,57 @@
+table.table.history.table-hover.table-bordered
+  thead
+    tr
+      th &nbsp;
+      - plan_specifications.each do |plan_specification|
+        th [ class = plan_specification.plan_lot.version_class ]
+          - if plan_specification.plan_lot.execute?
+            span.label.label-info = t('.lot_published')
+            br
+            - plan_specification.plan_lot.tenders_info.each do |ti|
+              = link_to tender_path(ti.id, anchor: dom_id(Lot.find(ti.lot_id))) do
+                => "№#{ti.num}.#{ti.num_lot}"
+                = abbr(ti.announce_date.to_date, t('.publish_date'))
+              br
+            br
+            br
+          = "#{PlanLot.human_attribute_name(:version)} #{plan_specification.plan_lot_version}"
+          br
+          = link_to "Лот № #{plan_specification.plan_lot_full_num} - #{plan_specification.plan_lot_status_name}",
+            plan_specification.plan_lot
+          br
+          = plan_specification.plan_lot_user_fio_short
+          br
+          = abbr(plan_specification.created_at.to_date, plan_specification.created_at)
+  tbody
+    = tr_for_history_plan_spec(plan_specifications, :num_spec, :num_spec)
+    = tr_for_history_plan_spec(plan_specifications, :qty, :qty)
+    = tr_for_history_plan_spec(plan_specifications, :cost_money, :cost_money)
+    = tr_for_history_plan_spec(plan_specifications, :cost_nds_money, :cost_nds_money)
+    = tr_for_history_plan_spec(plan_specifications, :unit, :unit_symbol_name)
+    = tr_for_history_plan_spec(plan_specifications, :product_type_id, :product_type_name)
+    = tr_for_history_plan_spec(plan_specifications, :cost_doc, :cost_doc)
+    = tr_for_history_plan_spec(plan_specifications, :direction_id, :direction_name)
+    = tr_for_history_plan_spec(plan_specifications, :financing, :financing_name)
+    = tr_for_history_plan_spec(plan_specifications, :name, :name)
+    = tr_for_history_plan_spec(plan_specifications, :requirements, :requirements)
+    = tr_for_history_plan_spec(plan_specifications, :customer, :customer_name)
+    = tr_for_history_plan_spec(plan_specifications, :consumer, :consumer_name)
+    = tr_for_history_plan_spec(plan_specifications, :delivery_date_begin, :delivery_date_begin)
+    = tr_for_history_plan_spec(plan_specifications, :delivery_date_end, :delivery_date_end)
+    = tr_for_history_plan_spec(plan_specifications, :monitor_service_id, :monitor_service_name)
+    = tr_for_history_plan_spec(plan_specifications, :curator, :curator)
+    = tr_for_history_plan_spec(plan_specifications, :tech_curator, :tech_curator)
+    = tr_for_history_plan_spec(plan_specifications, :bp_item, :bp_item)
+    = tr_for_history_plan_spec(plan_specifications, :note, :note)
+    = tr_for_history_plan_spec_address(plan_specifications, t('.addresses'), :fias_name)
+    = tr_for_history_plan_spec(plan_specifications, :invest_name, :invest_name)
+    = tr_for_history_plan_spec(plan_specifications, :okdp_id, :okdp_fullname)
+    = tr_for_history_plan_spec(plan_specifications, :okved_id, :okved_name)
+    = tr_for_history_plan_spec_amounts(plan_specifications, PlanSpecAmount.human_attribute_name(:amount_mastery),
+      :amount_mastery_money)
+    = tr_for_history_plan_spec_amounts(plan_specifications, PlanSpecAmount.human_attribute_name(:amount_mastery_nds),
+      :amount_mastery_nds_money)
+    = tr_for_history_plan_spec_amounts(plan_specifications, PlanSpecAmount.human_attribute_name(:amount_finance),
+      :amount_finance_money)
+    = tr_for_history_plan_spec_amounts(plan_specifications, PlanSpecAmount.human_attribute_name(:amount_finance_nds),
+      :amount_finance_nds_money)

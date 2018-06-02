@@ -1,0 +1,147 @@
+ru:
+  plan_lots:
+    defaults: &default
+      annual_limits: 'Годовые лимиты'
+      files: 'Прикреплённые файлы'
+      potential_participants: 'Потенциальные участники'
+      additional_to: "Дополнительная закупка к"
+      specification: "Спецификация"
+      addresses: "Адреса поставки"
+      invest_project: "Инвестиционный проект"
+      economic_activities: "Виды экономической деятельности"
+      planned_amount: "Планируемые суммы"
+    plan_lots:
+      bp_state: 'Бюджетный кодификатор'
+      bp_item: 'Пункт программы  Функционального бюджета, в соответствии с которым производится закупка (указывается номер пункта и наименование документа)'
+      dir_name: 'Направление'
+    show:
+      <<: *default
+      header: 'Просмотр лота'
+      header4_non_eis: 'Не публикуется в ЕИС'
+      header4_num_eis: '№ %{num} в ЕИС'
+      copy: 'Сделать копию'
+      history: 'История лота'
+      create_additional: 'Создать доп. закупку'
+      non_public_reason: 'Причины отсутствия старта'
+      gkpz: 'ГКПЗ'
+      protocols: 'Протоколы'
+      eis_num: 'Номер на ЕИС'
+    fias_plan_specification_fields:
+      remove_address: " Удалить адрес"
+    form:
+      <<: *default
+      add_participant: ' Добавить участника'
+      add_specification: ' Добавить спецификацию'
+      add_plan_annual_limit: ' Добавить лимит'
+      submit: 'Сохранить'
+      select_okdp: 'Выбор ОКДП'
+      select: 'Выбор'
+      filter: 'Фильтр'
+      cancel_filter: 'Сбросить фильтр'
+      subject: 'Выберите предмет'
+      tender_type: 'Выберите способ'
+      address_etp: 'Выберите адрес ЭТП'
+      reg_item: 'Выберите пункт'
+      orginizer: 'Выберите организатора'
+      order_1352: 'Выберите постановление'
+      order1352: 'Постановление правительства №1352'
+      select_ip: 'Выбор инвестиционного проекта'
+      invest_department: 'Потребитель'
+      remove: "Убрать"
+      ip:
+        num: 'Номер'
+        name: 'Наименование'
+        object_name: 'Наименование объекта генерации / программы развития'
+        date_install: 'Ввод объекта в эксплуатацию / окончание работ по проекту'
+        power: 'Мощность'
+        amount_financing: 'Планируемый объём обязательств по финан. на тек. год, руб. без НДС'
+      commission_placeholder: 'Выберите комиссию'
+      sme_type_placeholder: 'Не установлено'
+      modal_files:
+        file: 'Файл'
+        size: 'Размер'
+        type: 'Вид документа'
+        note: 'Примечание'
+        load: 'Загружен'
+        owner: 'Владелец'
+      close: 'Закрыть'
+      select_okved: 'Выбор ОКВЭД'
+    plan_lot_contractor_fields:
+      remove_participant: " Удалить участника"
+    plan_spec_amount_fields:
+      remove_year: " Удалить год"
+    plan_specification_fields:
+      <<: *default
+      select: 'Выбор'
+      select_ip: "Выбрать инвестиционный проект"
+      order1352: "Постановление Правительства №1352 от 11.12.2014"
+      remove: "Убрать"
+      remove_ip: "Убрать инвест. проект"
+      add_year: ' Добавить год'
+      remove_specification: " Удалить спецификацию"
+      select_okdp: "Выбрать ОКДП"
+      select_okved: "Выбрать ОКВЭД"
+      reform_okveds: 'Заменить коды на новые'
+    plan_specification_fields_ksazd:
+      nds: 'НДС'
+      nds_placeholder: 'вручную'
+    plan_specification_fields_torg:
+      nds: 'НДС'
+      nds_placeholder: 'вручную'
+      direction: 'Выберите направление закупки'
+      financing: 'Выберите источник'
+      bp_state: 'Выберите кодификатор'
+      monitor_service: 'Выберите курирующее подразделение'
+      production_unit: 'Выберите подразделение'
+      product_type: 'Выберите вид'
+    table_history_lot:
+      lot_published: 'Лот опубликован'
+      publish_date: 'Дата публикации'
+      actions: 'Действия'
+      remove_version: 'Удалить версию'
+      remove_version_confirm: 'Вы уверены?'
+      edit_lot: 'Корректировка лота'
+      select_lot: 'Поместить в выбранные'
+      potential_participants: 'Потенциальные участники'
+      edit: 'Изменить'
+      count_specs: 'Количество спецификаций'
+      history_specs: 'История изменения спецификаций'
+    table_history_spec:
+      lot_published: 'Лот опубликован'
+      publish_date: 'Дата публикации'
+      addresses: "Адреса поставки"
+    plan_annual_limit_fields:
+      header: 'Лимиты'
+      remove_year: 'Удалить лимит'
+    preselection_info:
+      header: 'Закупки по результатам предварительного отбора'
+      table:
+        num: 'Номер закупки'
+        date: 'Дата публикации'
+        cost_short: 'НПЦ'
+        cost: "Начальная предельная цена, руб. без НДС"
+        winner_cost_short: "ИЦП"
+        winner_cost: "Итоговая цена победителя, руб. без НДС"
+        econ: 'Экономия'
+        winner: 'Победитель'
+        status: 'Статус проведенной закупки'
+      start_cost: 'Годовой лимит предварительного отбора:'
+      public_cost: 'Проведено (запланировано) торгов на сумму:'
+      currency: 'руб. без НДС'
+      available_limit: 'Доступный лимит:'
+    index:
+      delete_gkpz: 'Удалить из ГКПЗ'
+      copy_plan_specifications: 'Скопировать спецификации'
+      additional_search: 'Расширенный поиск'
+      send_order: 'Отправить поручение'
+      single_source_contract: 'Заключить договор с ЕИ'
+    copy_plan_specifications:
+      header: 'Планируемые спецификации'
+      touch_specification: 'Отметьте для копирования'
+      select_specification: 'Выберите спецификации:'
+      select_lot: 'Выберите лот:'
+      name: 'Наименование'
+      price: 'Цена, т.р., без НДС'
+      customer: 'Заказчик'
+      consumer: 'Потребитель'
+      next: 'Далее'

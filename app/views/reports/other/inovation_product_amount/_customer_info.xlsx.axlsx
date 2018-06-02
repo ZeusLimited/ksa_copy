@@ -1,0 +1,7 @@
+rows = []
+rows << @sheet.add_row([@report.row_title('customer_name'), nil, @report.customer_info.fullname, nil], style: @styles[:td], type: :string)
+rows << @sheet.add_row([@report.row_title('ownership'), nil, @report.customer_info.ownership_fullname, nil], style: @styles[:td], type: :string)
+rows << @sheet.add_row([@report.row_title('address'), nil, @report.address_info, nil], style: @styles[:td], type: :string)
+rows << @sheet.add_row([@report.row_title('inn'), nil, @report.customer_info.inn, nil], style: @styles[:td], type: :string)
+rows << @sheet.add_row([@report.row_title('kpp'), nil, @report.customer_info.kpp, nil], style: @styles[:td], type: :string)
+AxlsxExt::AutoMergeNil.merge_rows(rows)

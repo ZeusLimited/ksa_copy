@@ -1,0 +1,119 @@
+table.table.history.table-hover.table-bordered
+  thead
+    tr
+      th &nbsp;
+      - plan_lots.each do |plan_lot|
+        th [ class = plan_lot.version_class ]
+          - if plan_lot.execute?
+            span.label.label-info = t('.lot_published')
+            br
+            - plan_lot.tenders_info.each do |ti|
+              = link_to tender_path(ti.id, anchor: dom_id(Lot.find(ti.lot_id))) do
+                => "№#{ti.num}.#{ti.num_lot}"
+                = abbr(ti.announce_date.strftime('%d.%m.%Y'), t('.publish_date'))
+              br
+            br
+            br
+          = plan_lot.status_name
+          br
+          = "#{plan_lot.class.human_attribute_name(:version)} #{plan_lot.version}"
+          br
+          = plan_lot.user_fio_short
+          br
+          = abbr(plan_lot.created_at.to_date, plan_lot.created_at)
+          br
+          - if can?(:add_to_user_plan_lots, plan_lot) || can?(:edit_without_history, PlanLot)
+            .btn-group
+              button.btn.btn-warning.dropdown-toggle data-toggle='dropdown'
+                = t('.actions')
+                span.caret
+              ul.dropdown-menu
+                - if can?(:destroy_version, PlanLot)
+                  li = link_to t('.remove_version'),
+                  destroy_version_plan_lot_path(plan_lot), method: :delete, data: { confirm: t('.remove_version_confirm') }
+                - if can?(:edit_without_history, PlanLot)
+                  li = link_to t('.edit_lot'), edit_without_history_plan_lot_path(plan_lot.id)
+                - if can?(:add_to_user_plan_lots, plan_lot)
+                  li
+                    = link_to t('.select_lot'),
+                      select_list_user_plan_lots_path(plan_lot_ids: [plan_lot.id]),
+                      method: :post
+  tbody
+    = tr_for_history_plan_lot(plan_lots, :gkpz_year, :gkpz_year)
+    = tr_link_for_history_plan_lot(plan_lots, :full_num, :full_num)
+    tr
+      th = PlanLot.human_attribute_name(:state)
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ] = t("plan_lot_state.#{plan_lot.state}")
+    tr
+      th = PlanLot.human_attribute_name(:protocol_id)
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ]
+          = link_to_protocol(plan_lot)
+          / - if plan_lot.protocol_id && can?(:edit, Protocol)
+          /   = link_to t('.edit'), edit_protocol_path(plan_lot.protocol_id), class: 'btn btn-warning'
+    tr
+      th = PlanLot.human_attribute_name(:additional_to)
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ]
+          - if plan_lot.additional_to_hex && plan_lot.additional_plan_lot
+            = link_to plan_lot.additional_plan_lot.full_num, plan_lot.additional_plan_lot
+    = tr_for_history_plan_lot(plan_lots, :additional_num, :additional_num)
+    = tr_for_history_plan_lot(plan_lots, :announce_date, :announce_date)
+    = tr_for_history_plan_lot(plan_lots, :subject_type, :subject_type_name)
+    = tr_for_history_plan_lot(plan_lots, :tender_type_id, :tender_type_name)
+    tr
+      th = PlanLot.human_attribute_name(:preselection_guid_hex)
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ]
+          - if plan_lot.preselection_guid_hex && plan_lot.preselection_plan_lot
+            = link_to plan_lot.preselection_plan_lot_full_num, plan_lot.preselection_plan_lot
+    = tr_for_history_plan_lot(plan_lots, :cost_nds, :cost_nds)
+    = tr_for_history_plan_lot(plan_lots, :cost, :cost)
+    = tr_for_history_plan_lot(plan_lots, :etp_address_id, :etp_address_name)
+    = tr_for_history_plan_lot(plan_lots, :regulation_item_id, :regulation_item_num)
+    = tr_for_history_plan_lot(plan_lots, :tender_type_explanations, :tender_type_explanations)
+    = tr_for_history_plan_lot(plan_lots, :explanations_doc, :explanations_doc)
+    = tr_for_history_plan_lot(plan_lots, :lot_name, :lot_name)
+    = tr_for_history_plan_lot(plan_lots, :department_id, :department_name)
+    = tr_for_history_plan_lot(plan_lots, :commission_id, :commission_name)
+    = tr_for_history_plan_lot(plan_lots, :sme_type_name, :sme_type_name)
+    = tr_for_history_plan_lot(plan_lots, :order1352_fullname, :order1352_fullname)
+    tr
+      th = t('.potential_participants')
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ]
+          - plan_lot.plan_lot_contractors.sort_by(&:contractor_id).each do |plc|
+            = plc.contractor_name_short
+            br
+    = tr_for_history_plan_lot(plan_lots, :direction_name, :direction_name)
+    tr
+      th = t('.count_specs')
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ] = plan_lot.plan_specifications.size
+    tr
+      th = t('.history_specs')
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ]
+          - plan_lot.plan_specifications.each do |plan_specification|
+            = link_to "#{plan_specification.num_spec}. #{plan_specification.name}",
+              history_plan_spec_path(plan_specification.guid_hex)
+            br
+    tr
+      th = PlanAnnualLimit.human_attribute_name(:cost_money)
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ]
+          - plan_lot.plan_annual_limits.each do |pal|
+            = pal.year
+            | :
+            =< pal.cost_money
+            br
+    tr
+      th = PlanAnnualLimit.human_attribute_name(:cost_nds_money)
+      - plan_lots.each do |plan_lot|
+        td [ class = plan_lot.version_class ]
+          - plan_lot.plan_annual_limits.each do |pal|
+            = pal.year
+            | :
+            =< pal.cost_nds_money
+            br

@@ -1,0 +1,9 @@
+ru:
+  activerecord:
+    models:
+      commission: 'Комиссия'
+    attributes:
+      commission:
+        name: 'Наименование'
+        commission_type: 'Уровень комиссии'
+        for_customers: 'Может осуществлять закупки для сторонних заказчиков'

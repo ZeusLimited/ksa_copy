@@ -1,0 +1,166 @@
+name: 'find_tenders'
+desc: 'Метод предназначен для поиска информации о закупках по параметрам.'
+request_params:
+  -
+    name: 'year'
+    data_type: 'Integer'
+    desc: 'Год ГКПЗ'
+    required: true
+    example: '2016'
+  -
+    name: 'customer_id'
+    data_type: 'Integer'
+    desc: 'ИД заказчика'
+    required: true
+    example: '2'
+  -
+    name: 'num'
+    data_type: 'String'
+    desc: 'Номер закупки (через точку номер лота)'
+    required: false
+    example: '24.1'
+  -
+    name: 'tender_type_id'
+    data_type: 'Integer'
+    desc: 'ИД способа закупки'
+    required: false
+    example: '10015'
+response_params:
+  -
+    name: 'plan_lot_guid'
+    data_type: 'Guid'
+    desc: 'Guid лота в планировании'
+    required: true
+    example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+  -
+    name: 'offer_id'
+    data_type: 'Integer'
+    desc: 'ИД победившей оферты'
+    required: true
+    example: '128902'
+  -
+    name: 'oos_num'
+    data_type: 'String'
+    desc: 'Номер закупки на ЕИС'
+    required: false
+    example: '31503015115'
+  -
+    name: 'lot_id'
+    data_type: 'Integer'
+    desc: 'ИД лота'
+    required: false
+    example: '914468'
+  -
+    name: 'is_sme'
+    data_type: 'String'
+    desc: 'Признак, эта закупка у МСП?'
+    required: true
+    example: 'Только МСП'
+  -
+    name: 'wp_num'
+    data_type: 'String'
+    desc: 'Номер протокола ВП'
+    required: false
+    example: 'РАО-52/ОЗП-ВП'
+  -
+    name: 'wp_confirm_date'
+    data_type: 'Date'
+    desc: 'Дата протокола ВП'
+    required: false
+    example: '2015-12-02'
+  -
+    name: 'year'
+    data_type: 'Integer'
+    desc: 'Год ГКПЗ'
+    required: true
+    example: '2016'
+  -
+    name: 'num'
+    data_type: 'String'
+    desc: 'Номер по ГКПЗ'
+    required: true
+    example: '6.1'
+  -
+    name: 'name'
+    data_type: 'String'
+    desc: 'Наименование закупки'
+    required: true
+    example: 'Подписка на периодические печатные издания'
+  -
+    name: 'customer'
+    data_type: 'String'
+    desc: 'Заказчик'
+    required: true
+    example: 'РАО ЭС Востока'
+  -
+    name: 'organizer'
+    data_type: 'String'
+    desc: 'Организатор'
+    required: true
+    example: 'РАО ЭС Востока'
+  -
+    name: 'is_additional'
+    data_type: 'Boolean'
+    desc: 'Признак, это доп. соглашение?'
+    required: true
+    example: 'false'
+  -
+    name: 'additional_plan_lot_guid'
+    data_type: 'String'
+    desc: 'Guid лота в планировании для доп. соглашения'
+    required: false
+    example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+  -
+    name: 'bp_item'
+    data_type: 'String'
+    desc: 'Номер пункта ФБ'
+    required: true
+    example: '21 801'
+  -
+    name: 'financing'
+    data_type: 'String'
+    desc: 'Источник финансирования'
+    required: true
+    example: '1.1 себестоимость'
+  -
+    name: 'is_regulated'
+    data_type: 'Boolean'
+    desc: 'Признак, это регламентированная закупка?'
+    required: true
+    example: 'true'
+  -
+    name: 'tender_type'
+    data_type: 'String'
+    desc: 'Способ закупки'
+    required: true
+    example: 'ОЗП'
+  -
+    name: 'etp'
+    data_type: 'Boolean'
+    desc: 'Признак ЭТП'
+    required: true
+    example: 'false'
+  -
+    name: 'winner_name'
+    data_type: 'String'
+    desc: 'Наименование победителя'
+    required: false
+    example: 'ООО Урал-Пресс Подписка'
+  -
+    name: 'winner_inn'
+    data_type: 'String'
+    desc: 'ИНН победителя'
+    required: false
+    example: '7714785678'
+  -
+    name: 'cost'
+    data_type: 'Decimal(18,2)'
+    desc: 'Стоимость победителя (без НДС) руб.'
+    required: false
+    example: '3288135.59'
+  -
+    name: 'cost_nds'
+    data_type: 'Decimal(18,2)'
+    desc: 'Стоимость победителя (с НДС) руб.'
+    required: false
+    example: '3880000.00'

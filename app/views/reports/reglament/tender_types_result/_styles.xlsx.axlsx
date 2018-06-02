@@ -1,0 +1,29 @@
+@margins = { left: 0.3937, right: 0.3937, top: 0.3937, bottom: 0.3937 }
+@setup = { paper_size: 9 }
+@options = { horizontal_centered: true }
+
+
+alignment_center = { horizontal: :center, vertical: :center, wrap_text: true }
+alignment_left = { horizontal: :left, vertical: :center, wrap_text: true }
+alignment_right = { horizontal: :right, vertical: :center, wrap_text: true }
+td = { sz: 12, font_name: 'Times New Roman', border: Axlsx::STYLE_THIN_BORDER, alignment: { vertical: :center, wrap_text: true } }
+th = { sz: 13, font_name: 'Times New Roman', i: true, b: true, border: Axlsx::STYLE_THIN_BORDER, alignment: { wrap_text: true } }
+money = { format_code: '#,##0.00', b: true }
+percent = { format_code: "0.00%", b: true }
+title = { sz: 12, b: true, alignment: alignment_center }
+note = { sz: 12,  b: true, alignment: alignment_left }
+comment = { sz: 9, alignment: alignment_left }
+sum = { bg_color: "87CEFA", b: true, border: Axlsx::STYLE_THIN_BORDER }
+
+@styles = {
+  title: wb.styles.add_style(title),
+  note: wb.styles.add_style(note),
+  comment: wb.styles.add_style(comment),
+  th: wb.styles.add_style(th),
+  td: wb.styles.add_style(td),
+  td_title: wb.styles.add_style(td.merge(b: true, i: true)),
+  td_center: wb.styles.add_style(td.merge(alignment: alignment_center)),
+  td_right: wb.styles.add_style(td.merge(alignment: alignment_right)),
+  td_money: wb.styles.add_style(td.merge(money)),
+  td_percent: wb.styles.add_style(td.merge(percent))
+}

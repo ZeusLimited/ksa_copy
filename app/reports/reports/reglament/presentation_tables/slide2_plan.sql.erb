@@ -1,0 +1,88 @@
+--slide2_plan_sql
+select
+  sum(cnt) as cnt,
+  sum(cost_nds) as cost_nds
+from (
+  select
+  count(distinct l.id) cnt,
+  sum(s.qty * s.cost_nds) cost_nds
+  from tenders t
+    inner join lots l on t.id = l.tender_id
+    inner join specifications s on s.lot_id = l.id
+    inner join plan_lots pl on pl.id = l.plan_lot_id
+    inner join lateral
+      (select * from
+        (select tpl.guid, tpl.status_id, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+          from plan_lots tpl
+          inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid) sub
+         where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+      ) gkpz_pl on true
+  inner join
+    (select pl1.guid, l1.frame_id, max(t1.announce_date) as max_announce_date
+      from tenders t1
+      inner join lots l1 on (t1.id = l1.tender_id)
+      left join plan_lots pl1 on (l1.plan_lot_id = pl1.id)
+      where (:for_year = 0 And t1.announce_date between :begin_date and :end_date) Or :for_year = 1
+      group by pl1.guid, l1.frame_id
+    ) vi on (vi.guid = pl.guid or l.frame_id = vi.frame_id) and vi.max_announce_date = t.announce_date
+  Where l.gkpz_year = :gkpz_year -- год ГКПЗ
+    AND (
+      (:for_year = 0 And t.announce_date between :begin_date and :end_date)
+      OR
+      :for_year = 1
+    )
+    <% if current_user_root_dept_id %>
+      and s.customer_id in
+        (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+    <% end %>
+    <% if customers.present? %>
+      and s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+    <% end %>
+    <% if organizers.present? %>
+      and t.department_id in
+        (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+    <% end %>
+
+  UNION ALL
+
+  select
+  count(distinct gkpz_pl.id) as cnt,
+  sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_nds
+  from
+    (select * from
+      (select tpl.*, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id And tp.date_confirm <= :end_date) sub
+       where rn = 1 And status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) gkpz_pl
+    inner join plan_specifications gkpz_ps on gkpz_ps.plan_lot_id = gkpz_pl.id
+  Where gkpz_pl.gkpz_year = :gkpz_year -- год ГКПЗ
+    AND (
+      (:for_year = 0 and gkpz_pl.announce_date between :begin_date and :end_date)
+      OR
+      :for_year = 1
+    )
+    and gkpz_pl.guid not in (
+      select pl.guid
+      from tenders t
+      inner join lots l on t.id = l.tender_id
+      inner join plan_lots pl on l.plan_lot_id = pl.id
+      where pl.gkpz_year = :gkpz_year
+        AND (
+          (:for_year = 0 And t.announce_date between :begin_date and :end_date)
+          OR
+          :for_year = 1
+        )
+      group by pl.guid
+    )
+    <% if current_user_root_dept_id %>
+      and gkpz_ps.customer_id in
+        (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+    <% end %>
+    <% if customers.present? %>
+      and gkpz_ps.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+    <% end %>
+    <% if organizers.present? %>
+      and gkpz_pl.department_id in
+        (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+    <% end %>
+) sub

@@ -1,0 +1,33 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 4)
+@outlines = []
+
+@sheet.add_row
+
+@simple_sheet.add_row_title @report.row_title('report_title1'), style: @styles[:text_center], columns_count: 4
+@simple_sheet.add_row_title @report.row_title('report_title2'), style: @styles[:text_center], columns_count: 4
+@simple_sheet.add_row_title(@report.row_title('report_title3',
+                                              year: @report.year_end),
+                            style: @styles[:text_center], columns_count: 4)
+
+@count_types = [:string, :string, :string, :string, :float, :string, :string, :float]
+@cost_types = [:string, :string, :float, :float, :string, :float, :float, :string]
+
+@count_styles = [@styles[:td], @styles[:td_wrap], @styles[:td_center], @styles[:td_center], @styles[:td], @styles[:td_center], @styles[:td_center], @styles[:td]]
+@cost_styles = [@styles[:td], @styles[:td_wrap], @styles[:td_money], @styles[:td_money], @styles[:td_center], @styles[:td_money], @styles[:td_money], @styles[:td_center]]
+@persent_styles = [@styles[:td], @styles[:td_wrap], @styles[:td_percent], @styles[:td_percent], @styles[:td_center], @styles[:td_percent], @styles[:td_percent], @styles[:td_center]]
+
+
+@sheet.add_row
+
+render 'customer_info' if @report.customer_info
+
+@sheet.add_row
+
+render 'main_table'
+
+@sheet.add_row
+
+render 'main_table_ii'
+
+sheet.column_widths 5, 65, 15, 15, 15, 15, 15, 15

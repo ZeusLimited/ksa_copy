@@ -1,0 +1,8 @@
+ru:
+  regulation_items:
+    create:
+      notice: 'Пункт положения добавлен успешно'
+    update:
+      notice: 'Пункт положения обновлен успешно'
+    destroy:
+      notice: 'Пункт положения удален успешно'

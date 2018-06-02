@@ -1,0 +1,38 @@
+ul.nav.nav-tabs
+  li.active = link_to t('.executes'), '#reglament', data: { toggle: "tab" }
+  li = link_to t('.gkpz'), '#gkpz', data: { toggle: "tab" }
+  li = link_to t('.bidders'), '#bidder', data: { toggle: "tab" }
+  li = link_to t('.contracts'), '#contract', data: { toggle: 'tab' }
+.tab-content
+  #reglament.tab-pane.active
+    = render 'shared/table_files', files: @tender.link_tender_files, type: true
+  #gkpz.tab-pane
+    = render 'shared/table_files', files: @tender.plan_lots_files, type: true
+  #bidder.tab-pane
+    #bidder_groups.accordion
+      - @tender.bidders.decorate.each do |bidder|
+        .accordion-group
+          .accordion-heading
+            = link_to '#' + dom_id(bidder.contractor), class: "accordion-toggle",
+              data: { toggle: "collapse", parent: "#bidder_groups" } do
+              = bidder.contractor_name_short
+              span.badge.pull-right = bidder.bidder_files.count
+          .accordion-body.collapse id=dom_id(bidder.contractor)
+            .accordion-inner
+              p.pull-right
+                = bidder.all_files_to_one
+              = render 'shared/table_files', files: bidder.bidder_files, type: false
+  #contract.tab-pane
+    #contract_groups.accordion
+      - @tender.lots.each do |lot|
+        - lot.offers.wins.each do |offer|
+          - next unless offer.contract
+          .accordion-group
+            .accordion-heading
+              = link_to '#' + dom_id(offer.contract), class: "accordion-toggle",
+                data: { toggle: "collapse", parent: "#contract_groups" } do
+                = "#{lot.fullname} (#{offer.bidder_contractor_name_short})"
+                span.badge.pull-right= offer.contract.contract_files.count
+            .accordion-body.collapse id=dom_id(offer.contract)
+              .accordion-inner
+                = render 'shared/table_files', files: offer.contract.contract_files, type: true

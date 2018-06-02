@@ -1,0 +1,27 @@
+ru:
+  activerecord:
+    models:
+      protocol: 'Протокол'
+    attributes:
+      protocol:
+        commission: "Закупочный орган"
+        date_confirm: "Дата протокола"
+        format: "Форма проведения"
+        is_quorum: "Кворум"
+        location: "Место проведения"
+        name: "Наименование"
+        num: "Номер протокола"
+    decorators:
+      protocol:
+        date_moved: "Дата объявления закупки перенесена на %{new_date} (протокол ЦЗК от %{p_date} № %{p_num})"
+    errors:
+      models:
+        protocol:
+          attributes:
+            base:
+              cancel_only_czk: 'Отменять регламентированные закупки может только ЦЗК'
+              absent_files: 'Необходимо прикрепить файл протокола'
+            date_confirm:
+              check_date_lots: "у этих лотов уже есть протоколы с датой большей либо равной указанной: <br />%{lots}"
+              check_date_lots_form_merge_greater: "Дата нового протокола должна быть больше %{min_date}"
+              check_date_lots_form_merge_less: "Дата нового протокола должна быть меньше %{max_date}"

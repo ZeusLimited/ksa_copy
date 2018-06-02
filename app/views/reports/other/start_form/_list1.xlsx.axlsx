@@ -1,0 +1,26 @@
+@sheet = sheet
+@outlines = []
+
+@columns = Reports::Other::StartForm::DETAIL_COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@sum_styles = @columns.values.map do |c|
+  if c[:sum]
+    c[:sum_style] ? @styles[c[:sum_style]] : @styles[:sum_money]
+  else
+    @styles[:sum]
+  end
+end
+
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, @columns.size)
+
+@sheet.add_row
+@simple_sheet.add_row_title(Reports::Other::StartForm.model_name.human,
+                            style: @styles[:title], columns_count: @columns.size)
+@sheet.add_row
+
+render 'detail_table', customer: customer
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

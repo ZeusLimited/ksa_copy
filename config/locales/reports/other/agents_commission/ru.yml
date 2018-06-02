@@ -1,0 +1,26 @@
+ru:
+  helpers:
+    submit:
+      reports_other_agents_commission:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/agents_commission: 'Агентские'
+    attributes:
+      reports/other/agents_commission:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчик'
+        gkpz_years: 'Год ГКПЗ'
+        organizers: 'Организатор'
+        plan_lot_statuses: 'Статус планирования'
+        lot_statuses: 'Статус Исполнения'
+        lot_num: 'Номер закупки'
+        format: 'Формат'
+  reports/other/agents_commission:
+      statuses:
+        plan_stage: 'На этапе планирования (из Плана ГКПЗ)'
+        exec_stage: 'На этапе исполнения (из Исполнения)'
+        cancel_before_open: 'Закупка отменена до вскрытия'
+        cancel_before_result: 'Закупка отменена до подведения итогов'
+        fail: 'Закупка признана несостоявшейся (в т.ч. ЕУ)'

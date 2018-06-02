@@ -1,0 +1,24 @@
+ru:
+  helpers:
+    submit:
+      reports_reglament_hundred_millions_tenders:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/hundred_millions_tenders: 'Отчет по закупкам более 100 млн. руб. без НДС'
+    attributes:
+      reports/reglament/hundred_millions_tenders:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_years: 'Годы ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        vz: 'План/Внеплан'
+        format: 'Формат'
+        contractors: 'Участники'
+        nomenclature: 'Номенклатура'
+        hundred_millions: 'Начальная (максимальная) цена закупки, руб. (без НДС) более 100 млн. руб'

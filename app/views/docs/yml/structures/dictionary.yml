@@ -1,0 +1,32 @@
+-
+  name: "<a href='#' class='link-to-structure' data-url='docs/structure?id=dictionaries'>..</a>"
+-
+  name: 'ref_id'
+  data_type: 'Integer'
+  desc: 'Идентификатор записи'
+  required: true
+  example: '15003'
+-
+  name: 'ref_type'
+  data_type: 'String'
+  desc: 'Тип записи'
+  required: true
+  example: 'PlanLotStatus'
+-
+  name: 'name'
+  data_type: 'String'
+  desc: 'Наименование краткое'
+  required: true
+  example: 'Согласован'
+-
+  name: 'fullname'
+  data_type: 'String'
+  desc: 'Полное наименование'
+  required: true
+  example: 'Согласован'
+-
+  name: 'is_actual'
+  data_type: 'Boolean'
+  desc: 'Запись активна?'
+  required: true
+  example: 'true'

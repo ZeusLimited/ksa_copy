@@ -1,0 +1,23 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to 'Вернуться к просмотру текущей версии', @plan_lot_current_version if @plan_lot_current_version
+      li= link_to_session_or_default t('return_to_list'), :filter_path, plan_lots_path
+
+.page-header
+  h1 История изменения лота
+
+.pull-right
+  p
+    .btn-group data-toggle="buttons-radio"
+      button#versoinAll.btn.active type="button" Все версии
+      button#versoinAgreement.btn type="button" С протоколом
+
+p= link_to "Полная история лота", history_full_plan_lot_path(guid: params[:guid]), target: "_blank"
+p
+  = link_to 'Удалить текущую версию',
+  destroy_current_version_user_plan_lots_path(guid: params[:guid]), method: :patch, data: { confirm: t('confirm') },
+  class: 'btn btn-danger' if can?(:destroy_current_version_user, PlanLot) && @plan_lot_current_version
+
+.horizontal-scroll
+  = render "table_history_lot", plan_lots: @plan_lots

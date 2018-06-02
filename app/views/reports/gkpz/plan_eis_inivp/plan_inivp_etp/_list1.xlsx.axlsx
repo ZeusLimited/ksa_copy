@@ -1,0 +1,12 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 18)
+@outlines = []
+
+@columns = @report.etp_columns
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+
+render 'reports/gkpz/plan_eis_inivp/plan_inivp_etp/main_table'
+
+@simple_sheet.change_column_widths(@widths)

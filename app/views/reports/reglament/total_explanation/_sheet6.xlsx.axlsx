@@ -1,0 +1,54 @@
+@sheet = sheet
+@col_count = 4
+
+def print_group(name, options = {})
+  values = Array.new(@col_count)
+  values[0] = name
+  group_row = @sheet.add_row values, options
+  @sheet.merge_cells group_row.cells[0..(@col_count - 1)]
+  group_row
+end
+
+print_group t('.text1'), style: @styles[:text_left_bold]
+
+sheet.add_row
+
+@head_rows = CSV.read('app/views/reports/reglament/total_explanation/csv/head_6.csv', col_sep: ';')
+
+rows = []
+@head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 60
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+r = @report.sheet6_row
+r_sme = @report.sheet6_sme_row
+
+styles = [@styles[:td], @styles[:td], @styles[:td], @styles[:td_percent]]
+
+sheet.add_row [t('.tab_row1_1'), t('.tab_row1_2'), t(".tab_row1_3_#{@report.gkpz_year}"), r['etp_dp']], style: styles
+sheet.add_row [t('.tab_row2_1'), t('.tab_row2_2'), t(".tab_row2_3_#{@report.gkpz_year}"), r['auction_dp']], style: styles
+sheet.add_row [t('.tab_row3_1'), t('.tab_row3_2'), t('.tab_row3_3'), r['ei_dp']], style: styles
+sheet.add_row [t('.tab_row4_1'), t('.tab_row4_2'), t('.tab_row4_3'), r_sme['sme_dp']], style: styles
+sheet.add_row [t('.tab_row5_1'), nil, t(".tab_row5_3_#{@report.gkpz_year}"), r_sme['sme_only_dp']], style: styles
+
+sheet.merge_cells "B7:B8"
+
+sheet.add_row
+print_group t('.order1352'), style: @styles[:text_left], height: 40
+
+sheet.add_row
+
+print_group t('.text2'), style: @styles[:text_left], height: 30
+print_group t('.text3'), style: @styles[:text_left], height: 30
+print_group t('.text4', holding: @holding_name), style: @styles[:text_left], height: 30
+print_group t('.text5', holding: @holding_name), style: @styles[:text_left], height: 30
+print_group t('.text6', holding: @holding_name), style: @styles[:text_left], height: 30
+print_group t('.text7', holding: @holding_name), style: @styles[:text_left], height: 30
+print_group t('.text8', holding: @holding_name), style: @styles[:text_left], height: 30
+print_group t('.text9'), style: @styles[:text_left], height: 30
+print_group t('.text10'), style: @styles[:text_left]
+print_group t('.text11'), style: @styles[:text_left]
+print_group t('.text12'), style: @styles[:text_left]
+print_group t('.text13'), style: @styles[:text_left]
+
+sheet.column_widths 30, 30, 30, 30

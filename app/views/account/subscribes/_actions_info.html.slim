@@ -1,0 +1,14 @@
+- ids = subscribe.subscribe_actions.pluck(:action_id)
+
+.container-fluid
+  .row-fluid
+    .span6
+      h4 = t('.actions')
+      - Dictionary.subscribe_actions.each do |sa|
+        p class=(ids.include?(sa.ref_id) ? "text-bold" : "muted")
+          = sa.name
+    .span6
+      h4 = t('.warnings')
+      - Dictionary.subscribe_warnings.each do |sa|
+        p class=(ids.include?(sa.ref_id) ? "text-bold" : "muted")
+          = "#{sa.name} - за #{subscribe.subscribe_actions.where(action_id: sa.ref_id).take.try(:days_before)} дней"

@@ -1,0 +1,32 @@
+plan_row = @report.plan_sql_rows.first
+fact_row = @report.fact_sql_rows.first
+
+final_row = plan_row.merge(fact_row)
+
+row_begin = @sheet.rows.size
+@rows.each do |row, property|
+  @sheet.add_row [property[:print_name] ? t("#{@prefix}.rows.#{row}") : nil,
+                  property[:name],
+                  row.to_s.sub('row', ''),
+                  property[:value].call(final_row)], height: property[:height],
+                  style: [@styles[property[:style_text] || :td_center], @styles[:td], @styles[:td_center], @styles[property[:style] || :td_money]]
+end
+
+AxlsxExt::AutoMergeNil.merge_rows(@sheet.rows[row_begin..@sheet.rows.size])
+
+@sheet.add_row []
+
+row = @sheet.add_row [t("#{@prefix}.footer.note"), nil, nil, nil], height: 30, style: @styles[:comment]
+@sheet.merge_cells row.cells.first(4)
+
+@sheet.add_row []
+
+row = @sheet.add_row [t("#{@prefix}.footer.boss"), nil, nil, nil], style: @styles[:note]
+@sheet.merge_cells row.cells.first(2)
+
+@sheet.add_row []
+
+row = @sheet.add_row [t("#{@prefix}.footer.chief"), nil, nil, nil], style: @styles[:note]
+@sheet.merge_cells row.cells.first(2)
+
+@simple_sheet.change_column_widths([18, 44, 5, 20])

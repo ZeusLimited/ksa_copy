@@ -1,0 +1,36 @@
+select
+  1 as lot_count,
+  t.id as tender_id,
+  t.num || '.' || l.num as tender_num,
+  l.name as lot_name,
+  l.id as lot_id,
+  c.confirm_date as contract_date,
+  sum(s.qty * cs.cost_nds) as cost_nds,
+  t.tender_type_id,
+  l.privacy_id,
+  cast(contr.is_sme as integer) as is_sme,
+  s.customer_id
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (l.id = s.lot_id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  inner join offers o on (o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+  inner join bidders b on (b.id = o.bidder_id)
+  inner join contractors contr on (contr.id = b.contractor_id)
+  inner join contracts c on (c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+  inner join contract_specifications cs on (c.id = cs.contract_id and s.id = cs.specification_id)
+
+Where l.status_id = <%= Constants::LotStatus::CONTRACT %> and c.confirm_date between :date_begin and :date_end
+
+<% if current_user_root_dept_id %>
+  And s.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+<% if customers.present? %>
+  And s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+<% end %>
+<% if tender_types.present? %>
+  And t.tender_type_id not in (<%= tender_types.join(', ') %>)
+<% end %>
+
+Group by l.id, t.num, l.num, l.name, c.confirm_date, t.id, l.tender_id, t.id,
+         l.privacy_id, cast(contr.is_sme as integer), t.tender_type_id, s.customer_id

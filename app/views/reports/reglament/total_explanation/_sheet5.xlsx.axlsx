@@ -1,0 +1,61 @@
+@sheet = sheet
+@col_count = 6
+
+def print_group(name, options = {})
+  values = Array.new(@col_count)
+  values[0] = name
+  group_row = @sheet.add_row values, options
+  @sheet.merge_cells group_row.cells[0..(@col_count - 1)]
+  group_row
+end
+
+print_group t('.text1'), style: @styles[:text_left_bold]
+
+sheet.add_row
+
+@head_rows = CSV.read('app/views/reports/reglament/total_explanation/csv/head_5.csv', col_sep: ';')
+
+rows = []
+@head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 40
+rows[1].height = 100
+rows[2].height = 15
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+@report.sheet5_rows.each do |row|
+  row_index = @sheet.rows.count + 1
+
+  @sheet.add_row [
+    row['name'],
+    to_thousand(row['contract_cost_nds']),
+    to_thousand(row['all_contract_cost_nds']),
+    "=IF(B#{row_index}=0,0,C#{row_index}/B#{row_index})",
+    to_thousand(row['sme_contract_cost_nds']),
+    "=IF(B#{row_index}=0,0,E#{row_index}/B#{row_index})"
+  ], style: [
+    @styles[:td], @styles[:td_money], @styles[:td_money], @styles[:td_percent],
+    @styles[:td_money], @styles[:td_percent]
+  ]
+end
+
+sum_vals_styles = [
+  @styles[:sum], @styles[:sum_money], @styles[:sum_money], @styles[:sum_percent],
+  @styles[:sum_money], @styles[:sum_percent]
+]
+
+sum_rows = %w(6 7)
+formula = ->(rows, column) { "=#{rows.map { |r| "#{column}#{r}" }.join('+')}" }
+
+sheet.add_row [
+  t('.sum'),
+  formula.call(sum_rows, 'B'),
+  formula.call(sum_rows, 'C'),
+  "=C8/B8",
+  formula.call(sum_rows, 'E'),
+  "=E8/B8"
+], style: sum_vals_styles
+
+sheet.add_row
+print_group t('.order1352'), style: @styles[:text_left], height: 30
+
+sheet.column_widths 40, 20, 20, 20, 20, 20

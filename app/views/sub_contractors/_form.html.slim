@@ -1,0 +1,30 @@
+= render 'shared/contract_info', lot: @lot, offer: @offer
+
+= input_block_form_for [@contract, @sub_contractor] do |f|
+  = error_messages_for @sub_contractor
+
+  = field_set_tag "Субподрядчик" do
+    .row
+      .span9
+        = f.hidden_field :contractor_id
+        = f.input :contractor_name_long, label: false
+    .row
+      .span9 = f.input :name
+    .row
+      .span2 = f.input :num
+      .span2 = f.input :confirm_date, as: :string, input_html: { class: 'datepicker' }
+      .span2 = f.input :begin_date, as: :string, input_html: { class: 'datepicker' }
+      .span2 = f.input :end_date, as: :string, input_html: { class: 'datepicker' }
+
+  = f.simple_fields_for :sub_contractor_specs do |f_sub_spec|
+    = field_set_tag f_sub_spec.object.specification_fullname do
+      = f_sub_spec.hidden_field :specification_id
+      = f_sub_spec.hidden_field :contract_specification_id
+
+      .row
+        .span2= f_sub_spec.input :cost_money, input_html: { class: "cost text-right money" }
+        .span2= f_sub_spec.input :cost_nds_money, input_html: { class: "cost_nds text-right money" }
+
+  .form-actions
+    => link_to "Отмена", contract_sub_contractors_path(@contract), class: 'btn btn-warning'
+    = f.submit "Сохранить", class: 'btn btn-primary'

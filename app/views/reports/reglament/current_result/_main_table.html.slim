@@ -1,0 +1,16 @@
+table.table.table-bordered.table-center.table-report.table-hover
+  = render 'thead'
+  tbody
+    - report.groups.each do |group|
+      = render 'group_rows', report: report, group: group, nesting_level: 1, nz: nz
+
+
+  - p_name = 'II. ЗАКУПКИ С НЕПОДВЕДЕННЫМИ ИТОГАМИ'
+  - p_sum_name = 'Всего по разделу II'
+  tbody
+    = render 'part_rows', rows: report.part2_rows(nz), cols_part: :part2, part_name: p_name, part_sum_name: p_sum_name
+
+  - p_name = 'III. НЕ ОБЪЯВЛЕННЫЕ ЗАКУПКИ В СООТВЕТСТВИИ С ПЛАНОМ ГКПЗ В ОТЧЕТНОМ ПЕРИОДЕ'
+  - p_sum_name = 'Всего по разделу III'
+  tbody
+    = render 'part_rows', rows: report.part3_rows(nz), cols_part: :part3, part_name: p_name, part_sum_name: p_sum_name

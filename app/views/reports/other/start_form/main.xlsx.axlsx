@@ -1,0 +1,15 @@
+wb = xlsx_package.workbook
+render 'reports/default_styles', wb: wb
+
+@customers = @report.customers || Department.roots_customers(@report.current_user_root_dept).pluck(:id)
+
+wb.add_worksheet(name: "запуски+итоги") do |sheet|
+  render 'list0', sheet: sheet
+end
+
+@customers.map(&:to_i).each do |customer|
+  name = Department.find(customer).decorate.shortname[0..29]
+  wb.add_worksheet(name: name) do |sheet|
+    render "list1", sheet: sheet, customer: customer
+  end
+end

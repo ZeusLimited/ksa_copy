@@ -1,0 +1,19 @@
+- rows = CSV.read(File.join('db', 'csv', Setting.company, 'import_plan_lots_example.csv'), col_sep: ';')
+
+h2 Загруженный список лотов
+table.table.table-bordered.table-striped
+  thead
+    tr
+      th №
+      - rows[0].each_with_index do |field, index|
+        - if field
+          th = rows[1][index]
+  tbody
+    - if !@import_lots.blank?
+      - @import_lots.each do |import_lot|
+        tr class=(import_lot.valid? ? 'success' : 'error')
+          = td_for_excel_import(import_lot, :num)
+          - rows[0].each do |field|
+            = td_for_excel_import(import_lot, field) if field
+    - else
+      td colspan="35" Нет данных

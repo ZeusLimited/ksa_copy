@@ -1,0 +1,25 @@
+ru:
+  reports:
+    reglament:
+      sme_table:
+        main_table:
+          order1352: 'Согласно Постановлению Правительства Российской Федерации от 11.12.2014 №1352 «Об особенностях участия субъектов малого и среднего предпринимательства в закупках товаров, работ, услуг отдельными видами юридических лиц» обязанность по проведению закупок у МСП для Общества в отчетном периоде не установлена.'
+  helpers:
+    submit:
+      reports_reglament_sme_table:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/reglament/sme_table: 'Таблица по МСП'
+    attributes:
+      reports/reglament/sme_table:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_years: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'

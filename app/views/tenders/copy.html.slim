@@ -1,0 +1,27 @@
+.page-header
+  h1 Создание копии закупочной процедуры
+
+= render 'tenders/tender_header', tender: tender
+
+= simple_form_for @tender.deep_clone, url: new_from_copy_tenders_path, method: :get do |f|
+  = error_messages_for @tender
+
+  = field_set_tag "Лоты" do
+    table.table.table-bordered.table-striped
+      thead
+        tr
+          th
+          th Номер
+          th Наименование
+          th Цена без НДС
+      tbody#lots_for_copy
+        = f.collection_check_boxes :lot_ids, @tender.lots, :id, :fullname, include_hidden: false do |b|
+          tr
+            td = b.label(class: "checkbox") { b.check_box(disabled: !b.object.can_copy?) }
+            td.right-cell= b.object.num
+            td = b.object.name
+            td.right-cell= p_money b.object.specs_cost
+
+    .form-actions
+      => link_to "Отмена", @tender, class: 'btn btn-warning'
+      = f.submit "Следующий шаг", class: 'btn btn-primary', name: nil, onclick: "return validate_copy_tenders_form()"

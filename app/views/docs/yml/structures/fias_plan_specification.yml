@@ -1,0 +1,14 @@
+-
+  name: "<a href='#' class='link-to-structure' data-url='docs/structure?id=plan_specification'>..</a>"
+-
+  name: 'addr_aoid'
+  data_type: 'String'
+  desc: 'Идентификатор адресного объекта (из ФИАС)'
+  required: true
+  example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'
+-
+  name: 'houseid'
+  data_type: 'String'
+  desc: 'Идентификатор дома (из ФИАС)'
+  required: false
+  example: '6F9619FF-8B86-D011-B42D-00CF4FC964FF'

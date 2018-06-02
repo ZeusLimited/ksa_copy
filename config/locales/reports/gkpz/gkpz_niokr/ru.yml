@@ -1,0 +1,26 @@
+ru:
+  reports/gkpz/gkpz_niokr:
+    title: "Годовая комплексная программа закупок %{customer} на %{year} год"
+  helpers:
+    submit:
+      reports_gkpz_gkpz_niokr:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/gkpz/gkpz_niokr: "ГКПЗ по НИОКР"
+    attributes:
+      reports/gkpz/gkpz_niokr:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        date_gkpz_on_state: 'Состояние ГКПЗ на'
+        gkpz_year: 'Год ГКПЗ'
+        gkpz_type: 'ГКПЗ / Внеплановые закупки'
+        customer: 'Заказчик'
+        organizers: 'Организатор'
+        etp_addresses: 'Адрес ЭТП'
+        tender_types: 'Способ закупки'
+        directions: 'Направление закупки'
+        subject_type: 'Предмет закупки'
+        statuses: 'Статус закупки'
+        show_status: 'Показывать статус закупки'
+        gkpz_state: 'Состояние в ГКПЗ'

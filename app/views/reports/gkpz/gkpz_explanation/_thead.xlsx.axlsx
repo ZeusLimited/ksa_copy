@@ -1,0 +1,3 @@
+head_rows = CSV.parse(ERB.new(File.read("app/views/reports/gkpz/gkpz_explanation/csv/#{name}.csv")).result)
+
+head_rows.each { |head_row| @sheet.add_row(head_row, style: @styles[:th]) }

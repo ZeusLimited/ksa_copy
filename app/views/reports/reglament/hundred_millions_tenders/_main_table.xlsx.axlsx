@@ -1,0 +1,47 @@
+@simple_sheet.add_row_title(p_name, style: @styles[:title_left], columns_count: 10)
+render 'thead'
+
+displayed_rows = 0
+row_num = 0
+first_row_merge = nil
+last_row_merge = nil
+
+result_rows.each do |row|
+
+  displayed_rows = row['cnt_offers'] if displayed_rows == 0
+
+  is_first_row = displayed_rows == row['cnt_offers']
+
+  row_num += 1 if is_first_row
+
+  values = @columns.map do |key, val|
+    if is_first_row
+      if val[:value]
+        key == :c1 ? row_num : val[:value].call(row)
+      else
+        key == :c1 ? row_num : val[:formula].call(row, @sheet.rows.size + 1)
+      end
+    else
+      if val[:value]
+        val[:no_merge] ? val[:value].call(row) : nil
+      else
+        val[:no_merge] ? val[:formula].call(row, @sheet.rows.size + 1) : nil
+      end
+    end
+  end
+
+  excel_row = @sheet.add_row values, style: @column_styles, types: @column_types
+
+  if is_first_row
+    first_row_merge = excel_row
+  else
+    last_row_merge = excel_row
+  end
+
+  displayed_rows -= 1
+  if displayed_rows == 0 && row['cnt_offers'] > 1
+    @columns.each_with_index do |col, index|
+      first_row_merge.cells[index].merge last_row_merge.cells[index] unless col[1][:no_merge]
+    end
+  end
+end

@@ -1,0 +1,174 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  .btn-group.pull-right.span2
+    button.btn.btn-primary.input-block-level.dropdown-toggle(data-toggle='dropdown')
+      = t('actions')
+      span.caret
+    ul.dropdown-menu
+      - if can?(:update, @open_protocol)
+        li = link_to t('edit'), edit_tender_open_protocol_path(@tender, @open_protocol)
+      - if can?(:destroy, @open_protocol)
+        li
+          = link_to t('.delete'),
+            tender_open_protocol_path(@tender, @open_protocol),
+            method: :delete,
+            data: { confirm: t('.confirm') }
+      li = link_to t('to_docx'), tender_open_protocol_path(@tender, @open_protocol, format: :docx)
+      li = link_to t('.reference'), reference_tender_open_protocol_path(@tender, @open_protocol, format: :docx)
+  h1 = t('.header')
+h4
+  = t('.caption',
+      commission_name: @open_protocol.commission_name_r,
+      tender_type: @tender.tender_type_fullname.mb_chars.downcase,
+      num: @tender.num)
+  = link_to_history_icon(@open_protocol)
+
+
+table.protocol-head
+  tbody
+    tr
+      td = @open_protocol.num
+      td.text-right = @open_protocol.sign_date.strftime('%d.%m.%Y')
+    tr
+      td.text-left colspan="2" = @open_protocol.sign_city
+
+dl
+  dt = t('.tender_caption')
+  dd
+    p = @tender.name
+    - if @tender.lots.size > 1
+      - @tender.lots.each do |lot|
+        p= lot.fullname
+  dt = t('.attended')
+  dd
+    p
+      == open_protocol.members(true)
+  dt = t('.questions')
+  dd
+    ol
+      - if @tender.etp?
+        - if open_protocol.offer_covers.size > 0
+          li
+            => t('.org_recieved')
+            => count_with_description(open_protocol.offer_covers.size, 2, :offer)
+            = t('.etp_participant_covers', etp: link_to_b2b).html_safe
+        - else
+          li = t('.no_covers')
+        li
+          = t('.etp_open_covers', etp: link_to_b2b).html_safe
+      - else
+        - if open_protocol.covers.empty?
+          li = t('.no_covers')
+        - else
+          - if open_protocol.pickup_covers.size > 0
+            li
+              => t('.orig_received')
+              => count_with_description(open_protocol.pickup_covers.size, 1, :cover)
+              = t('.reject_covers')
+          - if open_protocol.replace_covers.size > 0
+            li
+              => t('.org_recieved')
+              => count_with_description(open_protocol.replace_covers.size, 1, :cover)
+              = t('.replace_covers')
+          - if open_protocol.offer_covers.size > 0
+            li
+              => t('.org_recieved')
+              => count_with_description(open_protocol.offer_covers.size, 2, :offer)
+              = t('.participant_covers')
+          - if @open_protocol.open_protocol_present_bidders.size > 0
+            li
+              p = t('.open_covers')
+              - @open_protocol.open_protocol_present_bidders.each do |delegat|
+                p = "#{delegat.bidder.contractor_name_short} - #{delegat.delegate}"
+      li
+        = t('.begin_time')
+        = local_time_with_msk(open_protocol.open_date, tender.local_time_zone)
+      li = t('.place', location: open_protocol.location)
+      - unless @tender.etp?
+        li = t('.whole_covers')
+        - if @offers.by_type(Constants::OfferTypes::PICKUP).count > 0
+          li
+            p = t('.reject_offers_found')
+            table.table.table-striped.table-bordered
+              thead
+                tr
+                  th = t('.table.row_num')
+                  th = t('.table.contractor_name')
+                  th = t('.table.subject')
+                  th = t('.table.comments')
+              tbody
+                - @tender.bidders.by_offer_type(Constants::OfferTypes::PICKUP).each_with_index do |bidder, index|
+                  tr
+                    td = index + 1
+                    td
+                      p
+                        strong = bidder.contractor_name_short
+                      p = bidder.contractor_legal_addr
+                    td
+                      - bidder.offers.by_type(Constants::OfferTypes::PICKUP).each do |offer|
+                        p = offer.lot_name
+                    td
+                      - bidder.offers.by_type(Constants::OfferTypes::PICKUP).each do |offer|
+                        p = offer.note
+        - if @offers.by_type(Constants::OfferTypes::REPLACE).count > 0
+          li
+            p = t('.replace_offers_found')
+            table.table.table-striped.table-bordered
+              thead
+                tr
+                  th = t('.table.row_num')
+                  th = t('.table.contractor_name')
+                  th = t('.table.replace')
+                  th = t('.table.comments')
+              tbody
+                - @tender.bidders.by_offer_type(Constants::OfferTypes::REPLACE).each_with_index do |bidder, index|
+                  tr
+                    td = index + 1
+                    td
+                      p
+                        strong = bidder.contractor_name_short
+                      p = bidder.contractor_legal_addr
+                    td
+                      - bidder.offers.by_type(Constants::OfferTypes::REPLACE).each do |offer|
+                        p = offer.lot_name
+                        p = offer.change_descriptions
+                    td
+                      - bidder.offers.by_type(Constants::OfferTypes::REPLACE).each do |offer|
+                        p = offer.note
+      - if @offers.by_type(Constants::OfferTypes::OFFER).count > 0
+        li
+          p = t('.offers_found')
+          table.table.table-striped.table-bordered
+            thead
+              tr
+                th = t('.table.row_num')
+                th = t('.table.contractor_name')
+                th = t('.table.cost')
+                th = t('.table.comments')
+            tbody
+              - @tender.bidders.each_with_index do |bidder, index|
+                tr
+                  td= index + 1
+                  td
+                    p
+                      strong = bidder.contractor_name_short
+                    p= bidder.contractor_legal_addr
+                  td
+                    - bidder.offers.by_type(Constants::OfferTypes::OFFER).each do |offer|
+                      p
+                        b = offer.lot_fullname
+                      p Цена: #{p_money(offer.original_cost)} руб. (без НДС)
+                  td
+                    - bidder.offers.by_type(Constants::OfferTypes::OFFER).each do |offer|
+                      p = offer.note
+
+  dt = t('.resolve')
+  dd
+    ol= content_tag :li, @open_protocol.resolve
+
+table.protocol-head
+  tbody
+    tr
+      td = t('.clerk')
+      td.text-right= @open_protocol.clerk_fio_full

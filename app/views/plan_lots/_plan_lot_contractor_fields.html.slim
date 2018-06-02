@@ -1,0 +1,16 @@
+fieldset.plan_lot_contractor_fields
+  = f.hidden_field :_destroy
+  = f.hidden_field :plan_lot_id
+  - error = f.object.errors.present?
+  .row
+    .span9
+      .control-group class=(error ? "error" : "")
+        = f.label :contractor_id
+        .controls
+          = f.hidden_field :contractor_id, class: 'plan_lot_contractor input-block-level'
+          - if error
+            span.help-inline = f.object.errors.messages[:contractor_id].first
+    .span3
+      label &nbsp;
+      = link_to content_tag(:i, '', class: 'icon-minus') + t('.remove_participant'), '#',
+        class: "remove_plan_lot_contractor btn btn-danger pull-right input-large"

@@ -1,0 +1,9 @@
+ru:
+  offers:
+    defaults: &default
+      nds: 'НДС'
+      nds_placeholder: 'вручную'
+    form:
+      <<: *default
+    offer_specification_fields:
+      <<: *default

@@ -1,0 +1,64 @@
+@columns.each_pair do |ckey, cvalue|
+  group["#{ckey}_total"] = 0 if cvalue[:sum]
+end
+
+@simple_sheet.add_row_title group['name'], style: @styles["group_row_h#{nesting_level}".to_sym], columns_count: @columns.count if group['name'].present?
+
+if group.key?('children')
+  group['children'].each do |child|
+    render 'group_rows', group: child, nesting_level: nesting_level + 1, tender_types: tender_types, summary: summary
+    @columns.each_pair do |ckey, cvalue|
+      group["#{ckey}_total"] += child["#{ckey}_total"] || 0 if cvalue[:sum]
+    end
+  end
+end
+
+if group.key?('filter')
+  row_begin = @sheet.rows.size
+  first_row_merge = nil
+  last_row_merge = nil
+
+  @report.result_rows(group['filter'].merge(tender_type_id: tender_types)).each do |row|
+    unless summary
+      if row['rn'] == 1
+        values = @columns.values.map { |value| value[:value].call(row) }
+
+        first_row_merge = @sheet.add_row values, style: @column_styles[row['style']], types: @column_types
+      else
+        values = @columns.values.map { |value| value[:no_merge] ? value[:value].call(row) : nil }
+        last_row_merge = @sheet.add_row values, style: @column_styles[row['style']], types: @column_types
+      end
+
+      if row['rn'] == row['span'] && row['span'] != 1
+        @columns.each_with_index do |col, index|
+          first_row_merge.cells[index].merge last_row_merge.cells[index] unless col[1][:no_merge]
+        end
+      end
+    end
+
+    @columns.each_pair do |ckey, cvalue|
+      group["#{ckey}_total"] += cvalue[:value].call(row) || 0 if cvalue[:sum] && row['rn'] == 1
+    end
+  end
+
+  row_end = @sheet.rows.size
+
+  @outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }
+end
+
+if group.key?('sum_name')
+  values = @columns.each_with_index.map do |c, i|
+    if i == 0
+      group['sum_name']
+    else
+      if c[1][:sum]
+        c[1][:sum_value] ? c[1][:sum_value].call(group) : group["#{c[0]}_total"]
+      else
+        nil
+      end
+    end
+  end
+
+  row = @sheet.add_row values, style: @sum_styles
+  @sheet.merge_cells row.cells.first(2)
+end

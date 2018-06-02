@@ -1,0 +1,6 @@
+-
+  name: 'departments'
+  data_type: 'Array'
+  desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=department'>department</a>]"
+  required: false
+  structure: true

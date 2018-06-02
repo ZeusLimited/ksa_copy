@@ -1,0 +1,77 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 16)
+@outlines = []
+
+@columns = Reports::Gkpz::GkpzOosCommon::COLUMNS_EIS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@sum_styles = @columns.values.map do |c|
+  if c[:sum]
+    c[:sum_style] ? @styles[c[:sum_style]] : @styles[:sum_money]
+  else
+    @styles[:sum]
+  end
+end
+@sum_quarter_styles = @columns.values.map do |c|
+  c[:sum] ? @styles[:alt_sum_money] : @styles[:alt_sum]
+end
+
+current_user_dept = current_user.root_dept_id.is_a?(Array) ? current_user.root_dept_id.first : current_user.root_dept_id
+cust_id = @report.customers.present? ? @report.customers[0] : current_user_dept
+@customer = cust_id ? Department.find(cust_id) : nil
+
+@sheet.add_row
+@simple_sheet.add_row_title(t("reports/gkpz/gkpz_oos_new.title"), style: @styles[:title], columns_count: 16)
+@simple_sheet.add_row_title("на #{@report.gkpz_year} год", style: @styles[:title], columns_count: 16)
+
+@sheet.add_row
+render 'reports/gkpz/gkpz_oos_common/gkpz_oos_new/head_table'
+@sheet.add_row
+
+render 'reports/gkpz/gkpz_oos_common/gkpz_oos_new/main_table', filter: {}
+
+@sheet.add_row
+@simple_sheet.add_row_title(
+  t("reports/gkpz/gkpz_oos_new.title2"),
+  style: @styles[:alt_title],
+  columns_count: 16
+)
+
+all_sum = @report.all_sum.round(2)
+for_order1352_sum = @report.for_order1352_sum.round(2)
+only_sme_sum = @report.only_sme_sum.round(2)
+only_sme_sum_percent = (only_sme_sum / (all_sum - for_order1352_sum) * 100).round(2)
+
+@simple_sheet.add_row_title(
+  t(
+    "reports/gkpz/gkpz_oos_new.row1",
+    cost: ActiveSupport::NumberHelper.number_to_delimited(all_sum)),
+  style: @styles[:text_left],
+  columns_count: 16
+)
+
+@simple_sheet.add_row_title(
+  t(
+    "reports/gkpz/gkpz_oos_new.row2",
+    cost: ActiveSupport::NumberHelper.number_to_delimited(for_order1352_sum)),
+  style: @styles[:text_left],
+  height: 30,
+  columns_count: 16
+)
+
+@simple_sheet.add_row_title(
+  t(
+    "reports/gkpz/gkpz_oos_new.row3",
+    cost: ActiveSupport::NumberHelper.number_to_delimited(only_sme_sum),
+    percent: ActiveSupport::NumberHelper.number_to_delimited(only_sme_sum_percent)),
+  style: @styles[:text_left],
+  columns_count: 16
+)
+
+@sheet.add_row
+
+render 'reports/gkpz/gkpz_oos_common/gkpz_oos_new/main_table', filter: { sme_type_id: Constants::SmeTypes::SME } # only_sme
+
+@outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

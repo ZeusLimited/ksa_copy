@@ -1,0 +1,49 @@
+@columns.each_pair do |ckey, cvalue|
+  group["#{ckey}_total"] = 0 if cvalue[:sum]
+end
+
+@simple_sheet.add_row_title group['name'], style: @styles["group_row_h#{nesting_level}".to_sym]
+
+if group.key?('children')
+  group['children'].each do |child|
+    render 'group_rows', group: child, nesting_level: nesting_level + 1
+    @columns.each_pair do |ckey, cvalue|
+      group["#{ckey}_total"] += child["#{ckey}_total"] || 0 if cvalue[:sum]
+    end
+  end
+end
+
+if group.key?('filter')
+  row_begin = @sheet.rows.size
+
+  @report.result_rows(group['filter']).each do |row|
+    values = @columns.values.map { |value| value[:value].call(row) }
+
+    excel_row = @sheet.add_row values, style: @column_styles, types: @column_types
+
+    @columns.each_pair do |ckey, cvalue|
+      group["#{ckey}_total"] += cvalue[:value].call(row) || 0 if cvalue[:sum]
+    end
+  end
+
+  row_end = @sheet.rows.size
+
+  @outlines << { start_index: row_begin, end_index: row_end - 1, level: 1 }
+end
+
+if group.key?('sum_name')
+  values = @columns.map do |c|
+    if c[0] == :c1
+      group['sum_name']
+    else
+      if c[1][:sum]
+        c[1][:sum_value] ? c[1][:sum_value].call(group) : group["#{c[0]}_total"]
+      else
+        nil
+      end
+    end
+  end
+
+  row = @sheet.add_row values, style: @sum_styles
+  @sheet.merge_cells row.cells.first(2)
+end

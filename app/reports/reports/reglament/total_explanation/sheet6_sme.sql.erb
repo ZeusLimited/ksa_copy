@@ -1,0 +1,62 @@
+select
+  case when contract_cost = 0 then 0 else (non_sme_contract_cost_nds + sme_contract_cost_nds + subsme_contract_cost_nds) / contract_cost end as sme_dp,
+  case when contract_cost = 0 then 0 else sme_contract_cost_nds / contract_cost end as sme_only_dp
+from (
+select
+ sum(ca.amount_finance_nds) as contract_cost,
+ sum(case when l.sme_type_id is null and cast(cont.is_sme as integer) = 1 then ca.amount_finance_nds end) as non_sme_contract_cost_nds,
+ sum(case when l.sme_type_id = <%= Constants::SmeTypes::SME %> And cast(cont.is_sme as integer) = 1 then ca.amount_finance_nds end) as sme_contract_cost_nds,
+ sum(decode(l.sme_type_id, <%= Constants::SmeTypes::SUB_SME %>, (select sum(sca.amount_finance_nds)
+    from sub_contractors sub_c
+    inner join contractors tc on sub_c.contractor_id = tc.id
+    inner join sub_contractor_specs tscs on tscs.sub_contractor_id = sub_c.id
+    inner join contract_amounts sca on sca.contract_specification_id = tscs.id and sca.year = :gkpz_year
+    where sub_c.contract_id = c.id and cast(tc.is_sme as integer) = 1), 0)) as subsme_contract_cost_nds
+from tenders t
+  inner join lots l on (t.id = l.tender_id)
+  inner join specifications s on (s.lot_id = l.id)
+  inner join offer_specifications os on (os.specification_id = s.id)
+  inner join offers o on (o.id = os.offer_id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+  inner join bidders b on (b.id = o.bidder_id)
+  inner join contractors cont on (b.contractor_id = cont.id)
+  inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+  left join lots fr on (fr.id = l.frame_id)
+  inner join plan_lots pl on (pl.id = nvl(l.plan_lot_id, fr.plan_lot_id))
+  left join contracts c on (c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+  left join contract_specifications cs on (cs.contract_id = c.id and cs.specification_id = s.id)
+  inner join contract_amounts ca on ca.contract_specification_id = cs.id and ca.year = :gkpz_year
+  left join lateral (
+    select tpl.guid, max(tp.date_confirm) as can_date
+    from plan_lots tpl
+    inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+    inner join commissions tc on tp.commission_id = tc.id
+    where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+    group by tpl.guid
+  ) can on true
+  inner join lateral
+    (select * from
+      (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date and pl.guid = tpl.guid
+        where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+       where rn = 1) gkpz_pl on true
+  Where can.guid is null -- неотмененная
+  and t.tender_type_id != <%= Constants::TenderTypes::UNREGULATED %>
+  And EXTRACT(YEAR FROM c.confirm_date) > 2016
+  And c.confirm_date <= :end_date
+  And gkpz_pl.order1352_id = <%= Constants::Order1352::SELECT %>
+  <% if current_user_root_dept_id %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and s.customer_id in
+      (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+  <% end %>
+
+  <% if organizers.present? %>
+    and t.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+  <% end %>
+  --And l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+) sub

@@ -1,0 +1,9 @@
+ru:
+  activerecord:
+    models:
+      open_protocol_present_member: 'Присутствовавшие члены комиссии'
+    attributes:
+      open_protocol_present_member:
+        open_protocol_id: 'Ссылка на протокол вскрытия'
+        user_id: 'ФИО'
+        status_id: 'Статус в комиссии'

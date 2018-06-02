@@ -1,0 +1,31 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tns="urn:WashOut">
+   <soap:Body>
+      <tns:find_tenders_response>
+         <find_tenders xsi:type="tns:find_tenders">
+            <plan_lot_guid xsi:type="xsd:string">c3116b6f-960c-9825-2cd7-fa740e408958</plan_lot_guid>
+            <oos_num xsi:type="xsd:int"/>
+            <lot_id xsi:type="xsd:int"/>
+            <is_sme xsi:type="xsd:string">Все</is_sme>
+            <wp_num xsi:type="xsd:string"/>
+            <wp_confirm_date xsi:type="xsd:date"/>
+            <offer_id xsi:type="xsd:int"/>
+            <year xsi:type="xsd:int">2016</year>
+            <num xsi:type="xsd:string">24.1</num>
+            <name xsi:type="xsd:string">Услуги технического  агента, связанные с реализацией инвестиционного проекта «Строительство ГТУ-ТЭЦ в г. Владивостоке на площадке ЦПВБ»</name>
+            <customer xsi:type="xsd:string">РАО ЭС Востока</customer>
+            <organizer xsi:type="xsd:string">РАО ЭС Востока</organizer>
+            <is_additional xsi:type="xsd:boolean">true</is_additional>
+            <additional_plan_lot_guid xsi:type="xsd:string">45b68426-23b6-9ad4-0e90-12940e0ad351</additional_plan_lot_guid>
+            <bp_item xsi:type="xsd:string">29400</bp_item>
+            <financing xsi:type="xsd:string">2.1.4 прочие собственные средства</financing>
+            <is_regulated xsi:type="xsd:boolean">true</is_regulated>
+            <tender_type xsi:type="xsd:string">ЕИ</tender_type>
+            <etp xsi:type="xsd:boolean">false</etp>
+            <winner_name xsi:type="xsd:string"></winner_name>
+            <winner_inn xsi:type="xsd:string"/>
+            <cost xsi:type="xsd:decimal">9152542.37</cost>
+            <cost_nds xsi:type="xsd:decimal">10800000</cost_nds>
+         </find_tenders>
+      </tns:find_tenders_response>
+   </soap:Body>
+</soap:Envelope>

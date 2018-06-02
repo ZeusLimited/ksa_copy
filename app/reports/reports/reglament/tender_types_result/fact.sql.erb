@@ -1,0 +1,111 @@
+select
+  coalesce(sum(fact_cost), 0) as fact_cost,
+  coalesce(sum(fact_cost_v), 0) as fact_cost_v,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::OK.join(', ') %>) then fact_cost else 0 end), 0) as fact_cost_ok,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::OK.join(', ') %>) then fact_cost_v else 0 end), 0) as fact_cost_ok_v,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::ZK.join(', ') %>) then fact_cost else 0 end), 0) as fact_cost_zk,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::ZK.join(', ') %>) then fact_cost_v else 0 end), 0) as fact_cost_zk_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::PO %> then fact_cost else 0 end), 0) as fact_cost_po,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::PO %> then fact_cost_v else 0 end), 0) as fact_cost_po_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OZC %> then fact_cost else 0 end), 0) as fact_cost_ozc,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OZC %> then fact_cost_v else 0 end), 0) as fact_cost_ozc_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZZC %> then fact_cost else 0 end), 0) as fact_cost_zzc,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZZC %> then fact_cost_v else 0 end), 0) as fact_cost_zzc_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OZP %> then fact_cost else 0 end), 0) as fact_cost_ozp,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OZP %> then fact_cost_v else 0 end), 0) as fact_cost_ozp_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZZP %> then fact_cost else 0 end), 0) as fact_cost_zzp,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZZP %> then fact_cost_v else 0 end), 0) as fact_cost_zzp_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OKP %> then fact_cost else 0 end), 0) as fact_cost_okp,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::OKP %> then fact_cost_v else 0 end), 0) as fact_cost_okp_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZKP %> then fact_cost else 0 end), 0) as fact_cost_zkp,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::ZKP %> then fact_cost_v else 0 end), 0) as fact_cost_zkp_v,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::SIMPLE %> then fact_cost else 0 end), 0) as fact_cost_uz,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::SIMPLE %> then fact_cost_v else 0 end), 0) as fact_cost_uz_v,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::EI.join(', ') %>) then fact_cost else 0 end), 0) as fact_cost_ei,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::EI.join(', ') %>) then fact_cost_v else 0 end), 0) as fact_cost_ei_v,
+  coalesce(sum(case when solution_type_id = <%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %> then fact_cost else 0 end), 0) as fact_cost_eik,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::UNREGULATED %> then fact_cost else 0 end), 0) as fact_cost_nz,
+  coalesce(sum(case when tender_type_id = <%= Constants::TenderTypes::UNREGULATED %> then fact_cost_v else 0 end), 0) as fact_cost_nz_v,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::AUCTIONS.join(', ') %>) then fact_cost else 0 end), 0) as fact_cost_a,
+  coalesce(sum(case when tender_type_id in (<%= Constants::TenderTypes::AUCTIONS.join(', ') %>) then fact_cost_v else 0 end), 0) as fact_cost_a_v
+  From
+  (
+
+    select
+    t.tender_type_id,
+    wpl.solution_type_id,
+    sum(s.qty * os.final_cost_nds) as fact_cost,
+    decode(nvl2(sd.gkpz_year, gkpz_pl.state, 1), 0, sum(s.qty * os.final_cost_nds),0) as fact_cost_v
+
+    from tenders t
+
+    inner join lots l on l.tender_id = t.id
+    inner join specifications s on s.lot_id = l.id
+
+    inner join offers o on o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>
+    inner join offer_specifications os on o.id = os.offer_id and os.specification_id = s.id
+    inner join bidders b on b.id = o.bidder_id
+    inner join contractors c on c.id = b.contractor_id
+    inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+    inner join winner_protocol_lots wpl on (wpl.lot_id = l.id and wpl.winner_protocol_id = wp.id)
+    left join lots frame_lot on frame_lot.id = l.frame_id
+
+    inner join plan_lots pl on nvl(frame_lot.plan_lot_id, l.plan_lot_id) = pl.id
+
+    inner join
+      (select * from
+        (select tpl.guid, tpl.status_id, tpl.state, row_number() over (partition by tpl.guid order by tp.date_confirm desc) rn
+          from plan_lots tpl
+          inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+          where tpl.status_id in (<%= (Constants::PlanLotStatus::AGREEMENT_LIST + [Constants::PlanLotStatus::CANCELED]).join(', ') %>)
+            and tpl.gkpz_year = :gkpz_year
+        ) sub
+        where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) gkpz_pl on (pl.guid = gkpz_pl.guid)
+    left join (
+        select gkpz_year, department_id
+        from protocols pp
+          inner join commissions cc on (pp.commission_id = cc.id)
+        where cc.commission_type_id = <%= Constants::CommissionType::SD %>
+          and pp.date_confirm between :begin_date and :end_date
+          and pp.gkpz_year = :gkpz_year
+        Group By gkpz_year, department_id
+      ) sd on (sd.gkpz_year = l.gkpz_year and sd.department_id = l.root_customer_id)
+      /*left join (
+        select tpl.guid, max(tp.date_confirm) as can_date
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+        inner join commissions tc on tp.commission_id = tc.id
+        where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+          and tpl.gkpz_year = :gkpz_year
+        group by tpl.guid
+      ) can on gkpz_pl.guid = can.guid*/
+    Where l.status_id in (<%= Constants::LotStatus::HELD.join(', ') %>)
+      -- and can.guid is null -- неотмененная
+      and l.gkpz_year = :gkpz_year
+      and wp.confirm_date between :begin_date and :end_date
+      <% if customer.present? %>
+        and s.customer_id in
+          (<%= Department.subtree_ids_for(customer).join(', ') %>) -- заказчик
+      <% end %>
+      <% if organizers.present? %>
+        and t.department_id in
+          (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+      <% end %>
+
+      <% if tender_types.present? %>
+        and t.tender_type_id in (<%= tender_types.join(', ') %>)
+      <% end %>
+
+      <% if directions.present? %>
+        and s.direction_id in (<%= directions.join(', ') %>)
+      <% end %>
+
+      <% if financing_sources.present? %>
+        and s.financing_id in (<%= financing_sources.join(', ') %>)
+      <% end %>
+
+      <% if subject_type.present? %>
+        and l.subject_type_id = <%= subject_type %>
+      <% end %>
+    Group By l.id, nvl2(sd.gkpz_year, gkpz_pl.state, 1), t.tender_type_id, wpl.solution_type_id
+  ) sub

@@ -1,0 +1,32 @@
+# config/app.yml for rails-settings-cached
+defaults: &defaults
+  #contractor_form - форма справочника контрагентов.
+  #  all - Заполняются все контрагенты, в том числе филиалы. Проверка на уникальность ИНН + КПП
+  #  main - Заполняются только головные подразделения. ИНН уникален.
+  contractor_form: 'all'
+  # default_time_zone - Таймзона по умолчанию.
+  # список долтупных таймзон - `rake time:zones:all`
+  default_time_zone: 'Moscow'
+  # email_for_approve - email пользователя, активирующего учетки
+  email_for_approve: 'generalovas@rushydro.ru'
+  # app_name - краткое наименование системы
+  # КСАЗД - РАО
+  app_name: 'КСАЗД'
+
+  # company: Наименование компании
+  # raoesv
+  company: 'raoesv'
+
+  initial_gkpz_year: 2008
+
+  # Размер буфера при парсинге файлов на сервере.
+  multipart_buffer_size: 16_384
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_overdue_contract:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/overdue_contract: 'Отчет о нарушении сроков заключения договоров'
+    attributes:
+      reports/other/overdue_contract:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'

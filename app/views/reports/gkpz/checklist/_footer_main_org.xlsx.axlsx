@@ -1,0 +1,14 @@
+prefix = 'reports/gkpz/checklist.footer_main_org'
+
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.fb_curator",holding: @holding_name), nil, t("#{prefix}.sign"), nil, t("#{prefix}.sign_date")]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.approval"), nil, t("#{prefix}.approval"), nil, t("#{prefix}.approval")]
+@sheet.add_row [t("#{prefix}.tender_boss"), nil, t("#{prefix}.invest_boss",holding: @holding_name), nil, t("#{prefix}.economic_boss",holding: @holding_name)]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.sign"), nil, t("#{prefix}.sign"), nil, t("#{prefix}.sign")]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.sign_date"), nil, t("#{prefix}.sign_date"), nil, t("#{prefix}.sign_date")]
+@sheet.add_row
+@sheet.add_row [t("#{prefix}.curator"), nil, nil, nil, nil, nil]
+@sheet.add_row [t("#{prefix}.phone_number"), nil, nil, nil, nil, nil]

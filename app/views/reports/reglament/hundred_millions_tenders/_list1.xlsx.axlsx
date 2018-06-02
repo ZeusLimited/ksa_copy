@@ -1,0 +1,26 @@
+@sheet = sheet
+@simple_sheet = AxlsxExt::SimpleSheet.new(sheet, 31)
+@outlines = []
+
+@columns = Reports::Reglament::HundredMillionsTenders::COLUMNS
+@column_styles = @columns.values.map { |c| @styles[c[:style]] }
+@column_types = @columns.values.map { |c| c[:type] }
+@widths = @columns.values.map { |c| c[:width] }
+@columns_part_3 = Reports::Reglament::HundredMillionsTenders::COLUMNS_PART_3
+
+@sheet.add_row
+@simple_sheet.add_row_title(Reports::Reglament::HundredMillionsTenders.model_name.human,
+                            style: @styles[:title], columns_count: 10)
+@sheet.add_row
+
+p_name = 'I. ЗАКУПКИ С ПОДВЕДЕННЫМИ ИТОГАМИ'
+render 'main_table', p_name: p_name, result_rows: @report.part1_sql_rows
+
+p_name = 'II. ЗАКУПКИ С НЕПОДВЕДЕННЫМИ ИТОГАМИ'
+render 'main_table', p_name: p_name, result_rows: @report.part2_sql_rows
+
+p_name = 'III. НЕ ОБЪЯВЛЕННЫЕ ЗАКУПКИ В СООТВЕТСТВИИ С ПЛАНОМ ГКПЗ В ОТЧЕТНОМ ПЕРИОДЕ'
+render 'part_table', p_name: p_name, result_rows: @report.part3_sql_rows
+
+# @outlines.each { |o| sheet.outline_level_rows(o[:start_index], o[:end_index], o[:level], true) }
+@simple_sheet.change_column_widths(@widths)

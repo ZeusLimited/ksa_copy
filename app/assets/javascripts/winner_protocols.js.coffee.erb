@@ -1,0 +1,9 @@
+$(document).on 'change', 'form .wpl-solution-types', (event) ->
+  if ['<%= Constants::WinnerProtocolSolutionTypes::WINNER %>', '<%= Constants::WinnerProtocolSolutionTypes::SINGLE_SOURCE %>'].indexOf($(this).val()) != -1
+    $(this).closest('td.solution').find('.wpl-winner-info').show()
+  else
+    $(this).closest('td.solution').find('.wpl-winner-info').hide()
+
+document.addEventListener "turbolinks:load", ->
+  $('.wpl-solution-types').change()
+  $('#modal_caution').modal()

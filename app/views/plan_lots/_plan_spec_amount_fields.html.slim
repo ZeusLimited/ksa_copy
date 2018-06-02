@@ -1,0 +1,22 @@
+fieldset.amounts
+  = f.hidden_field :_destroy
+
+  .row.calc-cost-nds
+    .span1
+      = f.input :year, input_html: { value: f.object.year, class: 'input-block-level amount_year', readonly: true }
+    .span2
+      = f.input :amount_mastery do
+        = f.text_field :amount_mastery_money, class: 'amount_mastery input-block-level text-right money'
+    .span2
+      = f.input :amount_mastery_nds do
+        = f.text_field :amount_mastery_nds_money, class: 'amount_mastery_nds input-block-level text-right money'
+    .span2
+      = f.input :amount_finance do
+        = f.text_field :amount_finance_money, class: 'amount_finance input-block-level text-right money'
+    .span2
+      = f.input :amount_finance_nds do
+        = f.text_field :amount_finance_nds_money, class: 'amount_finance_nds input-block-level text-right money'
+    .span3
+      label &nbsp;
+      = link_to content_tag(:i, '', class: 'icon-minus') + t('.remove_year'), '#',
+        class: "remove_amount_fields btn btn-danger pull-right input-large"

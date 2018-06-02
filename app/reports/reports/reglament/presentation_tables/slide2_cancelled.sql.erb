@@ -1,0 +1,59 @@
+--slide2_cancelled_sql
+select
+count(distinct gkpz_pl.id) as cnt,
+sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_nds
+from
+  (select * from
+    (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      inner join commissions tc on tc.id = tp.commission_id
+      Where tpl.status_id in (<%= Constants::PlanLotStatus::NOT_DELETED_LIST.join(', ') %>) ) sub
+     where rn = 1) gkpz_pl
+  inner join plan_specifications gkpz_ps on gkpz_ps.plan_lot_id = gkpz_pl.id
+
+inner join lateral (
+  select tpl.guid, max(tp.date_confirm) as can_date
+  from plan_lots tpl
+  inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+  inner join commissions tc on tp.commission_id = tc.id and tc.commission_type_id = <%= Constants::CommissionType::CZK %>
+  where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %> and gkpz_pl.guid = tpl.guid
+  group by tpl.guid
+) can on true
+
+
+Where gkpz_pl.gkpz_year = :gkpz_year -- год ГКПЗ
+  and gkpz_pl.status_id != <%= Constants::PlanLotStatus::EXCLUDED_SD %>
+  and gkpz_pl.announce_date between :begin_date and :end_date
+  and gkpz_pl.tender_type_id is not null --исключение инновационных проектов
+  and (
+    (
+      -- Лот на СД не был
+      gkpz_pl.status_id != <%= Constants::PlanLotStatus::CONFIRM_SD %>
+      and
+      -- И Был объявлен в исполнении
+      gkpz_pl.guid in (
+        select pl.guid
+        from tenders t
+        inner join lots l on t.id = l.tender_id
+        inner join plan_lots pl on l.plan_lot_id = pl.id
+        where t.announce_date <= :end_date
+        group by pl.guid)
+    )
+    OR
+    -- ИЛИ лот был на СД
+    gkpz_pl.status_id = <%= Constants::PlanLotStatus::CONFIRM_SD %>
+  )
+
+  <% if current_user_root_dept_id %>
+    and gkpz_ps.customer_id in
+      (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>) -- заказчик
+  <% end %>
+  <% if customers.present? %>
+    and gkpz_ps.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>) -- customers
+  <% end %>
+  <% if organizers.present? %>
+    and gkpz_pl.department_id in
+      (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- organizers
+  <% end %>
+

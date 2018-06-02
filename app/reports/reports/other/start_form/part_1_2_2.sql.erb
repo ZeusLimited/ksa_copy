@@ -1,0 +1,37 @@
+    select
+      czk.department_id,
+      czk.root_customer_id,
+      czk.direction_id,
+      coalesce(czk.count, 0) as czk_count,
+      coalesce(czk.sum, 0) as czk_sum
+    from
+    (
+    Select
+    pl.department_id, pl.root_customer_id, ps.direction_id, pl.id,
+    count(distinct pl.id) as count,
+    sum(ps.qty * ps.cost_nds) as sum
+    from
+            (
+              SELECT
+                tpl.*,
+                row_number() OVER (PARTITION BY tpl.guid ORDER BY tp.date_confirm DESC) AS ag_rn
+              FROM plan_lots tpl
+              INNER JOIN protocols tp ON tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+              WHERE tpl.status_id IN (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>, <%= Constants::PlanLotStatus::CANCELLED_LIST.join(', ') %>)
+                <% if customers.present? %>
+                  and tpl.root_customer_id in (<%= customers.join(', ') %>)
+                <% end %>
+                <% if gkpz_year.present? %>
+                  and tpl.gkpz_year in (:gkpz_year)
+                <% end %>
+            ) pl
+      inner join plan_specifications ps on ps.plan_lot_id = pl.id and ag_rn = 1
+    Where pl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>) and pl.announce_date between :start_date and :end_date
+    <% if directions.present? %>
+      And ps.direction_id in (<%= directions.join(', ') %>)
+    <% end %>
+    <% if tender_types.present? %>
+      And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+    <% end %>
+    group by pl.department_id, pl.root_customer_id, ps.direction_id, pl.id
+  ) czk

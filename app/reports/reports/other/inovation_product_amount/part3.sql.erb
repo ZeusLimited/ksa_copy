@@ -1,0 +1,156 @@
+<% def sum_contracts(suffix = "")
+    <<-SQL
+      coalesce(sum(case
+                    when pl.order1352_id in (#{Constants::Order1352::EXCLUSIONS.join(', ')}                  
+                      ) and c.confirm_date between DATE :begin_date - interval '1 year' and :begin_date
+                    then cs.cost#{suffix} * s.qty
+                    else 0
+                   end), 0) as sum_contracts#{suffix}
+    SQL
+  end
+
+  def sum_contracts_sme(suffix = "")
+    <<-SQL
+      coalesce(sum(case
+                    when pl.order1352_id = #{Constants::Order1352::SELECT}
+                      and l.sme_type_id =  #{Constants::SmeTypes::SME}
+                      and c.confirm_date between DATE :begin_date - interval '1 year' and :begin_date
+                    then cs.cost#{suffix} * s.qty
+                    else 0
+                   end), 0) as sum_contracts_sme#{suffix}
+    SQL
+  end 
+
+  def sum_contracts_amount(suffix = "")
+    <<-SQL
+      coalesce(sum(case
+                    when pl.order1352_id in (#{Constants::Order1352::EXCLUSIONS.join(', ')}                  
+                      ) and c.confirm_date < DATE :begin_date and ca.id is not null
+                        and EXTRACT(YEAR FROM c.confirm_date) > 2016
+                    then ca.amount_finance#{suffix}
+                    else 0
+                   end), 0) as sum_contracts_amount#{suffix}
+    SQL
+  end
+
+  def sum_contracts_sme_amount(suffix = "")
+    <<-SQL
+      coalesce(sum(case
+                    when pl.order1352_id = #{Constants::Order1352::SELECT}
+                      and l.sme_type_id =  #{Constants::SmeTypes::SME}
+                      and EXTRACT(YEAR FROM c.confirm_date) > 2016
+                      and c.confirm_date < DATE :begin_date and ca.id is not null
+                    then ca.amount_finance#{suffix} * s.qty
+                    else 0
+                   end), 0) as sum_contracts_sme_amount#{suffix}
+    SQL
+  end %>
+--part 3
+select
+<% if detail.present? %>
+  pl.num_tender || '.' || pl.num_lot as num_gkpz,
+  pl.lot_name,
+  d.name as customer,
+  c.num as contract_num,
+  c.confirm_date as date_contract,
+  con.name as contragent,
+  c.id,
+  coalesce(sum(case when c.confirm_date between DATE :begin_date - interval '1 year' and :begin_date then cs.cost_nds * s.qty else 0 end), 0) as cost_nds,
+  coalesce(sum(case when c.confirm_date between DATE :begin_date - interval '1 year' and :begin_date then cs.cost * s.qty else 0 end), 0) as cost,
+  coalesce(sum(case when c.confirm_date < :begin_date and EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance_nds else 0 end), 0) as cost_amount_nds,
+  coalesce(sum(case when c.confirm_date < :begin_date and EXTRACT(YEAR FROM c.confirm_date) > 2016 then ca.amount_finance else 0 end), 0) as cost_amount,
+  case when c.confirm_date between DATE :begin_date - interval '1 year' and :begin_date then 1 else 0 end as is_current,
+  case when c.confirm_date < :begin_date and EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null then 1 else 0 end as is_ca
+<% else %>
+  
+  count(distinct(case when pl.order1352_id in (<%= Constants::Order1352::EXCLUSIONS.join(', ') %>)
+                        and c.confirm_date between DATE :begin_date - interval '1 year' and :begin_date
+                        then c.id
+                        else null
+                   end))              
+    as count_contracts,
+  <%= sum_contracts %> ,
+  <%= sum_contracts "_nds" %>,
+
+  
+  count(distinct(case when pl.order1352_id = <%= Constants::Order1352::SELECT %>
+                          and l.sme_type_id = <%= Constants::SmeTypes::SME %>
+                          and c.confirm_date between DATE :begin_date - interval '1 year' and :begin_date
+                      then c.id
+                      else null
+                    end))
+    as count_contracts_sme,
+  <%= sum_contracts_sme %>,
+  <%= sum_contracts_sme "_nds" %>,
+  count(distinct(case when pl.order1352_id in (<%= Constants::Order1352::EXCLUSIONS.join(', ') %>)
+                        and c.confirm_date < :begin_date and ca.id is not null
+                        and EXTRACT(YEAR FROM c.confirm_date) > 2016
+                        then c.id
+                        else null
+                   end))              
+    as count_contracts_amount,
+  <%= sum_contracts %> ,
+  <%= sum_contracts "_nds" %>,
+
+  
+  count(distinct(case when pl.order1352_id = <%= Constants::Order1352::SELECT %>
+                          and l.sme_type_id = <%= Constants::SmeTypes::SME %>
+                          and c.confirm_date < :begin_date and ca.id is not null
+                          and EXTRACT(YEAR FROM c.confirm_date) > 2016
+                      then c.id
+                      else null
+                    end))
+    as count_contracts_sme_amount,
+  <%= sum_contracts_amount %> ,
+  <%= sum_contracts_amount "_nds" %>,
+  <%= sum_contracts_sme_amount %>,
+  <%= sum_contracts_sme_amount "_nds" %>
+<% end %>
+from contracts c
+  inner join lots l on l.id = c.lot_id
+  inner join tenders t on t.id = l.tender_id
+  inner join contract_specifications cs on cs.contract_id = c.id
+  inner join specifications s on s.id = cs.specification_id and l.id = s.lot_id
+  inner join offers o on o.id = c.offer_id and o.lot_id = l.id
+  inner join plan_lots pl on (pl.id = l.plan_lot_id)
+  inner join plan_specifications ps on (ps.id = s.plan_specification_id and ps.plan_lot_id = pl.id)
+  inner join dictionaries tt on (tt.ref_id = t.tender_type_id)
+  inner join departments d on d.id = l.root_customer_id
+  inner join bidders b on b.id = o.bidder_id
+  inner join contractors con on con.id = b.contractor_id and Cast(con.is_sme as integer) = 1
+  left join lateral
+    ( select tpl.guid, max(tp.date_confirm) as can_date
+      from plan_lots tpl
+           inner join protocols tp on tp.id = tpl.protocol_id and pl.guid = tpl.guid
+                                      and extract(year from tp.date_confirm) <= extract(year from DATE :end_date) - 1
+           inner join commissions tc on tp.commission_id = tc.id
+      where tpl.status_id = <%= Constants::PlanLotStatus::CANCELED %>
+      group by tpl.guid
+    ) can on true
+  left join contract_amounts ca on ca.contract_specification_id = cs.id and ca.year = extract(year from DATE :end_date) - 1
+where c.confirm_date <= :end_date
+  and can.guid is null -- неотмененная
+  and s.direction_id in (<%= Direction.inivp.select(:id).to_sql %>)
+<% if organizers.present? %>
+  and t.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+<% if customers.present? %>
+  and s.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+  and c.type_id = <%= Constants::ContractTypes::BASIC %>
+
+<% if detail.present? %>
+  <% if row == 'row103' || row == 'row104' %>
+    and pl.order1352_id = <%= Constants::Order1352::SELECT %>
+    and l.sme_type_id = <%= Constants::SmeTypes::SME %>
+  <% else %>
+    and pl.order1352_id in (<%= Constants::Order1352::EXCLUSIONS.join(', ') %>)
+  <% end %>
+  group by (pl.num_tender || '.' || pl.num_lot), pl.lot_name, d.name, c.num, c.confirm_date, con.name, c.id
+           , case when c.confirm_date < :begin_date and EXTRACT(YEAR FROM c.confirm_date) > 2016 and ca.id is not null then 1 else 0 end
+  order by (pl.num_tender || '.' || pl.num_lot)
+<% end %>

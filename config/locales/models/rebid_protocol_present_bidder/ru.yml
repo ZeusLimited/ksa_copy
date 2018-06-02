@@ -1,0 +1,10 @@
+ru:
+  activerecord:
+    models:
+      rebid_protocol_present_bidder: 'Присутствовавшие представители участников'
+    attributes:
+      rebid_protocol_present_bidder:
+        rebid_protocol_id: 'Ссылка на протокол вскрытия'
+        bidder_id: 'Участник'
+        bidder: 'Участник'
+        delegate: 'ФИО представителя'

@@ -1,0 +1,186 @@
+<div class="page-header">
+  <h1>Редактирование требований к заявкам</h1>
+</div>
+
+<%= render 'tender_header', tender: @tender %>
+
+<%= simple_form_for @tender, url: update_offer_requirements_tender_path(@tender) do |f| %>
+  <%= error_messages_for @tender %>
+
+  <legend>Приём оферт</legend>
+
+  <div class="row">
+    <div class="span2">
+      <%= f.input :offer_reception_start, as: :string, input_html: { value: f.object.offer_reception_start,
+        class: 'datepicker input-block-level'} %>
+    </div>
+    <div class="span2">
+      <%= f.input :offer_reception_stop, as: :string, input_html: { value: f.object.offer_reception_stop,
+        class: 'datepicker input-block-level'} %>
+    </div>
+    <div class="span6">
+      <%= f.input :offer_reception_place, input_html: { class: 'address_name input-block-level'} %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span10">
+      <%= f.input :prepare_offer, as: :text, input_html: {rows: 3, class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <legend>Требования к составу заявок</legend>
+
+  <%= f.simple_fields_for :tender_content_offers do |builder| %>
+    <%= render 'tender_content_offer_fields', f: builder %>
+  <% end %>
+
+  <div class="row">
+    <div class="span12">
+      <%= link_to_add_fields content_tag(:i, '', class: 'icon-plus') + ' Добавить', f,
+        :tender_content_offers, "add_fields btn btn-success pull-right input-large", "add_tender_content_offer" %>
+    </div>
+  </div>
+
+  <legend>Обеспечение</legend>
+
+  <div class="row">
+    <div class="span2">
+      <%= f.input :guarantie_date_begin, as: :string, input_html: { value: f.object.guarantie_date_begin,
+        class: 'datepicker input-block-level'} %>
+    </div>
+    <div class="span2">
+      <%= f.input :guarantie_date_end, as: :string, input_html: { value: f.object.guarantie_date_end,
+        class: 'datepicker input-block-level'} %>
+    </div>
+  </div>
+
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th style="width: 100%;">Наименование лота</th>
+        <th>Размер обеспечения</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%= f.simple_fields_for :lots do |form_lot| %>
+        <tr>
+          <td><h5><%= "Лот № #{form_lot.object.num}. #{form_lot.object.name}" %></h5></td>
+          <td>
+            <%= form_lot.text_field :guarantie_cost_money, class: 'input-medium text-right money' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="row">
+    <div class="span6">
+      <%= f.input :guarantie_offer, as: :text, input_html: {rows: 3, class: 'input-block-level'} %>
+    </div>
+    <div class="span6">
+      <%= f.input :guarant_criterions, as: :text, input_html: {rows: 3, class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="span6">
+      <%= f.input :guarantie_making_money, as: :text, input_html: {rows: 3, class: 'input-block-level'} %>
+    </div>
+    <div class="span6">
+      <%= f.input :guarantie_recvisits, as: :text, input_html: {rows: 3, class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <legend>Оценочные критерии</legend>
+
+  <%= f.simple_fields_for :tender_eval_criterions do |builder| %>
+    <%= render 'tender_eval_criterion_fields', f: builder %>
+  <% end %>
+
+  <div class="row">
+    <div class="span12">
+      <%= link_to_add_fields content_tag(:i, '', class: 'icon-plus') + ' Добавить', f, :tender_eval_criterions %>
+    </div>
+  </div>
+
+  <legend>Альтернативные предложения</legend>
+  <div class="row">
+    <div class="span1">
+      <%= f.input :alternate_offer, input_html: {class: 'input-block-level'} %>
+    </div>
+    <div class="span7">
+      <%= f.input :alternate_offer_aspects, as: :text, input_html: {rows: 3, class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <legend>Авансирование</legend>
+  <div class="row">
+    <div class="span2">
+      <%= f.input :prepayment_cost_money, input_html: {value: f.object.prepayment_cost_money,
+        class: 'input-block-level text-right money'} %>
+    </div>
+    <div class="span2">
+      <%= f.input :prepayment_percent_money, input_html: {value: f.object.prepayment_percent_money,
+        class: 'input-block-level text-right money'} %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span4">
+      <%= f.input :prepayment_period_begin, as: :text, input_html: {rows: 4, class: 'input-block-level'} %>
+    </div>
+    <div class="span4">
+      <%= f.input :prepayment_period_end, as: :text, input_html: {rows: 4, class: 'input-block-level'} %>
+    </div>
+    <div class="span4">
+      <%= f.input :prepayment_aspects, as: :text, input_html: {rows: 4, class: 'input-block-level'} %>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <%= link_to "Отмена", show_offer_requirements_tender_path(@tender), class: 'btn' %>
+    <%= f.submit "Сохранить", class: 'btn btn-primary' %>
+  </div>
+
+<% end %>
+
+<div id="modal_eval" class="bootstrap-modal modal hide fade">
+  <div class="modal-header">
+    <button class="close" data-dismiss="modal">&times;</button>
+    <h3>Оценочные критерии</h3>
+  </div>
+  <div class="modal-body">
+    <% Criterion.evalutions.order(:position).each_with_index do |crit, index| %>
+      <label class="radio">
+        <%= radio_button_tag 'eval', crit.name, index == 0, id: nil %>
+        <%= crit.fullname %>
+      </label>
+      <hr>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal">Закрыть</button>
+    <button id="btn_select_eval" class="btn btn-primary">Выбрать</button>
+  </div>
+</div>
+
+<div id="modal_content_offer" class="bootstrap-modal modal hide fade">
+  <div class="modal-header">
+    <button class="close" data-dismiss="modal">&times;</button>
+    <h3>Требования к составу заявок</h3>
+  </div>
+  <div class="modal-body">
+    <% ContentOffer.order(:position).each_with_index do |content_offer, index| %>
+      <label class="radio">
+        <%= radio_button_tag 'content_offer', content_offer.name, index == 0, id: nil,
+        data: {type_id: content_offer.content_offer_type_id} %>
+        <%= content_offer.fullname %>
+      </label>
+      <hr>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal">Закрыть</button>
+    <button id="btn_select_content_offer" class="btn btn-primary">Выбрать</button>
+  </div>
+</div>

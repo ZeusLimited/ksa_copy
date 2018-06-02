@@ -1,0 +1,22 @@
+name: 'find_dictionary'
+desc: 'Метод предназначен для получения информации из словаря'
+request_params:
+  -
+    name: 'ref_id'
+    data_type: 'Integer'
+    desc: 'Идентификатор записи (возможно передавать несколько значений)'
+    required: false
+    example: '61001'
+  -
+    name: 'ref_type'
+    data_type: 'String'
+    desc: 'Тип записи (возможно передавать несколько значений)'
+    required: false
+    example: 'PlanLotStatus'
+response_params:
+  -
+    name: 'dictionaries'
+    data_type: 'Array'
+    desc: "Массив структур [<a href='#' class='link-to-structure' data-url='docs/structure?id=dictionary'>dictionary</a>]"
+    required: false
+    structure: true

@@ -1,0 +1,18 @@
+showSuggestion = (suggestions) ->
+  data = suggestions.data
+  $('.inn').val(data.inn)
+  $('.kpp').val(data.kpp)
+  $('.company-name').val(data.name.short)
+  $('.company-fullname').val(data.name.full_with_opf)
+
+document.addEventListener "turbolinks:load", ->
+
+  $("#company").suggestions
+    serviceUrl: "<%= ENV['DADATA_SERVICE_URL'] %>"
+    token: "<%= ENV['DADATA_API_KEY'] %>"
+    type: "PARTY"
+    count: 10
+    params:
+      type: null
+    onSuggestionsFetch: removeBranches
+    onSelect: showSuggestion

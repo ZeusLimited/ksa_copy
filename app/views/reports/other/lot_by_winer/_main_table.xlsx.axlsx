@@ -1,0 +1,45 @@
+@report.wins_sql_rows.each do |row|
+  if row['rn'] == 1 && row['root_id']
+    @simple_sheet.add_row_title(row['contractor_fullname'], style: @styles[:th])
+    render 'thead'
+  end
+
+  if row['lot_name']
+    values = @columns.values.map do |val|
+      val[:value].call(row)
+    end
+    @sheet.add_row values, style: @column_styles, types: @column_types
+  elsif row['root_id']
+    @sheet.add_row(
+      [
+        "Итого #{row['root_customer']}",
+        row['final_cost'],
+        nil,
+        nil,
+        nil,
+        nil,
+        nil,
+        nil,
+        nil
+      ],
+      style: [@styles[:sum], @styles[:sum_money], @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum]],
+      types: @column_types
+    )
+  else
+    result_row = @sheet.add_row(
+      [
+        "Итого: #{row['contractor_fullname']} ",
+        nil,
+        row['final_cost'],
+        nil,
+        nil,
+        nil,
+        nil,
+        nil,
+        nil
+      ],
+      style: [@styles[:sum], @styles[:sum], @styles[:sum_money], @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum], @styles[:sum]]
+    )
+    @sheet.merge_cells result_row.cells[0..1]
+  end
+end

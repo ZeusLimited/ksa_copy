@@ -1,0 +1,8 @@
+ru:
+  bidders:
+    create:
+      notice: 'Участник создан.'
+    update:
+      notice: 'Участник успешно изменен.'
+    destroy:
+      notice: 'Участник успешно удален.'

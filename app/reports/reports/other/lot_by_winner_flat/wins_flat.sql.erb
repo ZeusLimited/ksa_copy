@@ -1,0 +1,61 @@
+select
+          s.customer_id as customer,
+          t.num || '.' || l.num as num_tender,
+          pl.num_tender || case when fr.id is not null then '.' || t.num else '' end || '.' || case when fr.id is not null then l.num else pl.num_lot end as gkpz_num,
+          l.name as lot_name,
+          sum(s.qty * os.final_cost) as final_cost,
+          sum(s.qty * cs.cost) as contract_cost,
+          sum(s.qty * cs.cost_nds) as contract_cost_nds,
+          c.num as contract_num,
+          con.name || ' (' || ow.shortname || ')' as contractor_fullname,
+          t.department_id as organizer,
+          qtype.name as qtype_name,
+          dir.name as direction_name,
+          to_char(t.bid_date,'dd.mm.yyyy') as bid_date,
+          to_char(wp.confirm_date,'dd.mm.yyyy') as protocol_confirm_date,
+          ps.bp_item,
+          l.root_customer_id as root_id
+        From tenders t
+          inner join lots l on (t.id = l.tender_id)
+          inner join specifications s on (l.id = s.lot_id)
+          inner join offer_specifications os on (s.id = os.specification_id)
+          inner join offers o on (o.id = os.offer_id and o.version = 0 and o.status_id = 26004)
+          inner join bidders b on (o.bidder_id = b.id)
+          inner join contractors con on (con.id = b.contractor_id)
+          left join ownerships ow on ow.id = con.ownership_id
+          inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+          inner join dictionaries dir on (dir.ref_id = s.direction_id)
+          inner join dictionaries qtype on (qtype.ref_id = t.tender_type_id)
+          left join lots fr on fr.id = l.frame_id
+          inner join plan_lots pl on pl.id = coalesce(l.plan_lot_id, fr.plan_lot_id)
+          inner join plan_specifications ps on (ps.id = s.plan_specification_id)
+          left join contracts c on c.offer_id = o.id and c.lot_id = l.id
+          left join contract_specifications cs on cs.contract_id = c.id and cs.specification_id = s.id
+        Where o.status_id = 26004
+          And wp.confirm_date Between :begin_date And :end_date
+          <% if gkpz_years.present? %>
+            And l.gkpz_year in (<%= gkpz_years.join(',') %>)
+          <% end %>
+          <% if current_user_root_dept_id.present? %>
+            And s.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+          <% end %>
+          <% if customers.present? %>
+            And s.customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+          <% end %>
+          <% if organizers.present? %>
+            And t.department_id in (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+          <% end %>
+          <% if directions.present? %>
+            And s.direction_id in (<%= directions.join(',') %>)
+          <% end %>
+          <% if winners.present? %>
+            And con.guid in (select guid from contractors where con.id in (<%= winners %>))
+          <% end %>
+
+        Group By
+            con.name || ' (' || ow.shortname || ')',
+            l.root_customer_id
+          ,
+          (t.num, l.num, l.id, l.name, s.customer_id, t.department_id, dir.name, c.num, pl.num_tender, fr.id,
+           pl.num_lot, qtype.name, wp.confirm_date, ps.bp_item, t.bid_date)
+      Order By 1, 2, 3, 4, 5

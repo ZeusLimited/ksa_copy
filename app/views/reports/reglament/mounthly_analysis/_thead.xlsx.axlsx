@@ -1,0 +1,4 @@
+head_rows = CSV.parse ERB.new(IO.read('app/views/reports/reglament/mounthly_analysis/csv/table_head.csv')).result(binding)
+rows = []
+head_rows.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+AxlsxExt::AutoMergeNil.merge_rows(rows)

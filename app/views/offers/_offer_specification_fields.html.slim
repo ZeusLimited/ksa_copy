@@ -1,0 +1,13 @@
+tr.calc-cost-nds-offer.container-nds
+  td
+    = f.object.specification_fullname
+    = f.hidden_field :specification_id
+  td = select_tag :nds, options_from_collection_for_select(Dictionary.nds_values, 'name', 'fullname'),
+        include_blank: true, multiple: false, class: 'nds input-block-level', placeholder: t('.nds_placeholder')
+  td = f.input :cost_money, label: false, input_html: { class: "cost_offer cost_money input-medium text-right money" }
+  td = f.input :cost_nds_money, label: false, input_html: { class: "cost_offer_nds cost_nds_money input-medium text-right money" }
+  td = f.input :final_cost_money, label: false, input_html: { class: "final_cost_offer final_cost_money input-medium text-right money" }
+  td
+    = f.input :final_cost_nds_money,
+      label: false,
+      input_html: { class: "final_cost_offer_nds final_cost_nds_money input-medium text-right money" }

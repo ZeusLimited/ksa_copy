@@ -1,0 +1,20 @@
+ru:
+  helpers:
+    submit:
+      reports_other_tenders_efficiency_v2:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/other/tenders_efficiency_v2: 'Отчет по исполнению КПЭ АО "РГС"'
+    attributes:
+      reports/other/tenders_efficiency_v2:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customers: 'Заказчики'
+        gkpz_years: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'

@@ -1,0 +1,97 @@
+--part2
+select
+  pl.id,
+  --pl.guid,
+  --2
+  pl.num_tender || '.' || pl.num_lot as lot_num,
+  --3
+  pl.lot_name,
+  --4
+  d.name as direction_name,
+  --5
+  case when plan_pl.state = 0 then 'внеплан' when plan_pl.state = 1 then 'план' else null end as lot_state,
+  --decode(plan_pl.state, 0, 'внеплан', 1, 'план') as lot_state,
+  --6
+  org.name as org_name,
+  --7
+  <%= ActiveRecord::Base.concatinate("cons.name", "'; '", "ps.num_spec") %> as consumer_name,
+  --8
+  ct.name as ctype_name,
+  --9
+  case when pl.tender_type_id in (<%= Constants::TenderTypes::FRAMES.join(', ') %>) then 0 else sum(ps.qty * ps.cost_nds) end as plan_cost,
+  --10
+  sme_type.name as sme_type_name,
+  --11
+  --ttype.name || decode(pl.etp_address_id, <%= Constants::EtpAddress::NOT_ETP %>, '', null, '', ' ЭТП') as ttype_name,
+  ttype.name || case when pl.etp_address_id = <%= Constants::EtpAddress::NOT_ETP %> then '' when pl.etp_address_id is null then '' else ' ЭТП' end as ttype_name,
+  --12
+  pl.announce_date,
+  --13
+  t.reason,
+  --14
+  <%= ActiveRecord::Base.concatinate("ms.name", "'; '", "ps.num_spec") %> as monitor_services,
+  --15
+  <%= ActiveRecord::Base.concatinate("ps.curator", "'; '", "ps.num_spec") %> as curators,
+  --16
+  <%= ActiveRecord::Base.concatinate("ps.tech_curator", "'; '", "ps.num_spec") %> as tech_curators
+  from plan_lots pl
+  inner join (
+    select id, state from
+      (select tpl.id, tpl.status_id, tpl.state, row_number() over (partition by tpl.guid order by tp.date_confirm desc, tpl.version) rn
+        from plan_lots tpl
+        inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+        ) sub
+       where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+  ) plan_pl on (pl.id = plan_pl.id)
+  inner join protocols  p on (p.id = pl.protocol_id)
+  inner join plan_specifications ps on (pl.id = ps.plan_lot_id)
+  inner join departments cons on (cons.id = ps.consumer_id)
+  inner join departments org on (org.id = pl.department_id)
+  inner join departments ms on (ms.id = ps.monitor_service_id)
+  inner join dictionaries ttype on (pl.tender_type_id = ttype.ref_id)
+  left join commissions c on (c.id = pl.commission_id)
+  left join dictionaries ct on (c.commission_type_id = ct.ref_id)
+  left join dictionaries sme_type on (pl.sme_type_id = sme_type.ref_id)
+  left join directions d on (d.id = ps.direction_id)
+  left join (
+    select distinct
+      plan_lot_guid,
+      first_value(to_char(plne.reason)) over (partition by plan_lot_guid order by plne.created_at desc) as reason
+    from plan_lot_non_executions plne
+    Where trunc(plne.created_at) <= :end_date
+  ) t on (t.plan_lot_guid = pl.guid)
+Where pl.announce_date <= :end_date
+  <% if gkpz_year %>
+  and pl.gkpz_year in (:gkpz_year)
+  <% end %>
+  <% if organizers.present? %>
+  and pl.department_id in (<%= Department.subtree_ids_for(organizers).join(', ') %>)
+  <% end %>
+  <% if tender_types.present? %>
+    And pl.tender_type_id in (<%= tender_types.join(', ') %>)
+  <% end %>
+  <% if directions.present? %>
+    And ps.direction_id in (<%= directions.join(', ') %>)
+  <% end %>
+  And ps.direction_id in (:direction)
+  and pl.root_customer_id in (:customer)
+  and pl.guid not in (
+    select
+      ll.plan_lot_guid
+    from tenders tt
+      inner join lots ll on (ll.tender_id = tt.id)
+    Where tt.announce_date <= :end_date
+      <% if gkpz_year %>
+      And ll.gkpz_year in (:gkpz_year)
+      <% end %>
+      And ll.status_id != <%= Constants::LotStatus::NEW %>
+      <% if tender_types.present? %>
+        And tt.tender_type_id in (<%= tender_types.join(', ') %>)
+      <% end %>
+      And ll.root_customer_id in (:customer)
+    )
+Group By pl.id, pl.guid, pl.num_tender, d.name, pl.num_lot, pl.lot_name, plan_pl.state, org.name,ct.name,sme_type.name,
+  ttype.name, case when pl.etp_address_id = <%= Constants::EtpAddress::NOT_ETP %> then '' when pl.etp_address_id is null then '' else ' ЭТП' end,
+  pl.announce_date,
+  pl.tender_type_id, t.reason
+Order By pl.num_tender, pl.num_lot

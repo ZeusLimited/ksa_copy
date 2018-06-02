@@ -1,0 +1,5 @@
+= simple_form_for plan_lot_non_execution, url: url do |f|
+  = error_messages_for plan_lot_non_execution
+  .row
+    .span10= f.input :reason, as: :text, label: false, input_html: { rows: 4, placeholder: f.object.class.human_attribute_name(:reason), class: 'input-block-level' }
+    .span2 = f.submit 'Добавить', class: 'btn btn-primary btn-large'

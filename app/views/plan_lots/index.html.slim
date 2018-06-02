@@ -1,0 +1,213 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to 'Протоколы', protocols_path
+      li= link_to 'Поручения', orders_path
+
+.page-header
+  h1 Планирование закупок
+
+.pull-right.alert.alert-warning.lead
+  strong
+    a data={ toggle: 'collapse', target: "#plan_lots_additional_search" } class=('collapsed' unless @plan_filter.additional_search?) id="show_additional_search"
+        = t('.additional_search')
+
+= input_block_form_for @plan_filter, url: plan_lots_path, method: :get, turboboost: true do |f|
+  = error_messages_for @plan_filter
+
+  .row
+    .span2= f.input :years, collection: gkpz_years_range(4), include_hidden: false, input_html: multi
+    .span2
+      label &nbsp;
+      = f.input :selected_lots, as: :boolean, boolean_style: :inline
+  .row
+    .span4
+      = f.input :customers,
+          collection: Department.customers_by_root(current_user.root_dept_id),
+          label_method: :name_with_depth_symbols,
+          include_hidden: false,
+          label_html: { class: 'select-all-clear-roots' },
+          input_html: multi
+    .span4
+      = f.input :tender_types, label_html: { class: 'select-all-clear' } do
+        = f.select :tender_types,
+            Dictionary.tender_types.map { |t| [t.name, t.id, { 'title' => t.fullname }] },
+            { include_hidden: false },
+            multi.merge(class: 'select-title input-block-level')
+    .span4
+      = f.input :directions,
+          collection: Direction.order(:position),
+          include_hidden: false,
+          input_html: multi,
+          label_html: { class: 'select-all-clear' }
+  .row
+    .span4
+      = f.input :statuses,
+          collection: Dictionary.plan_lot_statuses,
+          include_hidden: false,
+          input_html: multi,
+          label_html: { class: 'select-all-clear' }
+    .span4= f.input :name
+    .span4= f.input :num
+
+  #plan_lots_additional_search.collapse class=("in" if @plan_filter.additional_search?)
+    .row
+      .span2 = f.input :declared, collection: PlanFilter::DECLARED_VALS, input_html: { data: { placeholder: 'Все' } }
+      .span2
+        = f.input :control_lots,
+          as: :select,
+          collection: [['Да', "in_control"],['Нет', "out_control"]], input_html: { data: { placeholder: 'Все' } }
+      .span2 = f.input :state, collection: t_enums('plan_lot_state'), input_html: { data: { placeholder: 'Все' } }
+      .span2 = f.input :gkpz_state, collection: PlanLot::GKPZ_STATE, include_blank: false
+      .span2.gkpz_on_date = f.input :gkpz_on_date_begin, input_html: { class: 'datepicker' }
+      .span2.gkpz_on_date = f.input :gkpz_on_date_end, input_html: { class: 'datepicker' }
+    .row
+      .span2 = f.input :etp_addresses, collection: Dictionary.etp_addresses, include_hidden: false, input_html: multi
+      .span2 = f.input :subject_types, collection: Dictionary.subject_types, include_hidden: false, input_html: multi
+      .span2= f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2= f.input :date_end, input_html: { class: 'datepicker' }
+      .span2 = f.input :start_cost, input_html: { class: 'text-right' }
+      .span2 = f.input :end_cost, input_html: { class: 'text-right' }
+    .row
+      .span6
+        = f.input :organizers,
+            collection: Department.organizers_by_root,
+            label_method: :name_with_depth_symbols,
+            label_html: { class: 'select-all-clear-roots' },
+            include_hidden: false,
+            input_html: multi
+      .span4 = f.input :regulation_items,
+        collection: RegulationItem.all,
+        label_method: :num,
+        include_hidden: false,
+        input_html: multi
+      .span2 = f.input :sme_types, collection: Dictionary.sme_types, label_html: { class: 'select-all-clear' },
+        include_hidden: false, input_html: multi
+    .row
+      .span6
+        = f.input :consumers,
+          collection: Department.consumers_by_root,
+          label_method: :name_with_depth_symbols,
+          include_hidden: false,
+          input_html: multi
+      .span6
+        = f.input :monitor_services,
+          collection: Department.monitor_services,
+          include_hidden: false,
+          input_html: multi
+    .row
+      .span6
+        = f.input :okdp do
+          = f.hidden_field :okdp, data: { multiple: true }, class: 'okdp input-block-level'
+      .span6
+        = f.input :okved do
+          = f.hidden_field :okved, data: { multiple: true }, class: 'okved input-block-level'
+
+    .row
+      .span12
+        = f.input :bidders do
+          = f.hidden_field :bidders, data: { multiple: true }, class: 'plan_lot_contractor input-block-level'
+    .row
+      .span12
+        = f.input :order1352, collection: Dictionary.order1352, label_method: :fullname, include_hidden: false, input_html: multi
+
+  .row
+    .offset8.span2
+      label &nbsp;
+      = f.button :button, class: 'btn-success input-block-level', name: nil, id: 'plan_lot_search_button'
+    .span2
+      label &nbsp;
+      = link_to('Создать лот', new_plan_lot_path, class: "btn btn-primary input-block-level")
+  br
+  .row
+    .offset8.span2
+      = link_to('Импорт из Excel', import_excel_plan_lots_path, class: "btn btn-warning input-block-level")
+    .span2
+      = link_to('Создать инновационный проект', new_plan_innovation_path, class: 'btn btn-primary input-block-level')
+
+- if params[:plan_filter].present?
+  ul.nav.nav-tabs
+    li.active
+      = link_to "Лоты", "#lots", data: { toggle: "tab" }
+    li
+      = link_to "#selected-lots", data: { toggle: "tab" } do
+        | Выбранные лоты (#{{content_tag :span, @plan_selected_lots.total_count, id: "selected-lots-count"}})
+
+  .tab-content
+    .tab-pane.active#lots
+      p
+        span
+          | Найдено закупок:
+          span.label<= @plan_lots.total_count
+        span.pull-right
+          => link_to export_excel_plan_lots_path(plan_filter: params[:plan_filter], format: :xlsx), id: 'export_excel' do
+            => image_tag File.join('file-icons', '16px', 'xlsx.png')
+            | Экспорт в Excel
+          => link_to export_excel_lot_plan_lots_path(plan_filter: params[:plan_filter], format: :xlsx), id: 'export_excel_lot' do
+            | (по лотам)
+      = paginate @plan_lots
+      = render 'table_plan_lots/found', plan_lots: @plan_lots
+      = paginate @plan_lots
+    .tab-pane#selected-lots
+      p.text-right.actions
+        => link_to 'Отправить на рассмотрение',
+            submit_approval_plan_lots_url,
+            method: :patch,
+            class: 'btn btn-warning',
+            id: 'submit_approval',
+            data: { confirm: 'Вы уверены?' }
+        => link_to 'Вернуть на доработку',
+            return_for_revision_plan_lots_path,
+            method: :patch,
+            class: 'btn btn-info',
+            id: 'return_for_revision',
+            data: { confirm: 'Вы уверены?' }
+        => link_to 'Рассмотреть',
+            agree_plan_lots_path,
+            method: :patch,
+            class: 'btn btn-inverse',
+            id: 'agree',
+            data: { confirm: 'Вы уверены?' }
+        => link_to 'Создать протокол ЗК', new_protocol_path(type: 'zk'), class: 'btn btn-success', id: 'new_protocol_zk'
+        => link_to 'Отправить на утверждение СД',
+            pre_confirm_sd_plan_lots_path,
+            method: :patch,
+            class: 'btn btn-warning',
+            id: 'pre_confirm_sd',
+            data: { confirm: 'Вы уверены?' }
+        => link_to 'Вернуть с утверждения СД',
+            cancel_pre_confirm_sd_plan_lots_path,
+            method: :patch,
+            class: 'btn btn-info',
+            id: 'cancel_pre_confirm_sd',
+            data: { confirm: 'Вы уверены?' }
+        => link_to 'Создать протокол СД', new_protocol_path(type: 'sd'), class: 'btn btn-success', id: 'new_protocol_sd'
+        - if can?(:create, Tender)
+          => link_to 'Подготовить к публикации', new_tender_path, class: 'btn btn-inverse', id: 'new_tenders'
+          => link_to 'Провести НЗ', new_unregulated_path, class: 'btn btn-inverse', id: 'new_unregulated'
+        => link_to 'На контроль',
+          create_list_control_plan_lots_path,
+          method: :post,
+          class: 'btn btn-info control_plan_lots',
+          id: 'check_to_control'
+        => link_to 'Снять с контроля',
+          delete_list_control_plan_lots_path,
+          method: :delete,
+          class: 'btn btn-info control_plan_lots',
+          id: 'uncheck_from_control'
+        => link_to 'Подписаться', new_list_account_subscribes_path, class: 'btn btn-inverse'
+        => link_to t('.delete_gkpz'), destroy_all_plan_lots_path, method: :delete, class: 'btn btn-danger'
+        => link_to t('.copy_plan_specifications'), copy_plan_specifications_plan_lots_path, class: 'btn btn-info', id: 'copy_plan_specifications'
+        => link_to t('.send_order'), new_order_path, method: :get, class: 'btn btn-inverse'
+      #selected-lots-table
+        = render 'table_plan_lots/selected', plan_lots: @plan_selected_lots
+        = paginate @plan_selected_lots,
+            param_name: 'page_sel',
+            theme: 'pagination_scroll',
+            params: { controller: 'user_plan_lots', action: 'index' }
+
+  - content_for :javascript_includes do
+    javascript:
+      $(document).ready(function() {
+      #{render 'user_plan_lots/visibility_actions.js.erb'}
+      });

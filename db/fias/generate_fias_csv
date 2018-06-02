@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ -f /media/fias_dbf.rar ]
+then
+  echo unrar files
+  rm -rf /media/fias
+  unrar x -n@db/fias/fias_files.lst /media/fias_dbf.rar /media/fias/
+
+  echo Convert addrobj DBF to CSV
+  dbf_dump --fields aoid,aoguid,parentguid,previd,nextid,aolevel,formalname,offname,shortname,okato,oktmo,regioncode,postalcode,actstatus --fs=";" /media/fias/ADDROBJ.DBF > /media/fias/addrobj.csv
+  rm /media/fias/ADDROBJ.DBF
+  echo Convert character from cp866 to cp1251
+  iconv -f cp866 -t cp1251 /media/fias/addrobj.csv > /media/fias/addrobj1251.csv
+
+  echo Convert houses DBF to CSV
+  for file in /media/fias/HOUSE[0-9]*
+  do
+    dbf_dump --fields aoguid,houseguid,houseid,buildnum,housenum,okato,oktmo,postalcode,strucnum,enddate --fs=";" $file >> /media/fias/houses.csv
+    rm $file
+  done
+
+  echo Convert character from cp866 to cp1251
+  iconv -f cp866 -t cp1251 /media/fias/houses.csv > /media/fias/houses1251.csv
+else
+  echo File /media/fias_dbf.rar does not exist. Please download file.
+fi

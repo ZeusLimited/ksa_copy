@@ -1,0 +1,53 @@
+= content_tag :div, class: cycle("even", "odd") + " frame", id: dom_id(lot)  do
+  - lot = lot.decorate
+  h3
+    => lot.nums
+    = link_to_plan_lot(lot) if lot.plan_lot_id
+    = lot.link_to_frame_lot if lot.frame_id
+  h4
+    = lot.name
+    =< link_to_history_icon(lot)
+
+  table.table.table-bordered.table-striped
+    thead
+      tr
+        th = t('.specs.name')
+        th = t('.specs.customer')
+        th = t('.specs.qty')
+        th = t('.specs.cost')
+        th = t('.specs.nds')
+        th = t('.specs.cost_nds')
+        th.column-icon
+    tbody
+      - lot.specifications.each do |spec|
+        tr
+          td = spec.fullname
+          td = spec.customer.try(:name)
+          td = spec.count_with_unit
+          td.right-cell = p_money(spec.cost)
+          td.right-cell = p_money(spec.nds)
+          td.right-cell = p_money(spec.cost_nds)
+          td = link_to_history_icon(spec)
+
+  a.collapsed data= { toggle: 'collapse', target: "#lot_additional_info#{lot.id}" }
+    = t('.additional')
+  .collapse id="lot_additional_info#{lot.id}"
+    fieldset.frame
+      .row
+        = view_text_field('span2', lot, :sme_type_name)
+        = view_text_field('span2', lot, :privacy_name)
+        = view_text_field('span3', lot, :registred_bidders_count)
+        = view_text_field('span4', lot, :fas_appeal, tbool(lot.fas_appeal))
+      .row
+        = view_text_area('span4', lot, :boss_note, nil, label: Lot.human_attribute_name("boss_note_ksazd"))
+        = view_text_area('span3', lot, :non_public_reason)
+        = view_text_area('span4', lot, :note)
+      .row
+        = view_text_field('span4', lot, :life_cycle, tbool(lot.life_cycle))
+      - if lot.order
+        .row
+          = view_text_field('span2', lot, :order_num)
+          = view_text_field('span2', lot, :order_agreement_date)
+
+  p.text-right
+    strong style=lot.status_stylename_html = lot.status_fullname

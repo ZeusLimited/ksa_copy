@@ -1,0 +1,36 @@
+additional_search_path = "/plan_lots/preselection_search.json"
+additional_info_path = "/plan_lots/additional_info.json"
+
+change_is_preselection = ->
+  for_po_types = [<%= Constants::TenderTypes::FOR_PO.join(', ') %>]
+  tender_type_id = parseInt($('#plan_lot_tender_type_id').val(), 10)
+  if tender_type_id in for_po_types
+    $('.preselection').show()
+  else
+    $('.preselection').hide()
+
+document.addEventListener "turbolinks:load", ->
+  change_is_preselection()
+  $('#plan_lot_tender_type_id').change change_is_preselection
+
+  $('#plan_lot_preselection_guid_hex').select2
+    placeholder: "Выберите закупку"
+    minimumInputLength: 1
+    allowClear: true
+    ajax:
+      url: additional_search_path
+      dataType: 'json'
+      data: (term, page) ->
+        q: term
+        cust_id: $('select.customers').first().val()
+      results: (data, page) -> { results: data.plan_lots }
+    initSelection: (element, callback) ->
+      add_guid = $(element).val()
+      if add_guid isnt ""
+        $.ajax
+          url: additional_info_path
+          data: { guid: add_guid }
+          dataType: 'json'
+        .done (data) -> callback(data)
+    formatResult: planlotFormatResult
+    formatSelection: planlotFormatSelection

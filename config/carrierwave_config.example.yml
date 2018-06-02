@@ -1,0 +1,26 @@
+default: &def
+  # storage - варинты хранилища файлов
+  #  :file - локальное хранилище
+  #  :fog - облако
+  :storage: :file
+
+development:
+  <<: *def
+
+test:
+  <<: *def
+
+production:
+  :fog_provider: 'fog/openstack'
+  :storage: :fog
+  :fog_directory: 'raoesv'
+  :fog_public: false
+  :fog_credentials:
+    :provider: 'OpenStack'
+    :openstack_auth_url: 'https://auth.selcdn.ru/v1.0'
+    :openstack_username: '<login>'
+    :openstack_api_key:  '<password>'
+    :openstack_temp_url_key: '<key>'
+  :fog_attributes:
+    Cache-Control: 'max-age=315576000'
+  :fog_authenticated_url_expiration: 3600 # Время жизни ссылки в секундах

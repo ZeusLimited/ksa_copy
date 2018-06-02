@@ -1,0 +1,42 @@
+.page-header
+  h1 = I18n.t('reports/reglament/mounthly_analysis.header', customer: @report.customer_name)
+
+.row
+  .span12
+    p.text-right по состоянию на #{@report.state_mounth.strftime('%d.%m.%Y')}
+
+- columns = Reports::Reglament::MounthlyAnalysis::COLUMNS
+
+table.table.table-bordered.table-center
+  thead
+    tr
+      th rowspan="2" № п/п
+      th rowspan="2" Статус закупки
+      th colspan="3" с 01.01.2015 (нарастающим итогом)
+      th colspan="3" в т.ч. за #{@report.month} месяц
+    tr
+      th Кол-во, шт.
+      th Плановая стоимость, тыс.руб. с НДС
+      th Итоговая стоимость, тыс.руб. с НДС
+      th Кол-во, шт.
+      th Плановая стоимость, тыс.руб. с НДС
+      th Итоговая стоимость, тыс.руб. с НДС
+    tr
+      - (1..8).each do |i|
+        th = i
+  tbody
+    - @report.structure.each do |row|
+      - result = @report.send(row['sql'] + "_row", row['filters'])
+      tr
+        - columns.each do |key, value|
+          td
+            - if key == :c1
+              = row['num']
+            - elsif key == :c2
+              = row['name']
+            - else
+              - val = [:c3, :c6].include?(key) ? value[:value].call(result) : p_money(value[:value].call(result))
+              - if row['not_detail']
+                = val
+              - else
+                = link_to_detail val, row['num'], key

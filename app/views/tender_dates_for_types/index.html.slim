@@ -1,0 +1,24 @@
+.page-header
+  h1 = t('.head')
+
+p.text-left
+  = link_to 'Добавить', new_tender_dates_for_type_path, class: "btn btn-primary"
+  span.pull-right
+
+table.table.table-bordered
+  thead
+    tr
+      th = t('.tender_type')
+      th = t('.tender_type_fullname')
+      th = t('.count_day')
+      th
+      th
+  tbody
+    - @tender_dates_for_types.each do |tdft|
+      tr
+        td = tdft.tender_type_name
+        th = tdft.tender_type_fullname
+        td = tdft.days
+        td = link_icon_title 'icon-edit', t('.edit'), edit_tender_dates_for_type_path(tdft)
+        td = link_icon_title 'icon-trash', t('.destroy'), tdft, method: :delete, data: { confirm: 'Вы уверены?' }
+

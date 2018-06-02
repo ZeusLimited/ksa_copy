@@ -1,0 +1,61 @@
+= field_set_tag nil, class: " frame lot coloring" do
+  = f.hidden_field :_destroy
+  = f.hidden_field :plan_lot_id
+  = f.hidden_field :prev_id
+  = f.hidden_field :frame_id
+  h3
+    = t('.lot_num')
+    = f.text_field :num, class: 'span1 text-right'
+    = link_to_plan_lot(f.object) if f.object.plan_lot_id
+    = t('.sublot_num')
+    = f.text_field :sublot_num, placeholder: 'Нет', class: 'span1 text-right'
+  - if f.object.frame_id
+    = f.input :name, as: :text, input_html: { rows: 3, class: 'span11' }
+  - else
+    h4 = f.object.name
+
+  table.table.table-bordered
+    thead
+      tr
+        - if f.object.frame_id.present?
+          th.column-icon
+        th.span1 = t('.spec_table.num')
+        th = t('.spec_table.name')
+        th.span2 = t('.spec_table.customer')
+        th.span1 = t('.spec_table.direction')
+        th.span1 = t('.spec_table.qty')
+        th.span2 = t('.spec_table.cost')
+        th.span1 = t('.spec_table.nds')
+        th.span2 = t('.spec_table.cost_nds')
+    = f.simple_fields_for :specifications do |builder|
+      = render 'tender_partials/specification_fields', f: builder
+
+  a data={ toggle: 'collapse', target: "#lot_additional_info#{f.index}" }
+    = t('.additional_properties')
+  .in.collapse id="lot_additional_info#{f.index}"
+    fieldset.frame
+      .row
+        .span2
+          = f.association :sme_type,
+            collection: Dictionary.sme_types,
+            input_html: { class: 'input-block-level lot-sme-type', data: { placeholder: t('.sme_type_placeholder') } }
+        .span2
+          = f.association :privacy, collection: Dictionary.privacy, include_blank: false,
+            input_html: { class: 'input-block-level' }
+        .span3 = f.input :registred_bidders_count, input_html: { class: 'input-block-level' }
+        .span4=  f.input :fas_appeal, as: :select, input_html: { class: 'input-block-level' }
+      .row
+        .span4
+          = f.input :boss_note,
+            as: :text,
+            label: Lot.human_attribute_name("boss_note_ksazd"),
+            input_html: { rows: 3, class: 'input-block-level' }
+        .span3= f.input :non_public_reason, as: :text, input_html: { rows: 3, class: 'input-block-level' }
+        .span4= f.input :note, as: :text, input_html: { rows: 3, class: 'input-block-level' }
+      .row
+        .span4 = f.input :life_cycle, as: :select, include_blank: false, input_html: { class: 'input-block-level' }
+
+  - if f.object.status_id == Constants::LotStatus::NEW
+    p.pull-right
+      = link_to content_tag(:i, '', class: 'icon-minus') + " Удалить лот", '#',
+        class: "remove_lot_fields btn btn-danger pull-right input-large"

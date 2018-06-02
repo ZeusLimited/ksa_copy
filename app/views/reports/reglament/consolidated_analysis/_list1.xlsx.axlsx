@@ -1,0 +1,43 @@
+@sheet = sheet
+
+plan = @report.plan_sql_rows
+fact = @report.fact_sql_rows
+
+plan_types = plan.map { |r| r['ttype2'] }
+fact_types = fact.map { |r| r['ttype2'] }
+
+ttypes = (plan_types + fact_types).uniq.sort
+
+row1 = []
+row2 = []
+row3 = []
+row4 = []
+
+ttypes.each do |ttype|
+  row1 += [ttype, nil, nil, nil]
+  row2 += ['План', nil, 'Факт', nil]
+  row3 += ['Кол-во, шт.', 'Сумма, тыс.руб.'] * 2
+
+  plan_result_row = plan.to_hash.find { |r| r['ttype2'] == ttype }
+  fact_result_row = fact.to_hash.find { |r| r['ttype2'] == ttype }
+
+  plan_result_row ||= {}
+  fact_result_row ||= {}
+
+  row4 += [
+    plan_result_row['sum_cnt'],
+    plan_result_row['sum_cost_nds'],
+    fact_result_row['sum_cnt'],
+    fact_result_row['sum_cost_nds']
+  ]
+end
+
+rows = []
+
+rows << @sheet.add_row(row1, style: @styles[:td_title])
+rows << @sheet.add_row(row2, style: @styles[:td_title])
+rows << @sheet.add_row(row3, style: @styles[:td_title])
+
+AxlsxExt::AutoMergeNil.merge_rows(rows)
+
+@sheet.add_row row4, style: @styles[:td_center]

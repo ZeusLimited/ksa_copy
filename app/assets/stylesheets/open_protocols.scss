@@ -1,0 +1,27 @@
+// Place all the styles related to the open_protocols controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+ol {
+  li {
+    margin-top: 10px;
+  }
+}
+
+dl {
+  dt, dd {
+    margin-bottom: 15px;
+    margin-top: 15px;
+  }
+}
+
+table.protocol-head {
+  width: 100%;
+  td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+table.protocol-offers {
+  margin-top: 15px;
+}

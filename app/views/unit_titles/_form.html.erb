@@ -1,0 +1,11 @@
+<%= form_for(unit_title) do |f| %>
+  <%= error_messages_for unit_title %>
+
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

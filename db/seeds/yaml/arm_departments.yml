@@ -1,0 +1,16 @@
+--- # Департаменты минэнерго
+- { arm_id: "360071", department_id: 2, name: "РАО ЭС Востока (ИА)" }
+- { arm_id: "362100", department_id: 3, name: "Сахалинэнерго" }
+- { arm_id: "362230", department_id: 4, name: "ДГК" }
+- { arm_id: "362502", department_id: 5, name: "ДРСК" }
+- { arm_id: "003066", department_id: 6, name: "ДЭК" }
+- { arm_id: "362400", department_id: 7, name: "Якутскэнерго" }
+- { arm_id: "362000", department_id: 8, name: "Магаданэнерго" }
+- { arm_id: "361900", department_id: 9, name: "Камчатскэнерго" }
+- { arm_id: "760070", department_id: 1000011, name: "Передвижная энергетика" }
+- { arm_id: "362600", department_id: 801000, name: "Чукотэнерго" }
+- { arm_id: "761952", department_id: 906000, name: "ЮЭСК" }
+- { arm_id: "761713", department_id: 1000019, name: "Благовещенская ТЭЦ" }
+- { arm_id: "762101", department_id: 1000020, name: "Сахалинская ГРЭС-2" }
+- { arm_id: "761814", department_id: 1000021, name: "ТЭЦ в г. Советская Гавань" }
+- { arm_id: "762401", department_id: 1000022, name: "Якутская ГРЭС-2" }

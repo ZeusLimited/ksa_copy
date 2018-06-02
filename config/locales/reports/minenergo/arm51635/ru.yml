@@ -1,0 +1,27 @@
+ru:
+  helpers:
+    submit:
+      reports_minenergo_arm51635:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/minenergo/arm51635: 'Годовая комплексная программа закупок (Макет 51635 Минэнерго)'
+    attributes:
+      reports/minenergo/arm51635:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        date_gkpz_on_state: 'Состояние ГКПЗ на'
+        gkpz_type: 'ГКПЗ / Внеплановые закупки'
+        customer: 'Заказчик'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        tender_types: 'Способы'
+        directions: 'Направления'
+        financing_sources: 'Источники финансирования'
+        subject_type: 'Предмет'
+        format: 'Формат'
+        par22222: "тыс. руб. с НДС"
+        par55555: "Руководитель организации"
+        par77777: "Ответственный за исполнение макета"
+        statuses: 'Строки плана'
+        consumers: "Потребитель"

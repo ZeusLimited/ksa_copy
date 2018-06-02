@@ -1,0 +1,22 @@
+ru:
+  reports/pui/effect_operation:
+    row_titles:
+      summary: 'ИТОГО'
+      materials: 'в т.ч. материалы'
+      services: 'услуги'
+  helpers:
+    submit:
+      reports_pui_effect_operation:
+        create: "Сформировать"
+  activemodel:
+    models:
+      reports/pui/effect_operation: 'Информация об экономическом эффекте от закупок по операционной деятельности'
+    attributes:
+      reports/pui/effect_operation:
+        date_begin: 'Дата начала периода'
+        date_end: 'Дата окончания периода'
+        customer: 'Заказчик'
+        gkpz_year: 'Год ГКПЗ'
+        organizers: 'Организаторы'
+        directions: 'Направления'
+        format: 'Формат'

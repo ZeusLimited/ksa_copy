@@ -1,0 +1,9 @@
+- content_for :subnav do
+  .subnav data-spy="affix" data-offset-top="20"
+    ul.nav.nav-pills
+      li= link_to 'История лота', history_plan_lot_path(@plan_lot.guid_hex)
+
+.page-header
+  h1 Корректировка лота
+
+= render 'form', url: update_without_history_plan_lot_path(@plan_lot), http_method: :patch, plan_lot: @plan_lot

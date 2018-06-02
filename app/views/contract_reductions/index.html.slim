@@ -1,0 +1,64 @@
+- content_for :subnav do
+  .subnav data={ spy: "affix", "offset-top" => "20" }
+    ul.nav.nav-pills
+      li= link_to 'Вернуться к основному договору', offer_contract_path(@offer)
+
+.page-header
+  h1 Дополнительные соглашения к договору #{link_to(@basic_contract.title, offer_contract_path(@offer))}
+
+= render 'shared/contract_info', lot: @lot, offer: @offer
+
+.row
+  .span7
+    = field_set_tag "Доп. соглашения с увеличением стоимости" do
+      table.table.table-bordered
+        thead
+          tr
+            th.center-cell rowspan="2" Номер
+            th.center-cell rowspan="2" Дата
+            th.center-cell colspan="2" Стоимость
+            th.center-cell colspan="2" Период поставки
+            th.column-icon rowspan="2"
+          tr
+            th.center-cell без НДС
+            th.center-cell с НДС
+            th.center-cell Начало
+            th.center-cell Окончание
+        tbody
+          - @contracts.each do |contract|
+            tr
+              td = contract.num
+              td = contract.confirm_date
+              td.right-cell = p_money contract.cost
+              td.right-cell = p_money contract.cost_nds
+              td = contract.delivery_date_begin
+              td = contract.delivery_date_end
+              td
+                = link_icon_title 'icon-info-sign', 'Просмотр', offer_contract_path(contract.offer)
+  .span5
+    = field_set_tag "Доп. соглашения на уменьшение стоимости" do
+
+      table.table.table-bordered
+        thead
+          tr
+            th.center-cell rowspan="2" Номер
+            th.center-cell rowspan="2" Дата
+            th.center-cell colspan="2" Стоимость
+            th.column-icon rowspan="2"
+            th.column-icon rowspan="2"
+            th.column-icon rowspan="2"
+          tr
+            th.center-cell без НДС
+            th.center-cell с НДС
+        tbody
+          - @reductions.each do |reduction|
+            tr
+              td= reduction.num
+              td= reduction.confirm_date
+              td.right-cell= "-#{p_money reduction.cost}".html_safe
+              td.right-cell= "-#{p_money reduction.cost_nds}".html_safe
+              td= link_show contract_contract_reduction_path(@offer.contract, reduction)
+              td= link_edit edit_contract_contract_reduction_path(@offer.contract, reduction)
+              td= link_delete contract_contract_reduction_path(@offer.contract, reduction)
+      p.pull-right
+        = link_to "Новое доп. соглашение на уменьшение", new_contract_contract_reduction_path(@offer.contract), class: 'btn btn-primary'

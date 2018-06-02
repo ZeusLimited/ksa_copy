@@ -1,0 +1,29 @@
+<h1>Listing commission_users</h1>
+
+<table>
+  <tr>
+    <th>Commission</th>
+    <th>User</th>
+    <th>Status</th>
+    <th>Is veto</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @commission_users.each do |commission_user| %>
+  <tr>
+    <td><%= commission_user.commission_id %></td>
+    <td><%= commission_user.user_id %></td>
+    <td><%= commission_user.status %></td>
+    <td><%= commission_user.is_veto %></td>
+    <td><%= link_to 'Show', commission_user %></td>
+    <td><%= link_to 'Edit', edit_commission_user_path(commission_user) %></td>
+    <td><%= link_to 'Destroy', commission_user, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Commission user', new_commission_user_path %>

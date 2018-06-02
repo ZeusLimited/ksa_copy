@@ -1,0 +1,75 @@
+select
+1 as lot_count,
+tender_id,
+tender_num, lot_name,
+lot_id,
+contract_date,
+sum(cost_nds) as cost_nds,
+plan_cost_nds,
+tender_type_id,
+privacy_id,
+is_sme
+from (
+  select
+    t.id as tender_id,
+    t.num || '.' || l.num as tender_num,
+    l.name as lot_name,
+    l.id as lot_id,
+    c.confirm_date as contract_date,
+    sum(s.qty * cs.cost_nds) as cost_nds,
+    sum_plan.plan_cost_nds as plan_cost_nds,
+    -- sum(sum(gkpz_ps.cost_nds * gkpz_ps.qty)) over (partition by l.tender_id order by l.tender_id)  as plan_cost_nds,
+    t.tender_type_id,
+    l.privacy_id,
+    cast(contr.is_sme as integer) as is_sme,
+    s.customer_id
+  from tenders t
+    inner join lots l on (t.id = l.tender_id)
+    inner join specifications s on (l.id = s.lot_id)
+    inner join winner_protocols wp on (wp.id = l.winner_protocol_id)
+    inner join offers o on (o.lot_id = l.id and o.version = 0 and o.status_id = <%= Constants::OfferStatuses::WIN %>)
+    inner join bidders b on (b.id = o.bidder_id)
+    inner join contractors contr on (contr.id = b.contractor_id)
+    inner join contracts c on (c.offer_id = o.id and c.type_id = <%= Constants::ContractTypes::BASIC %>)
+    inner join contract_specifications cs on (c.id = cs.contract_id and s.id = cs.specification_id)
+
+    left join plan_lots pl on pl.id = l.plan_lot_id
+    left join plan_specifications ps on ps.plan_lot_id = pl.id and s.plan_specification_id = ps.id
+    left join
+      (select * from
+        (select tpl.*, row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+            from plan_lots tpl
+            inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_end
+         where tpl.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) sub
+       where rn = 1) gkpz_pl on (pl.guid = gkpz_pl.guid)
+     left join plan_specifications gkpz_ps on gkpz_ps.plan_lot_id = gkpz_pl.id and gkpz_ps.guid = ps.guid
+
+    inner join (
+      select sum(sub.cost_nds * sub.qty) as plan_cost_nds, sub.num_tender, sub.gkpz_year, sub.root_customer_id from
+        (select tps.cost_nds, tps.qty, tpl.num_tender, tpl.gkpz_year, tpl.root_customer_id, tpl.status_id,
+          row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+            from plan_lots tpl
+            inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :date_end
+            inner join plan_specifications tps on tps.plan_lot_id = tpl.id
+        ) sub
+      where sub.rn = 1 and sub.status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)
+      group by sub.num_tender, sub.gkpz_year, sub.root_customer_id
+      ) sum_plan on sum_plan.num_tender = pl.num_tender and sum_plan.gkpz_year = pl.gkpz_year and sum_plan.root_customer_id = pl.root_customer_id
+
+  Where l.status_id = <%= Constants::LotStatus::CONTRACT %>
+    And c.confirm_date between :date_begin and :date_end
+  <% if tender_types.present? %>
+    And t.tender_type_id not in (<%= tender_types.join(', ') %>)
+  <% end %>
+  Group by l.id, t.num, l.num, l.name, c.confirm_date, t.id, l.tender_id, t.id, sum_plan.plan_cost_nds,
+           l.privacy_id, cast(contr.is_sme as integer), t.tender_type_id, s.customer_id
+) table1 where plan_cost_nds > 500000
+
+<% if current_user_root_dept_id %>
+  And customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+<% if customers.present? %>
+  And customer_id in (<%= Department.subtree_ids_for(customers).join(', ') %>)
+<% end %>
+Group By tender_id, tender_num, lot_name, lot_id, contract_date, plan_cost_nds,
+  tender_type_id, privacy_id, is_sme

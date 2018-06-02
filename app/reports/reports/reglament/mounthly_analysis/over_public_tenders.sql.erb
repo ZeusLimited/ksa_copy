@@ -1,0 +1,73 @@
+-- sql_over_public_tenders
+<% if detail %>
+select
+  id, num, name, sum(cost_nds_all) gkpz_cost_nds_all, sum(cnt_all) cnt_all
+from
+(
+select
+  gkpz_pl.id,
+  gkpz_pl.num_tender || '.' || gkpz_pl.num_lot as num,
+  gkpz_pl.lot_name as name,
+  sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_nds_all,
+  case when gkpz_pl.main_direction_id = gkpz_ps.direction_id then 1 else 0 end cnt_all
+<% else %>
+select
+
+coalesce(sum(cnt_all), 0) as cnt_all,
+coalesce(sum(cost_nds_all), 0) as cost_nds_all
+from (
+
+select
+
+(case when gkpz_pl.main_direction_id = gkpz_ps.direction_id then 1 else 0 end) as cnt_all,
+sum(gkpz_ps.qty * gkpz_ps.cost_nds) as cost_nds_all
+
+<% end%>
+
+from
+  (select * from
+    (select
+      tpl.*,
+      row_number() over (partition by tpl.guid order by tpl.status_id desc, tp.date_confirm desc) rn
+      from plan_lots tpl
+      inner join protocols tp on tp.id = tpl.protocol_id and tp.date_confirm <= :end_date
+      where tpl.status_id in (<%= Constants::PlanLotStatus::NOT_DELETED_LIST.join(', ') %>)) sub
+     where rn = 1 and status_id in (<%= Constants::PlanLotStatus::AGREEMENT_LIST.join(', ') %>)) gkpz_pl
+   inner join plan_specifications gkpz_ps on (gkpz_ps.plan_lot_id = gkpz_pl.id)
+Where gkpz_pl.announce_date > :end_date
+  and exists (
+    select 'x'
+    from lots l
+      inner join tenders t on l.tender_id = t.id
+      inner join plan_lots pl on pl.id = l.plan_lot_id
+    where t.announce_date <= :end_date
+      and pl.guid = gkpz_pl.guid
+  )
+<% if gkpz_years.present? %>
+  and gkpz_pl.gkpz_year in (<%= gkpz_years.join(', ') %>)
+<% end %>
+
+<% if current_user_root_dept_id %>
+  and gkpz_ps.customer_id in (<%= Department.subtree_ids_for(current_user_root_dept_id).join(', ') %>)
+<% end %>
+
+<% if customers.present? %>
+  and gkpz_ps.customer_id in
+    (<%= Department.subtree_ids_for(customers).join(', ') %>) -- заказчик
+<% end %>
+
+<% if organizers.present? %>
+  and gkpz_pl.department_id in
+    (<%= Department.subtree_ids_for(organizers).join(', ') %>) -- организатор
+<% end %>
+
+Group By gkpz_pl.main_direction_id, gkpz_pl.id, gkpz_ps.direction_id
+
+<% if detail %>
+, gkpz_pl.num_tender, gkpz_pl.num_lot, gkpz_pl.lot_name
+<% end %>
+) sub
+<% if detail %>
+Group By id, num, name
+Order by num, name
+<% end %>

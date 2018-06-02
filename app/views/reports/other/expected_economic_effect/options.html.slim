@@ -1,0 +1,25 @@
+= rep_prd Reports::Other::ExpectedEconomicEffect
+
+= input_block_form_for @options, url: reports_other_expected_economic_effect_show_path,
+  method: :get, html: { target: '_blank' } do |f|
+
+  = field_set_tag "Параметры отчёта" do
+    .row
+      .span2 = f.input :date_begin, input_html: { class: 'datepicker' }
+      .span2 = f.input :date_end, input_html: { class: 'datepicker' }
+      .span1 = f.input :gkpz_year, collection: gkpz_years_range, include_blank: false
+    .row
+      .span6
+        = f.input :customers, collection: Department.customers_by_root(current_user.root_dept_id),
+          label_method: :name_with_depth_symbols, input_html: multi, include_hidden: false
+    .row
+      .span6
+        = f.input :organizers, collection: Department.organizers_by_root, label_method: :name_with_depth_symbols,
+          input_html: multi, include_hidden: false
+    .row
+      .span6
+        = f.input :directions, collection: Direction.order(:position), input_html: multi,
+          include_hidden: false
+
+    .form-actions
+      = f.button :button, class: 'btn btn-primary', name: nil

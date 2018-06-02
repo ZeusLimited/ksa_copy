@@ -1,0 +1,22 @@
+- content_for :subnav do
+  .subnav data-spy="affix"  data-offset-top="20"
+    ul.nav.nav-pills
+      li = link_to t('return_to_list'), tender_bidders_path(tender)
+      li = link_to t('edit'), edit_tender_bidder_path(tender, bidder)
+
+.page-header
+  h1 = t('.header')
+
+p.pull-right data-turbolinks="false"
+  = bidder.all_files_to_one
+legend == t('.documents', bidder: bidder.link_to_contractor)
+= render 'shared/table_files', files: bidder.bidder_files, type: false
+
+- bidder.covers.each_with_index do |cover, index|
+  = content_tag :legend, t('.cover_num', num: index + 1)
+  .row
+    = view_text_field('span2', cover, :register_num)
+    = view_text_field('span2', cover, :register_time)
+    = view_text_field('span2', cover, :type_id, cover.type_name)
+    = view_text_field('span2', cover, :provision)
+    = view_text_field('span3', cover, :delegate)

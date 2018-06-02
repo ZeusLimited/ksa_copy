@@ -1,0 +1,16 @@
+callout.container-big class="warning" style="width:100%"
+  row.container-big
+    / columns.container-big small="12" large="12"
+    = email_image_tag("#{Setting.company}.png")
+    p.text-center = t('.hello', fio: @user.io_full)
+br
+span = t('.activate', app_name: Setting.app_name)
+br
+span = t('.login')
+span.text-bold =  @user.login
+br
+span = t('.welcome', app_name: Setting.app_name)
+br
+br
+button href=root_url class="success expanded" = t('.go_torg')
+br

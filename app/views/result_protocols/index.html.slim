@@ -1,0 +1,28 @@
+= render "/shared/submenu_tender", tender: @tender
+
+.page-header
+  h1 = t('.title')
+
+= render 'tenders/tender_header', tender: tender
+
+p.text-right
+  = link_to t('.create_protocol'), new_tender_result_protocol_path(tender), class: "btn btn-primary"
+
+table.table.table-bordered.table-striped.table-nonfluid
+  thead
+    tr
+      th = t('.table.num')
+      th = t('.table.date')
+      th = t('.table.city')
+      th
+      th
+      th
+  tbody
+  - tender.result_protocols.each do |result_protocol|
+    tr
+      td = result_protocol.num
+      td = result_protocol.sign_date
+      td = result_protocol.sign_city
+      td = link_show [tender, result_protocol]
+      td = link_edit edit_tender_result_protocol_path(tender, result_protocol)
+      td = link_delete  [tender, result_protocol]

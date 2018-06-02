@@ -1,0 +1,39 @@
+postgre_rushydro: &pr
+  adapter: postgresql
+  host: localhost
+  username: postgres
+
+development:
+  ### BETA RUSHYDRO ###
+  <<: *pr
+  database: raoesv_development
+
+  ### DEMO RUSHYDRO ###
+  # <<: *pr
+  # host: 23.101.67.216
+  # username: ksazd
+  # password: Ins1?O$3
+
+  ### PROD RUSHYDRO ###
+  # <<: *pr
+  # host: 10.101.102.131
+  # username: ksazd
+  # password: Ins1?O$3
+
+test:
+  <<: *pr
+  database: raoesv_test
+
+staging:
+  adapter: postgresql
+  host: '10.0.0.5'
+  database: raoesv
+  username: ksazd
+  password: Ins1?O$3
+
+production:
+  adapter: postgresql
+  host: '10.101.102.131'
+  database: raoesv
+  username: ksazd
+  password: Ins1?O$3

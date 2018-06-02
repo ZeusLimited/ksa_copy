@@ -1,0 +1,6 @@
+.page-header
+  h1 = t('.header')
+
+== render 'form', user: @user
+
+= link_to t('return_to_list'), url_from_session_or_default(:filter_users, user_index_path)

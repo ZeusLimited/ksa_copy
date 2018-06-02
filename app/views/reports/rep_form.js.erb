@@ -1,0 +1,9 @@
+$("#rep_form").html("<%= j(render(partial: @name)) %>");
+$("#rep_form").find('select').select2({allowClear: true});
+$("#rep_form").find('[data-toggle="tooltip"]').tooltip();
+$("#rep_form").find('.datepicker').datepicker({changeMonth: true, changeYear: true});
+add_select_all_clear();
+add_select_all_clear_roots();
+multi_for_contractors();
+multi_for_winners();
+multi_for_users();

@@ -1,0 +1,5 @@
+--- # Типы требований к составу заявок
+- { ref_id: 26001, position: 01, name: "Первичная", stylename_html: "background-color: #ffffc2;" }
+- { ref_id: 26002, position: 02, name: "Принята", stylename_html: "background-color: #D9EDF7;" }
+- { ref_id: 26003, position: 03, name: "Отклонена", stylename_html: "background-color: #F2DEDE;" }
+- { ref_id: 26004, position: 04, name: "Победила", stylename_html: "background-color: #DFF0D8;" }

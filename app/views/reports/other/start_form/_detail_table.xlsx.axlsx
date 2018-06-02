@@ -1,0 +1,5 @@
+render 'detail_head'
+
+@report.groups.each do |group|
+  render 'detail_group_rows', customer: customer, group: group
+end

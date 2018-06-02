@@ -1,0 +1,55 @@
+<div class="page-header">
+  <h1>Редактирование требований к участникам</h1>
+</div>
+
+<%= render 'tender_header', tender: @tender %>
+
+<%= simple_form_for @tender, url: update_bidder_requirements_tender_path(@tender) do |f| %>
+  <%= error_messages_for @tender %>
+
+  <div class="row">
+    <div class="span6"><%= f.input :provide_offer, as: :text, input_html: {rows: 4, class: 'input-block-level'} %></div>
+    <div class="span6"><%= f.input :preferences, as: :text, input_html: {rows: 4, class: 'input-block-level'} %></div>
+  </div>
+
+  <div class="row">
+    <div class="span4"><%= f.input :is_sertification, label: false, inline_label: Tender.human_attribute_name(:is_sertification) %></div>
+  </div>
+
+  <legend>Отборочные критерии</legend>
+  <%= f.simple_fields_for :tender_draft_criterions do |builder| %>
+    <%= render 'tender_draft_criterion_fields', f: builder %>
+  <% end %>
+
+  <div class="row">
+    <div class="span12">
+      <%= link_to_add_fields content_tag(:i, '', class: 'icon-plus') + ' Добавить', f, :tender_draft_criterions %>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <%= link_to "Отмена", show_bidder_requirements_tender_path(@tender), class: 'btn' %>
+    <%= f.submit "Сохранить", class: 'btn btn-primary' %>
+  </div>
+
+<% end %>
+
+<div id="modal_draft" class="bootstrap-modal modal hide fade">
+  <div class="modal-header">
+    <button class="close" data-dismiss="modal">&times;</button>
+    <h3>Отборочные критерии</h3>
+  </div>
+  <div class="modal-body">
+    <% Criterion.drafts.order(:position).each_with_index do |draft, index| %>
+      <label class="radio">
+        <%= radio_button_tag 'draft', draft.name, index == 0, id: nil %>
+        <%= draft.name %>
+      </label>
+      <hr>
+    <% end %>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal">Закрыть</button>
+    <button id="btn_select_draft" class="btn btn-primary">Выбрать</button>
+  </div>
+</div>

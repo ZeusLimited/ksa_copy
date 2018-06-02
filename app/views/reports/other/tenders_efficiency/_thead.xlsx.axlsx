@@ -1,0 +1,7 @@
+head_row_1 = CSV.read('app/views/reports/other/tenders_efficiency/csv/head.csv')
+
+rows = []
+head_row_1.each { |head_row| rows << @sheet.add_row(head_row, style: @styles[:th]) }
+rows[0].height = 30
+
+AxlsxExt::AutoMergeNil.merge_rows(rows)
