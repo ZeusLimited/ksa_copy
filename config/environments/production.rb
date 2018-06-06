@@ -87,7 +87,7 @@ Rails.application.configure do
   # Use default logging formatter so that PID and timestamp are not suppressed.
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.default_url_options = { host: 'ksazd.rushydro.ru' }
-  config.action_mailer.default_options = { from: 'ksazd@rushydro.ru' }
+  config.action_mailer.default_options = { from: 'ksadz_user@rushydro.ru' }
   config.action_mailer.smtp_settings = {
     address: 'casdc1.corp.gidroogk.com',
     port: 25,

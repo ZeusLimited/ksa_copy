@@ -19,3 +19,20 @@
 - { ref_id: 10018, position: 10, name: "ОРК", fullname: "Открытый конкурс (на рамочное соглашение)" }
 - { ref_id: 10019, position: 19, name: "ЗРК", fullname: "Закрытый конкурс (на рамочное соглашение)" }
 - { ref_id: 10020, position: 10, name: "ПО", fullname: "Предварительный отбор" }
+#
+# - { ref_id: 10021, position: 20, name: "ОК", fullname: "Открытый конкурс" }
+# - { ref_id: 10022, position: 21, name: "ОКД", fullname: "Открытый конкурс (двухэтапный)" }
+# - { ref_id: 10023, position: 23, name: "ОКМ", fullname: "Открытый конкурс (многоэтапный)" }
+# - { ref_id: 10024, position: 24, name: "КЭ", fullname: "Конкурс в электронной форме" }
+# - { ref_id: 10025, position: 25, name: "КЭД", fullname: "Конкурс в электронной форме (двухэтапный)" }
+# - { ref_id: 10026, position: 26, name: "КЭМ", fullname: "Конкурс в электронной форме (многоэтапный)" }
+# - { ref_id: 10027, position: 27, name: "ЗК", fullname: "Закрытый конкурс" }
+# - { ref_id: 10028, position: 28, name: "ЗКД", fullname: "Закрытый конкурс (двухэтапный)" }
+# - { ref_id: 10029, position: 29, name: "ЗКМ", fullname: "Закрытый конкурс (многоэтапный)" }
+# - { ref_id: 10030, position: 30, name: "АЭ", fullname: "Аукцион в электронной форме" }
+# - { ref_id: 10031, position: 31, name: "ЗПЭ", fullname: "Запрос предложений в электронной форме" }
+# - { ref_id: 10032, position: 32, name: "ЗКЭ", fullname: "Запрос котировок в электронной форме" }
+# - { ref_id: 10033, position: 33, name: "ОЗК", fullname: "Открытый запрос котировок" }
+# - { ref_id: 10034, position: 34, name: "ЗЗК", fullname: "Закрытый запрос котировок" }
+# - { ref_id: 10035, position: 35, name: "МЗ", fullname: "Мелкая закупка" }
+# - { ref_id: 10036, position: 36, name: "ЕП", fullname: "Закупка у единственного поставщика (исполнителя, подрядчика)" }
