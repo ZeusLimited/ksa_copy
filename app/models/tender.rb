@@ -334,10 +334,6 @@ class Tender < ApplicationRecord
     ActiveSupport::TimeZone.new(time_zone).local_to_utc(bid_date).getlocal(Time.zone.utc_offset)
   end
 
-  def integrated?
-    etp_address_id == EtpAddress::B2B_ENERGO && TenderTypes::INTEGRATED.include?(tender_type_id)
-  end
-
   def request_offers?
     TenderTypes::ZP.include?(tender_type_id)
   end
@@ -388,13 +384,24 @@ class Tender < ApplicationRecord
 
   def validate_reception_period
     return unless tender_type_id && bid_date && announce_date
-    days_between = (bid_date.to_date - announce_date.to_date).to_i - 1
-    return days_between.nil?
-    year = lots.pluck(:gkpz_year).include? 2017
-    days_count = TenderDatesForType.find_by(tender_type_id: tender_type_id).days
-    if days_between < days_count
-      errors.add(:bid_date, :reception_period, days_count: days_count)
+    days_count = TenderDatesForType.find_by(tender_type_id: tender_type_id)&.days.to_i
+    return if days_count.zero?
+
+    message, apply_method = if TenderTypes::BUSINESS_DAYS.include?(tender_type_id)
+                              %i[reception_business_period business_days]
+                            else
+                              %i[reception_period days]
+                            end
+
+    if sme?
+      days_count = 7 if TenderTypes::SME_7_DAYS.include?(tender_type_id) && total_cost >= 30_000_000
+      days_count = 5 if tender_type_id == TenderTypes::ZPE
+      days_count = 4 if tender_type_id == TenderTypes::ZCE
     end
+
+    return if days_count.public_send(apply_method).after(announce_date.to_date) < bid_date.to_date
+
+    errors.add(:bid_date, message, days_count: days_count)
   end
 
   def validate_dates
@@ -437,6 +444,10 @@ class Tender < ApplicationRecord
 
   def not_etp
     errors.add(:etp_address_id, :not_etp) unless etp_address_id == EtpAddress::NOT_ETP
+  end
+
+  def sme?
+    lots.all? { |lot| lot.sme_type_id == SmeTypes::SME }
   end
 
   def self.filter_by_search_name(search)

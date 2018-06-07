@@ -9,9 +9,7 @@
   #dialog-confirm title="Проверочная информация"
 
   .row
-    .span2
-      = f.input :tender_type_id, collection: types, value_method: 'ref_id', include_blank: false,
-        input_html: { class: 'input-block-level' }
+    .span2 == render 'shared/components/tender_type', f: f, scope: types
     .span2
       = f.input :etp_address_id, collection: etp_addresses, value_method: 'ref_id', include_blank: false,
         input_html: { class: 'input-block-level' }

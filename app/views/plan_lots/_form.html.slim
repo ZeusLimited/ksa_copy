@@ -44,17 +44,8 @@
       = f.association :subject_type, collection: Dictionary.subject_types, include_blank: false,
         input_html: { class: 'input-block-level', data: { placeholder: t('.subject') } },
         include_blank: false
-    .span2
-      = f.input :tender_type_id do
-        = f.select :tender_type_id,
-          options_for_select(Dictionary.tender_types.map { |t| [t.name, t.id, { 'title' => t.fullname }] }, f.object.tender_type_id),
-          { include_blank: false },
-          class: 'select-title input-block-level',
-          data: { 'preselection' => Constants::TenderTypes::PO,
-                  'only-source-id' => Constants::TenderTypes::ONLY_SOURCE,
-                  'unregulated' => Constants::TenderTypes::UNREGULATED,
-                   url: for_type_regulation_items_url,
-                   placeholder: t('.tender_type') }
+    .span2 == render 'shared/components/tender_type', f: f
+
 
     - tender_type = f.object.tender_type_id ? f.object.tender_type_id : Dictionary.tender_types.first.id
     .span2

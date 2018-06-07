@@ -1,0 +1,5 @@
+= f.input :tender_types, label_html: { class: 'select-all-clear' } do
+  = f.select :tender_types,
+      grouped_options_for_select(DictionaryDecorator.grouped_tender_types, f.object.tender_types),
+      { include_hidden: false },
+      multi.merge(class: 'select-title input-block-level')

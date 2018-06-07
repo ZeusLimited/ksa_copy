@@ -27,12 +27,7 @@
       .span3= f.input :gkpz_type, collection: Reports::Gkpz::Gkpz::GKPZ_TYPES, include_blank: false
     .row
       .span3= f.input :etp_addresses, collection: Dictionary.etp_addresses, include_hidden: false, input_html: multi
-      .span3
-        = f.input :tender_types,
-            collection: Dictionary.tender_types,
-            include_hidden: false,
-            label_html: { class: 'select-all-clear' },
-            input_html: multi
+      .span3 == render 'shared/components/tender_types', f: f
     .row
       .span3= f.input :directions, collection: Direction.order(:position), include_hidden: false, input_html: multi
       .span3= f.input :subject_type, collection: Dictionary.subject_types

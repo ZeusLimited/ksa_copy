@@ -165,6 +165,88 @@ describe Tender do
     end
   end
 
+  describe 'validate_reception_period' do
+    subject { tender.errors[:bid_date] }
+
+    let(:big_sme_type) { [KEO, KED, KEM, AE].sample }
+    let(:zpe) { ZPE }
+    let(:zce) { ZCE }
+    let(:date) { Date.current }
+    let(:tender) { build(:tender, announce_date: date, bid_date: 2.days.after(date), tender_type_id: tender_type_id) }
+    let(:lot) { build(:lot, tender: tender, sme_type_id: sme_type_id) }
+    let(:specification) { build(:specification, lot: lot, qty: 1, cost: cost) }
+    let(:cost) { 29_999_999 }
+
+    before do
+      create(:tender_dates_for_type, tender_type_id: tender_type_id, days: 15)
+      lot.specifications << specification
+      tender.lots << lot
+      tender.valid?
+    end
+
+    context 'when big_sme_type and sme' do
+      let(:tender_type_id) { big_sme_type }
+      let(:sme_type_id) { SmeTypes::SME }
+
+      context 'when cost is bigger then or equal to 30 millions' do
+        let(:cost) { 30_000_000 }
+
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_period', days_count: 7)) }
+      end
+
+      context 'when cost is smaller then 30 millions' do
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_period', days_count: 15)) }
+      end
+    end
+
+    context 'when big_sme_type and non_sme' do
+      let(:tender_type_id) { big_sme_type }
+      let(:sme_type_id) { nil }
+
+      context 'when cost is bigger then or equal to 30 millions' do
+        let(:cost) { 30_000_000 }
+
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_period', days_count: 15)) }
+      end
+
+      context 'when cost is smaller then 30 millions' do
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_period', days_count: 15)) }
+      end
+    end
+
+    context 'when zpe' do
+      let(:tender_type_id) { zpe }
+
+      context 'when sme' do
+        let(:sme_type_id) { SmeTypes::SME }
+
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_business_period', days_count: 5)) }
+      end
+
+      context 'when non sme' do
+        let(:sme_type_id) { SmeTypes::SUB_SME }
+
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_business_period', days_count: 15)) }
+      end
+    end
+
+    context 'when zce' do
+      let(:tender_type_id) { zce }
+
+      context 'when sme' do
+        let(:sme_type_id) { SmeTypes::SME }
+
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_business_period', days_count: 4)) }
+      end
+
+      context 'when non sme' do
+        let(:sme_type_id) { SmeTypes::SUB_SME }
+
+        it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_business_period', days_count: 15)) }
+      end
+    end
+  end
+
 
 
   # it "self.generate new tender from plan" do

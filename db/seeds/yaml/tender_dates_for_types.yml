@@ -8,13 +8,12 @@
   tender_type_id: [10009, 10010]
 - count_date: 20
   tender_type_id: [10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008, 10018, 10019]
+- count_date: 1
+  tender_type_id: [10021]
 
-#КВАДРА
-# - count_date: 5
-#   tender_type_id: [10014]
-# - count_date: 7
-#   tender_type_id: [10011, 10012, 10013]
-# - count_date: 15
-#   tender_type_id: [10009, 10010]
-# - count_date: 20
-#   tender_type_id: [10001, 10002, 10003, 10004, 10005, 10006, 10007, 10008, 10018, 10019]
+- count_date: 15
+  tender_type_id: [10022, 10023, 10024, 10025, 10026, 10027, 10028, 10029, 10030, 10031, 10032, 10033]
+- count_date: 7
+  tender_type_id: [10034, 10035, 10036]
+- count_date: 5
+  tender_type_id: [10037, 10038, 10039]

@@ -767,8 +767,8 @@ class PlanLot < ApplicationRecord
   end
 
   def valid_etp_address
-    return unless noncompetitive? || simple?
-    errors.add(:etp_address_id, :not_etp) unless etp_address_id == EtpAddress::NOT_ETP
+    errors.add(:etp_address_id, :not_etp) if tender_type_non_etp? && etp_address_id != EtpAddress::NOT_ETP
+    errors.add(:etp_address_id, :etp) if tender_type_etp? && etp_address_id == EtpAddress::NOT_ETP
   end
 
   def first_spec_root_customer
