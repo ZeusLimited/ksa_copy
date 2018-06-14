@@ -172,10 +172,11 @@ describe Tender do
     let(:zpe) { ZPE }
     let(:zce) { ZCE }
     let(:date) { Date.current }
-    let(:tender) { build(:tender, announce_date: date, bid_date: 2.days.after(date), tender_type_id: tender_type_id) }
+    let(:tender) { build(:tender, announce_date: date, bid_date: bid_date, tender_type_id: tender_type_id) }
     let(:lot) { build(:lot, tender: tender, sme_type_id: sme_type_id) }
     let(:specification) { build(:specification, lot: lot, qty: 1, cost: cost) }
     let(:cost) { 29_999_999 }
+    let(:bid_date) { 14.days.after(date) }
 
     before do
       create(:tender_dates_for_type, tender_type_id: tender_type_id, days: 15)
@@ -190,6 +191,7 @@ describe Tender do
 
       context 'when cost is bigger then or equal to 30 millions' do
         let(:cost) { 30_000_000 }
+        let(:bid_date) { 6.days.after(date) }
 
         it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_period', days_count: 7)) }
       end
@@ -219,6 +221,7 @@ describe Tender do
 
       context 'when sme' do
         let(:sme_type_id) { SmeTypes::SME }
+        let(:bid_date) { 4.business_days.after(date) }
 
         it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_business_period', days_count: 5)) }
       end
@@ -235,6 +238,7 @@ describe Tender do
 
       context 'when sme' do
         let(:sme_type_id) { SmeTypes::SME }
+        let(:bid_date) { 3.business_days.after(date) }
 
         it { is_expected.to include(SpecError.model_message('tender', 'bid_date', 'reception_business_period', days_count: 4)) }
       end

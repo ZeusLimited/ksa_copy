@@ -399,7 +399,7 @@ class Tender < ApplicationRecord
       days_count = 4 if tender_type_id == TenderTypes::ZCE
     end
 
-    return if days_count.public_send(apply_method).after(announce_date.to_date) < bid_date.to_date
+    return if days_count.public_send(apply_method).after(announce_date.to_date) <= bid_date.to_date
 
     errors.add(:bid_date, message, days_count: days_count)
   end
