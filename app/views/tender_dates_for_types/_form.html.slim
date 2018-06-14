@@ -4,9 +4,7 @@
   .row
     .span2
       = f.input :days, as: :integer, input_html: { class: 'input-block-level' }
-    .span2
-      = f.input :tender_type_id, collection: Dictionary.where(ref_type: 'Tender_Types'), value_method: 'ref_id', include_blank: false,
-        input_html: { class: 'input-block-level' }
+    .span2 == render 'shared/components/tender_type', f: f
 
   .form-actions.text-right
     => f.submit t('save'), class: 'btn btn-primary'

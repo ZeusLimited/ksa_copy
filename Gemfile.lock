@@ -94,10 +94,6 @@ GEM
       actionpack (>= 3.1)
       axlsx (>= 2.0.1)
     bcrypt (3.1.11)
-    better_errors (2.3.0)
-      coderay (>= 1.0.0)
-      erubi (>= 1.0.0)
-      rack (>= 0.9.0)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
     bootstrap-sass (2.3.2.2)
@@ -670,8 +666,6 @@ DEPENDENCIES
   awesome_print
   axlsx (~> 2.1.0.pre)
   axlsx_rails
-  better_errors
-  binding_of_caller
   bootstrap-sass (~> 2.3.2.2)
   bootstrap-timepicker-rails
   bootswatch-rails (~> 0.5.0)
@@ -777,4 +771,4 @@ DEPENDENCIES
   whenever
 
 BUNDLED WITH
-   1.16.1
+   1.16.2

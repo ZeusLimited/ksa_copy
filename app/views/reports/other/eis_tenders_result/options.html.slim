@@ -15,11 +15,7 @@
             include_hidden: false,
             input_html: multi
     .row
-      .span7
-        = f.input :tender_types,
-            collection: Dictionary.tender_types,
-            include_hidden: false,
-            input_html: { 'data-placeholder' => 'Нет', multiple: true }
+      .span7 == render 'shared/components/tender_types', f: f
     .row
       .span2 = f.input :format, collection: { 'Excel' => 'xlsx' }, include_blank: false
 

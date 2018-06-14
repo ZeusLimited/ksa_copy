@@ -28,12 +28,7 @@
           include_hidden: false,
           label_html: { class: 'select-all-clear-roots' },
           input_html: multi
-    .span4
-      = f.input :tender_types, label_html: { class: 'select-all-clear' } do
-        = f.select :tender_types,
-            Dictionary.tender_types.map { |t| [t.name, t.id, { 'title' => t.fullname }] },
-            { include_hidden: false },
-            multi.merge(class: 'select-title input-block-level')
+    .span4 == render 'shared/components/tender_types', f: f
     .span4
       = f.input :directions,
           collection: Direction.order(:position),

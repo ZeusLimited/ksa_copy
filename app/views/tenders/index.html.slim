@@ -27,11 +27,7 @@
       = f.input :organizers, collection: Department.organizers_by_root, label_method: :name_with_depth_symbols,
         label_html: { class: 'select-all-clear-roots' },
         include_hidden: false, input_html: { 'data-placeholder' => 'Все', multiple: true }
-    .span4
-      .control-group
-        = f.label :tender_types, class: 'select-all-clear'
-        = f.select :tender_types, Dictionary.tender_types.collection_for_select,
-          { include_hidden: false }, class: 'select-title input-block-level', 'data-placeholder' => 'Все', multiple: true
+    .span4 == render 'shared/components/tender_types', f: f
 
   .row
     .span4

@@ -1,0 +1,11 @@
+- scope ||= Dictionary.tender_types
+= f.input :tender_type_id do
+  = f.select :tender_type_id,
+    grouped_options_for_select(DictionaryDecorator.grouped_tender_types(scope), f.object.tender_type_id),
+    { include_blank: false },
+    class: 'select-title input-block-level',
+    data: { 'preselection' => Constants::TenderTypes::PO,
+            'only-source-id' => Constants::TenderTypes::ONLY_SOURCE,
+            'unregulated' => Constants::TenderTypes::UNREGULATED,
+             url: for_type_regulation_items_url,
+             placeholder: t('.tender_type') }

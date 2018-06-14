@@ -14,29 +14,6 @@ ActiveRecord::Schema.define(version: 20180601053522) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-  enable_extension "orafce"
-
-  create_table "annual_kpis", force: :cascade do |t|
-    t.integer "customer_id", null: false
-    t.integer "gkpz_year", null: false
-    t.integer "year", null: false
-    t.integer "month"
-    t.decimal "cost", null: false
-    t.decimal "cost_nds", null: false
-    t.decimal "etp_cost", null: false
-    t.decimal "etp_cost_nds", null: false
-    t.decimal "auction_cost", null: false
-    t.decimal "auction_cost_nds", null: false
-    t.decimal "single_source_cost", null: false
-    t.decimal "single_source_cost_nds", null: false
-    t.decimal "msp_cost", null: false
-    t.decimal "msp_cost_nds", null: false
-    t.decimal "submsp_cost", null: false
-    t.decimal "submsp_cost_nds", null: false
-    t.integer "type_name", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
 
   create_table "arm_departments", id: :serial, force: :cascade, comment: "Предприятия в АРМ минэнерго" do |t|
     t.string "arm_id", null: false, comment: "Идентификатор подразделения в арм минэнерго"
@@ -272,6 +249,8 @@ ActiveRecord::Schema.define(version: 20180601053522) do
     t.integer "parent_dept_id", comment: "ИД родителя"
     t.string "name", comment: "Наименование"
     t.integer "position", comment: "Порядок сортировки"
+    t.text "legal_address", comment: "Юридический адрес"
+    t.text "fact_address", comment: "Фактический адрес"
     t.boolean "is_customer", comment: "Может быть заказчиком?"
     t.boolean "is_organizer", comment: "Может быть организатором?"
     t.integer "etp_id", comment: "Код на ЭТП"
@@ -818,9 +797,7 @@ ActiveRecord::Schema.define(version: 20180601053522) do
     t.uuid "preselection_guid", comment: "GUID закупки предварительного отбора"
     t.integer "regulation_item_id", comment: "Ссылка на пункт положения"
     t.date "charge_date", comment: "Дата направления поручения"
-    t.boolean "direct", default: false, comment: "По счету"
     t.boolean "non_eis", default: false, null: false, comment: "Не публикуется в план закупок ЕИС"
-    t.boolean "centralized", default: false, comment: "Централизованная?"
     t.index ["guid"], name: "i_plan_lots_guid"
     t.index ["protocol_id"], name: "i_plan_lots_protocol"
   end
@@ -1249,7 +1226,6 @@ ActiveRecord::Schema.define(version: 20180601053522) do
     t.boolean "hidden_offer", comment: "Использовать ли закрытую подачу предложений"
     t.integer "b2b_classifiers", default: [], comment: "Классификаторы b2b-center", array: true
     t.boolean "price_begin_limited", comment: "Ограничивать предложения участников указанной в извещении стоимостью"
-    t.boolean "centralized", default: false, comment: "Централизованная?"
   end
 
   create_table "unfair_contractors", id: :serial, comment: "Реест недобросовестных контрагентов", force: :cascade, comment: "Реест недобросовестных контрагентов" do |t|

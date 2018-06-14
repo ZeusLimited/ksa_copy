@@ -225,89 +225,73 @@ module Constants
     PO = 10_020 # Предварительный отбор
     SIMPLE = 10_021 # Упрощенная закупка
 
+    # NEW types
+    OKO = 10_022 # открытый конкурс
+    OKD = 10_023 # открытый конкурс (двухэтапный)
+    OKM = 10_024 # открытый конкурс (многоэтапный)
+    KEO = 10_025 # конкурс в электронной форме
+    KED = 10_026 # конкурс в электронной форме (двухэтапный)
+    KEM = 10_027 # конкурс в электронной форме (многоэтапный)
+    ZKO = 10_028 # закрытый конкурс
+    ZKD = 10_029 # закрытый конкурс (двухэтапный)
+    ZKM = 10_030 # закрытый конкурс (многоэтапный)
+    AE = 10_031 # аукцион в электронной форме
+    AO = 10_032 # аукцион открытый
+    AZ = 10_033 # аукцион закрытый
+    ZPE = 10_034 # запрос предложений в электронной форме
+    ZPO = 10_035 # запрос предложений открытый
+    ZPZ = 10_036 # запрос предложений закрытый
+    ZCE = 10_037 # запрос котировок в электронной форме
+    ZCO = 10_038 # запрос котировок открытый
+    ZCZ = 10_039 # запрос котировок закрытый
+    MINI = 10_040 # мелкая закупка
+    SINGLE_SOURCE = 10_041 # закупка у единственного поставщика (исполнителя, подрядчика)
+
+    # GROUPS
     ALL = [OOK, ZOK, OMK, ZMK, OCK, ZCK, OA, ZA, OKP, ZKP, OZP, ZZP, OZC, ZZC, ONLY_SOURCE, UNREGULATED, ZPP, ORK, ZRK,
-      PO, SIMPLE]
-    REGULATED = ALL - [UNREGULATED]
+           PO, SIMPLE, OKO, OKD, OKM, KEO, KED, KEM, ZKO, ZKD, ZKM, AE, AO, AZ, ZPE, ZPO, ZPZ, ZCE, ZCO, ZCZ, MINI,
+           SINGLE_SOURCE].freeze
+    REGULATED = ALL - [UNREGULATED, MINI]
 
-    OK = [OOK, OMK, OCK, ORK]
-    ZK = [ZOK, ZMK, ZCK, ZRK]
-    KP = [OKP, ZKP]
-    ZP = [OZP, ZZP]
-    ZC = [OZC, ZZC]
-    EI = [ONLY_SOURCE, ZPP]
+    OK = [OOK, OMK, OCK, ORK, OKO, OKD, OKM, KEO, KED, KEM].freeze
+    ZK = [ZOK, ZMK, ZCK, ZRK, ZKO, ZKD, ZKM].freeze
+    KP = [OKP, ZKP].freeze
+    ZP = [OZP, ZZP, ZPE, ZPO, ZPZ].freeze
+    ZC = [OZC, ZZC, ZCE, ZCO, ZCZ].freeze
+    EI = [ONLY_SOURCE, ZPP, SINGLE_SOURCE].freeze
 
-    FOR_PO = [ZZC, ZZP, ZOK, ZMK, ZKP]
-    BANNED = [ORK, ZRK, OCK, ZCK]
+    NONCOMPETITIVE = [ONLY_SOURCE, UNREGULATED, MINI, SINGLE_SOURCE].freeze
 
-    NONCOMPETITIVE = [ONLY_SOURCE, UNREGULATED]
+    SME = [KEO, KED, KEM, AE, ZPE, ZCE].freeze
+    SME_7_DAYS = [KEO, KED, KEM, AE].freeze
+    BUSINESS_DAYS = [ZPE, ZPO, ZPZ, ZCE, ZCO, ZCZ].freeze
 
-    REBID_1_DAY = [OZP, ZZP, OKP, ZKP, OOK, ZOK, OMK, ZMK]
-    SW_MUST_3_DAYS = [OOK, ZOK, OMK, ZMK, ORK, OZP, ZZP, OCK, ZCK]
+    ETP = SME
+    NON_SME = [OKO, OKD, OKM, ZKO, ZKD, ZKM, AO, AZ, ZPO, ZPZ, ZCO, ZCZ, MINI, SINGLE_SOURCE].freeze
+    NON_ETP = NON_SME + NONCOMPETITIVE + [SIMPLE]
 
-    TOTAL_20_DAYS = [OOK, ZOK, OA, ZA, ORK]
-    TOTAL_10_DAYS = [OKP, ZKP, OZP, ZZP, OZC, ZZC]
-
-    FAST = [OZC, ZZC, ORK, ZRK, OCK, ZCK, ZPP, SIMPLE, ONLY_SOURCE, UNREGULATED]
-    AUCTIONS = [OA, ZA]
+    FAST = [OZC, ZZC, ORK, ZRK, OCK, ZCK, ZPP, SIMPLE, ONLY_SOURCE, UNREGULATED, ZCE, ZCO, ZCZ, MINI, SINGLE_SOURCE].freeze
+    AUCTIONS = [OA, ZA].freeze
     TENDERS = OK + ZK
-    FRAMES = [ORK, ZRK]
 
-    CAN_ONE_BIDDER = [ONLY_SOURCE, UNREGULATED]
-    ROSSTAT_OTHER_OPEN = [OKP, OZP, OZC, ZPP]
-    ROSSTAT_OTHER_CLOSE = [ZKP, ZZP, ZZC]
-    ROSSTAT_EI = [ONLY_SOURCE, UNREGULATED]
+    ### TODO, or not TODO ###
+    CAN_ONE_BIDDER = [ONLY_SOURCE, UNREGULATED, SINGLE_SOURCE, MINI].freeze # Уточнить так ли это
+    OFFER_GUARANTIE = [AUCTIONS, TENDERS, PO].flatten # Anything else?
+    NO_ALTERNATE_OFFERS = [AUCTIONS, ZC].flatten # Anything else?
+    BANNED = [ORK, ZRK, OCK, ZCK].freeze # TODO, put all old types in the list, after July 1
+    REBID_1_DAY = [OZP, ZZP, OKP, ZKP, OOK, ZOK, OMK, ZMK].freeze # Anything else?
+    SW_MUST_3_DAYS = [OOK, ZOK, OMK, ZMK, ORK, OZP, ZZP, OCK, ZCK].freeze # Anything else?
+    CLOSED = [ZOK, ZMK, ZCK, ZA, ZKP, ZZP, ZZC, ONLY_SOURCE, UNREGULATED, ZPP, ZRK].freeze # Anything else?
+    CLOSED_WITHOUT_EI = [ZOK, ZMK, ZCK, ZA, ZKP, ZZP, ZZC, ZPP, ZRK].freeze # Anything else?
 
-    CLOSED = [ZOK, ZMK, ZCK, ZA, ZKP, ZZP, ZZC, ONLY_SOURCE, UNREGULATED, ZPP, ZRK]
-    CLOSED_WITHOUT_EI = [ZOK, ZMK, ZCK, ZA, ZKP, ZZP, ZZC, ZPP, ZRK]
-    OPENED = [OOK, OMK, OCK, OA, OKP, OZP, OZC, ORK]
-
-    INTEGRATED = [OOK, ZOK, OMK, ZMK, OKP, ZKP, PO, OZP, ZZP, OZC, ZZC]
-    INTEGRATED_TENDER = [OOK, ZOK, OMK, ZMK, OKP, ZKP]
-
-    OFFER_GUARANTIE = [AUCTIONS, TENDERS, PO].flatten
-    NO_ALTERNATE_OFFERS = [AUCTIONS, ZC].flatten
+    ### DEPRECATED ####
+    ROSSTAT_OTHER_OPEN = [OKP, OZP, OZC, ZPP].freeze # ROSSTAT
+    ROSSTAT_OTHER_CLOSE = [ZKP, ZZP, ZZC].freeze # ROSSTAT
+    ROSSTAT_EI = [ONLY_SOURCE, UNREGULATED].freeze # ROSSTAT
+    INTEGRATED_TENDER = [OOK, ZOK, OMK, ZMK, OKP, ZKP].freeze # For link b2b_energo
+    FRAMES = [ORK, ZRK].freeze # Frames are no longer awailable
+    FOR_PO = [ZZC, ZZP, ZOK, ZMK, ZKP].freeze # PO is not longer awailable
   end
-
-  # module Direction
-  #   FUEL = 21_001 # Топливо : Топливо для электростанций
-  #   TPIR = 21_002 # ТПиР : Техническое перевооружение и реконструкция
-  #   KS = 21_003 # КС : Капитальное строительство
-  #   ERP = 21_004 # ЭРП : Энергоремонтное производство
-  #   OSU = 21_005 # ОСУ : Общесистемные услуги
-  #   IT_OTHER = 21_006 # Закупки ИТ - прочие : Закупки в области ИТ (прочие)
-  #   NIOKR_INVEST = 21_007 # НИОКР - инвестиции : НИОКР - инвестициии
-  #   AXN = 21_008 # АХН : Продукция административно-хозяйственного назначения
-  #   ER = 21_009 # ЭР : Эксплуатационные расходы
-  #   OTHER = 21_010 # Прочие : Прочие закупки
-  #   IT_INVEST = 21_011 # Закупки ИТ - инвестиции : Закупки в области ИТ (инвестиции)
-  #   NIOKR_OTHER = 21_012 # НИОКР - прочие : НИОКР и прочие консультационные услуги
-  #   IPIVP_INVEST = 21_013 # ИПИВП - инвестиции : Инновационная продукция и (или) высокотехнологическая продукция (инвестиции)
-  #   IPIVP_OTHER = 21_014 # ИПИВП - прочие: Инновационная продукция и (или) высокотехнологическая продукция (прочие)
-
-  #   FOR_INVEST = [KS, TPIR, NIOKR_INVEST, IT_INVEST, IPIVP_INVEST]
-
-  #   GROUP1 = [ERP, IT_OTHER, ER, FUEL, NIOKR_OTHER, AXN, OSU, OTHER, IPIVP_OTHER]
-  #   GROUP2 = [KS, TPIR, IT_INVEST, NIOKR_INVEST, IPIVP_INVEST]
-
-  #   NIOKR = [NIOKR_INVEST, NIOKR_OTHER]
-  #   IPIVP = [IPIVP_INVEST, IPIVP_OTHER]
-  #   PRIORITY = {
-  #     KS => 1,
-  #     TPIR => 2,
-  #     IT_INVEST => 3,
-  #     NIOKR_INVEST => 4,
-  #     IPIVP_INVEST => 5,
-  #     ERP => 6,
-  #     IT_OTHER => 7,
-  #     ER => 8,
-  #     FUEL => 9,
-  #     NIOKR_OTHER => 10,
-  #     IPIVP_OTHER => 11,
-  #     AXN => 13,
-  #     OSU => 14,
-  #     OTHER => 14
-  #   }
-  # end
 
   module ContentOfferType
     HR = 24_001 # Справка о кадровых ресурсах

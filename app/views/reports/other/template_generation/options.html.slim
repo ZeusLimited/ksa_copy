@@ -15,8 +15,7 @@
         = f.input :organizers, collection: Department.organizers_by_root, label_method: :name_with_depth_symbols,
           input_html: multi, include_hidden: false
     .row
-      .span3
-        = f.input :tender_types, collection: Dictionary.tender_types, input_html: multi, include_hidden: false
+      .span3 == render 'shared/components/tender_types', f: f
       .span3
         = f.input :subject_type, collection: Dictionary.subject_types
     .row

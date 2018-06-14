@@ -104,8 +104,6 @@ gem 'sys-filesystem'
 gem 'whenever', :require => false
 
 group :development do
-  gem 'better_errors'
-  gem 'binding_of_caller'
   gem 'capistrano-bundler'
   gem 'capistrano-rails'
   gem 'capistrano-rbenv'

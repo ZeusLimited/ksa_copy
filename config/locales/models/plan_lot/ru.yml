@@ -91,6 +91,7 @@ ru:
               after_preselect: "не может быть раньше, чем через 25 дней после даты объявления предварительного отбора"
             etp_address_id:
               not_etp: "должен быть вне ЭТП"
+              etp: 'должен быть ЭТП'
             regulation_item_id:
               non_valid: "имеет неверное значение"
             commission_id:

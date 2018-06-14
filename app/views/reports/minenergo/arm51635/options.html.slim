@@ -16,8 +16,7 @@
       .span3= f.input :gkpz_year, collection: gkpz_years_range, include_hidden: false, input_html: multi
       .span3= f.input :gkpz_type, collection: Reports::Gkpz::Gkpz::GKPZ_TYPES, include_blank: false
     .row
-      .span3
-        = f.input :tender_types, collection: Dictionary.tender_types, input_html: multi, include_hidden: false
+      .span3 == render 'shared/components/tender_types', f: f
       .span3
         = f.input :subject_type, collection: Dictionary.subject_types
     .row
