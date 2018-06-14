@@ -19,6 +19,8 @@
 
 # Learn more: http://github.com/javan/whenever
 
+env :PATH, ENV['PATH']
+
 set :output, 'log/scheduled.log'
 
 set :chronic_options, hours24: true
