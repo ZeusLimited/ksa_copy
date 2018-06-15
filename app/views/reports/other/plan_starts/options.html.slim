@@ -25,12 +25,7 @@
           include_hidden: false,
           label_html: { class: 'select-all-clear-roots' }
     .row
-      .span3
-        = f.input :tender_types,
-          collection: Dictionary.tender_types,
-          input_html: multi,
-          include_hidden: false,
-          label_html: { class: 'select-all-clear' }
+      .span3 == render 'shared/components/tender_types', f: f
       .span3 = f.input :format, collection: { 'Excel' => 'xlsx' }, include_blank: false
 
     .form-actions

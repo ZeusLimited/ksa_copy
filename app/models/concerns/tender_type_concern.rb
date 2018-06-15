@@ -55,4 +55,16 @@ module TenderTypeConcern
   def simple?
     tender_type_id == TenderTypes::SIMPLE
   end
+
+  def tender_type_etp?
+    TenderTypes::ETP.include?(tender_type_id)
+  end
+
+  def tender_type_non_etp?
+    TenderTypes::NON_ETP.include?(tender_type_id)
+  end
+
+  def tender_type_non_sme?
+    Constants::TenderTypes::NON_SME.include?(tender_type_id)
+  end
 end

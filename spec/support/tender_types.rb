@@ -232,4 +232,49 @@ RSpec.shared_examples 'tender types' do
       it { should be false }
     end
   end
+
+  describe '#tender_type_etp?' do
+    subject { object.tender_type_etp? }
+    context 'ETP type' do
+      let(:tender_type_id) { Constants::TenderTypes::ETP.sample }
+
+      it { should be true }
+    end
+
+    context 'Any others' do
+      let(:tender_type_id) { Constants::TenderTypes::NON_ETP.sample }
+
+      it { should be false }
+    end
+  end
+
+  describe '#tender_type_non_etp?' do
+    subject { object.tender_type_non_etp? }
+    context 'ETP type' do
+      let(:tender_type_id) { Constants::TenderTypes::NON_ETP.sample }
+
+      it { should be true }
+    end
+
+    context 'Any others' do
+      let(:tender_type_id) { Constants::TenderTypes::ETP.sample }
+
+      it { should be false }
+    end
+  end
+
+  describe '#tender_type_non_sme?' do
+    subject { object.tender_type_non_sme? }
+    context 'ETP type' do
+      let(:tender_type_id) { Constants::TenderTypes::NON_SME.sample }
+
+      it { should be true }
+    end
+
+    context 'Any others' do
+      let(:tender_type_id) { Constants::TenderTypes::SME.sample }
+
+      it { should be false }
+    end
+  end
 end

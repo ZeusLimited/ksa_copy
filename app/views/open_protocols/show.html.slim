@@ -52,11 +52,11 @@ dl
           li
             => t('.org_recieved')
             => count_with_description(open_protocol.offer_covers.size, 2, :offer)
-            = t('.etp_participant_covers', etp: link_to_b2b).html_safe
+            = t('.etp_participant_covers', etp: link_to_etp(@tender.etp_address_id)).html_safe
         - else
           li = t('.no_covers')
         li
-          = t('.etp_open_covers', etp: link_to_b2b).html_safe
+          = t('.etp_open_covers', etp: link_to_etp(@tender.etp_address_id)).html_safe
       - else
         - if open_protocol.covers.empty?
           li = t('.no_covers')

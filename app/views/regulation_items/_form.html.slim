@@ -9,10 +9,11 @@
         input_html: { class: 'input-block-level' }
   .row
     .span6
-      = f.input :tender_type_ids,
-      collection: Dictionary.tender_types,
-      include_hidden: false,
-      input_html: multi.merge(class: 'input-block-level')
+      = f.input :tender_type_ids do
+        = f.select :tender_type_ids,
+          grouped_options_for_select(DictionaryDecorator.grouped_tender_types, f.object.tender_type_ids),
+          { include_hidden: false },
+          multi.merge(class: 'input-block-level')
     .span6
       = f.input :department_ids,
         collection: Department.roots_customers(current_user.root_dept).order(:position),

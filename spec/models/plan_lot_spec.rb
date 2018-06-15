@@ -111,73 +111,47 @@ RSpec.describe PlanLot, type: :model do
     end
 
     describe '#valid_etp_address' do
-      let(:error_message) { "должен быть вне ЭТП" }
+      before { plan_lot.valid? }
 
-      context 'etp_address is b2b' do
-        context 'single_source' do
-          let!(:plan_lot) { build(:plan_lot, :single_source, :etp_b2b) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).to include(error_message)
+      describe 'not etp' do
+        let(:error_message) { "должен быть вне ЭТП" }
+
+        context 'etp_address is b2b' do
+          context 'when in list' do
+            let!(:plan_lot) { build(:plan_lot, :etp_b2b, tender_type_id: Constants::TenderTypes::NON_ETP.sample) }
+
+            it { expect(plan_lot.errors.messages[:etp_address_id]).to include(error_message) }
+          end
+
+          context 'other' do
+            let!(:plan_lot) { build(:plan_lot, :zpp, :etp_b2b) }
+
+            it { expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message) }
           end
         end
 
-        context 'unregulated' do
-          let!(:plan_lot) { build(:plan_lot, :unregulated, :etp_b2b) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).to include(error_message)
-          end
-        end
+        context 'etp_address is not_etp' do
+          context 'when in list' do
+            let!(:plan_lot) { build(:plan_lot, :non_etp, tender_type_id: Constants::TenderTypes::NON_ETP.sample) }
 
-        context 'simple' do
-          let!(:plan_lot) { build(:plan_lot, :simple, :etp_b2b) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).to include(error_message)
+            it { expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message) }
           end
-        end
 
-        context 'other' do
-          let!(:plan_lot) { build(:plan_lot, :zpp, :etp_b2b) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message)
+          context 'other' do
+            let!(:plan_lot) { build(:plan_lot, :zpp, :non_etp) }
+
+            it { expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message) }
           end
         end
       end
 
-      context 'etp_address is not_etp' do
-        context 'single_source' do
-          let!(:plan_lot) { build(:plan_lot, :single_source, :non_etp) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message)
-          end
-        end
+      describe 'must etp' do
+        let(:error_message) { "должен быть ЭТП" }
 
-        context 'unregulated' do
-          let!(:plan_lot) { build(:plan_lot, :unregulated, :non_etp) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message)
-          end
-        end
+        context 'when in list' do
+          let!(:plan_lot) { build(:plan_lot, :non_etp, tender_type_id: Constants::TenderTypes::ETP.sample) }
 
-        context 'simple' do
-          let!(:plan_lot) { build(:plan_lot, :simple, :non_etp) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message)
-          end
-        end
-
-        context 'other' do
-          let!(:plan_lot) { build(:plan_lot, :zpp, :non_etp) }
-          it do
-            plan_lot.valid?
-            expect(plan_lot.errors.messages[:etp_address_id]).not_to include(error_message)
-          end
+          it { expect(plan_lot.errors.messages[:etp_address_id]).to include(error_message) }
         end
       end
     end

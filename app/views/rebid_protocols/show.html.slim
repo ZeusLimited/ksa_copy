@@ -44,8 +44,8 @@ dl
           li
             => t('.org_recieved')
             => count_with_description(@rebid_protocol.offers.rebid.count, 2, :offer)
-            = t('.etp_participant_covers', etp: link_to_b2b).html_safe
-          li = t('.etp_open_covers', etp: link_to_b2b).html_safe
+            = t('.etp_participant_covers', etp: link_to_etp(@tender.etp_address_id)).html_safe
+          li = t('.etp_open_covers', etp: link_to_etp(@tender.etp_address_id)).html_safe
       - else
         li
           => t('.org_recieved')

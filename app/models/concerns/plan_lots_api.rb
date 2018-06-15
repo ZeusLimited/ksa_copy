@@ -90,7 +90,7 @@ module PlanLotsApi
               where tpl.preselection_guid is not null
              ) sub
              where rn = 1) ppl on (pl.guid = ppl.preselection_guid)
-          inner join plan_specifications ps on (ps.plan_lot_id = nvl(ppl.id, pl.id))
+          inner join plan_specifications ps on (ps.plan_lot_id = coalesce(ppl.id, pl.id))
           inner join departments d on d.id = pl.root_customer_id
         Where pl.status_id in (#{PlanLotStatus::AGREEMENT_LIST.join(', ')})
         Group By d.tender_cost_limit, pl.gkpz_year, pl.num_tender, pl.num_tender

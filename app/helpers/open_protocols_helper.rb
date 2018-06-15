@@ -4,6 +4,15 @@ module OpenProtocolsHelper
     "#{l_center}"
   end
 
+  def link_to_etp(etp_address_id)
+    case etp_address_id
+    when Constants::EtpAddress::B2B_ENERGO
+      link_to 'www.b2b-center.ru', 'http://www.b2b-center.ru', target: '_blank'
+    when Constants::EtpAddress::EETP
+      link_to 'rushydro.roseltorg.ru', 'https://rushydro.roseltorg.ru', target: '_blank'
+    end
+  end
+
   def class_for_member(protocol_present_member)
     return "hide" if protocol_present_member.hide
     return "clerk" if protocol_present_member.status_id == Constants::Commissioners::CLERK
