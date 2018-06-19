@@ -105,7 +105,7 @@ class PlanLotsController < ApplicationController
     redux_store(
       'SharedReduxStore',
       props: {
-        meta: { ui: { eis_plan_lots: { eis_num: { id: @plan_lot.eis.id, num: @plan_lot.eis.num } } } },
+        meta: { ui: { eis_plan_lots: { eis_num: { id: @plan_lot.eis&.id, num: @plan_lot.eis&.num } } } },
       },
     )
   end
