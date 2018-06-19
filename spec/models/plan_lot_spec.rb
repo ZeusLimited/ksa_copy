@@ -39,28 +39,24 @@ RSpec.describe PlanLot, type: :model do
   end
 
   context '#valid_sme_costs' do
-    context '#rao' do
-      let(:error_message) { "не может иметь значение МСП, т.к. закупка более 200 млн. руб. без НДС" }
-      let(:plan_lot) { build(:plan_lot, :sme, plan_specifications: [build(:plan_specification, :cost_100, :cost_nds_100)]) }
+    let(:error_message) { "не может иметь значение МСП, т.к. закупка более 400 млн. руб. без НДС" }
+    let(:plan_lot) { build(:plan_lot, :sme, plan_specifications: [build(:plan_specification, :cost_100, :cost_nds_100)]) }
 
-      before do
-        allow(Setting).to receive(:company).exactly(11).times.and_return('raoesv')
-        plan_lot.valid?
-      end
-
-      context 'sum more 100 mln' do
-        let(:plan_lot) { build(:plan_lot, :sme, plan_specifications: [build(:plan_specification, :cost_100, :cost_nds_100)]) }
-        it do
-          expect(plan_lot.errors.messages[:sme_type_id]).not_to include(error_message)
-        end
-      end
-      # context 'sum more 200 mln' do
-      #   let(:plan_lot) { build(:plan_lot, :sme, plan_specifications: [build(:plan_specification, :cost_300, :cost_nds_300)]) }
-      #   it { expect(plan_lot.errors.messages[:sme_type_id]).to include(error_message) }
-      # end
-
+    before do
+      allow(Setting).to receive(:company).exactly(11).times.and_return('raoesv')
+      plan_lot.valid?
     end
 
+    context 'sum more 100 mln' do
+      let(:plan_lot) { build(:plan_lot, :sme, plan_specifications: [build(:plan_specification, :cost_100, :cost_nds_100)]) }
+      it do
+        expect(plan_lot.errors.messages[:sme_type_id]).not_to include(error_message)
+      end
+    end
+    context 'sum more 400 mln' do
+      let(:plan_lot) { build(:plan_lot, :sme, plan_specifications: [build(:plan_specification, cost: 500_000_000, cost_nds: 500_000_000)]) }
+      it { expect(plan_lot.errors.messages[:sme_type_id]).to include(error_message) }
+    end
   end
 
   context "#contract?" do

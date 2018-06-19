@@ -13,7 +13,7 @@
 
 .page-header
   h1 = t('.header')
-  h4 = @plan_lot.non_eis ? t('.header4_non_eis') : t('.header4_num_eis', num: plan_lot.eis.num)
+  h4 = @plan_lot.non_eis ? t('.header4_non_eis') : t('.header4_num_eis', num: plan_lot.eis&.num)
 
 .row
   = control_notify(@plan_lot.control)
