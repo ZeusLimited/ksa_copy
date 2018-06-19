@@ -197,7 +197,7 @@ class PlanLot < ApplicationRecord
 
     pl.validate :restrict_not_level1kk
     def restrict_not_level1kk
-      return if different_organizer? || unregulated? || only_source?
+      return if different_organizer? || noncompetitive?
       errors.add(:commission_id, :restrict_not_level1kk) unless commission_level1_kk?
     end
   end

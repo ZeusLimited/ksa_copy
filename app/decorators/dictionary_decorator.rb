@@ -7,8 +7,8 @@ class DictionaryDecorator < Draper::Decorator
 
   def self.grouped_tender_types(scope = Dictionary.tender_types)
     [
-      ['Старые способы', scope.where('ref_id <= ?', Constants::TenderTypes::SIMPLE).map(&TYPE_DECORATOR)],
       ['Новые способы',  scope.where('ref_id >  ?', Constants::TenderTypes::SIMPLE).map(&TYPE_DECORATOR)],
+      ['Старые способы', scope.where('ref_id <= ?', Constants::TenderTypes::SIMPLE).map(&TYPE_DECORATOR)],
     ]
   end
 end
