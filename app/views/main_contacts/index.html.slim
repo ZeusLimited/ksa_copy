@@ -6,5 +6,3 @@
 .form-actions.pull-right
   - if can?(:manage, MainContact)
       => link_to t('add'), new_main_contact_path, class: "btn btn-info"
-
-  = link_to 'Обратиться в техподдержку', 'https://support.arink-group.ru/projects/ksazd/issues', class: "btn btn-warning", target: '_blank'
