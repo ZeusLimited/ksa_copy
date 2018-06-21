@@ -80,6 +80,36 @@ RSpec.shared_examples 'tender types' do
     end
   end
 
+  describe 'single_source?' do
+    subject { object.single_source? }
+    context 'when single source' do
+      let(:tender_type_id) { Constants::TenderTypes::SINGLE_SOURCE }
+
+      it { should be true }
+    end
+
+    context 'Any others' do
+      let(:tender_type_id) { Constants::TenderTypes::OOK }
+
+      it { should be false }
+    end
+  end
+
+  describe 'ei?' do
+    subject { object.ei? }
+    context 'when EI' do
+      let(:tender_type_id) { Constants::TenderTypes::EI.sample }
+
+      it { should be true }
+    end
+
+    context 'Any others' do
+      let(:tender_type_id) { Constants::TenderTypes::OOK }
+
+      it { should be false }
+    end
+  end
+
   describe 'preselection?' do
     subject { object.preselection? }
     context 'PO' do

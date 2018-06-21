@@ -24,6 +24,14 @@ module TenderTypeConcern
     tender_type_id == TenderTypes::ONLY_SOURCE
   end
 
+  def single_source?
+    tender_type_id == TenderTypes::SINGLE_SOURCE
+  end
+
+  def ei?
+    TenderTypes::EI.include?(tender_type_id)
+  end
+
   def preselection?
     tender_type_id == TenderTypes::PO
   end

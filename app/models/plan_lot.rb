@@ -323,7 +323,7 @@ class PlanLot < ApplicationRecord
   end
 
   def valid_single_source_contractors_size
-    return unless only_source?
+    return unless only_source? || single_source?
     contractor_ids = plan_lot_contractors.map(&:contractor_id).compact
     errors.add(:base, :must_have_one_contractor) if contractor_ids.size != minimum_contractors
   end
@@ -334,15 +334,11 @@ class PlanLot < ApplicationRecord
   end
 
   def minimum_contractors
-    @minimum_contractors = if preselection_guid.present?
-                             0
-                           else
-                             (only_source? || zpp?) ? 1 : 3
-                           end
+    preselection_guid.blank? ? render_minimum_contractors : 0
   end
 
   def render_minimum_contractors
-    (only_source? || zpp?) ? 1 : 3
+    ei? ? 1 : 3
   end
 
   def validate_okdp_etp

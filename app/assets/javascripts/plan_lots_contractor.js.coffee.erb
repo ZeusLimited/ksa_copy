@@ -34,7 +34,7 @@ contractor_info_path = "/contractors/info.json"
     formatSelection: contractorFormatSelection
 
 minimum_contractors = ->
-  array = ["<%= Constants::TenderTypes::ONLY_SOURCE %>", "<%= Constants::TenderTypes::ZPP %>"]
+  array = <%= Constants::TenderTypes::EI.map(&:to_s) %>
   if $('#plan_lot_preselection_guid_hex').val() == ''
     if $.inArray($('#plan_lot_tender_type_id').val(), array) == -1 then 3 else 1
   else
