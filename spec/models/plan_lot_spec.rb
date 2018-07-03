@@ -38,6 +38,31 @@ RSpec.describe PlanLot, type: :model do
     end
   end
 
+  describe '#validate_okdp_etp' do
+    subject { plan_lot.errors[:etp_address_id] }
+
+    let(:plan_lot) { build(:plan_lot_with_specs, tender_type_id: tender_type_id, plan_specifications: [plan_specification]) }
+    let(:plan_specification) { build(:plan_specification) }
+    let(:error_message) { SpecError.model_message(:plan_lot, :etp_address_id, :order616) }
+
+    before do
+      create(:okdp_sme_etp, code: plan_specification.okdp_code, okdp_type: Constants::OkdpSmeEtpType::ETP)
+      plan_lot.valid?
+    end
+
+    context 'when tender type exclude 616' do
+      let(:tender_type_id) { Constants::TenderTypes::ORDER616_EXCLUSION.sample }
+
+      it { is_expected.not_to include error_message }
+    end
+
+    context 'when tender type include 616' do
+      let(:tender_type_id) { (Constants::TenderTypes::ALL - Constants::TenderTypes::ORDER616_EXCLUSION).sample }
+
+      it { is_expected.to include error_message }
+    end
+  end
+
   context '#valid_sme_costs' do
     let(:error_message) { "не может иметь значение МСП, т.к. закупка более 400 млн. руб. без НДС" }
     let(:plan_lot) { build(:plan_lot, :sme, plan_specifications: [build(:plan_specification, :cost_100, :cost_nds_100)]) }
