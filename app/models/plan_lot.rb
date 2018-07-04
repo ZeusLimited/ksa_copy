@@ -342,12 +342,12 @@ class PlanLot < ApplicationRecord
   end
 
   def validate_okdp_etp
-    return if tender_type_id && Constants::TenderTypes::NONCOMPETITIVE.include?(tender_type_id)
+    return if tender_type_id && Constants::TenderTypes::ORDER616_EXCLUSION.include?(tender_type_id)
     incorrect = plan_specifications.any? do |ps|
       [ps.okdp_id, etp_address_id].all? && !etp? &&
         OkdpSmeEtp.exists?(code: ps.okdp_code, okdp_type: Constants::OkdpSmeEtpType::ETP)
     end
-    errors.add(:etp_address_id, "указан неверно (616 приказ)") if incorrect
+    errors.add(:etp_address_id, :order616) if incorrect
   end
 
   def validate_announce_date
