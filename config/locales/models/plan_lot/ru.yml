@@ -92,6 +92,7 @@ ru:
             etp_address_id:
               not_etp: "должен быть вне ЭТП"
               etp: 'должен быть ЭТП'
+              order616: 'указан неверно (616 приказ)'
             regulation_item_id:
               non_valid: "имеет неверное значение"
             commission_id:
